@@ -8,6 +8,8 @@
     <!-- Chart.js for data visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <!-- i18n system -->
+    <script src="js/i18n.js"></script>
 </head>
 <body>
     <div class="crt-overlay"></div>
@@ -16,10 +18,16 @@
         <header class="telemetry-header">
             <div class="header-decoration left"></div>
             <h1 class="main-title">
-                <span class="title-prefix">ОТК-001</span>
+                <span class="title-prefix" data-i18n="title.prefix">ОТК-001</span>
                 <span class="title-divider">///</span>
-                <span class="title-main">СИСТЕМА ОЧИСТКИ ДАННЫХ</span>
+                <span class="title-main" data-i18n="title.main">СИСТЕМА ОЧИСТКИ ДАННЫХ</span>
             </h1>
+            <!-- Language Switcher -->
+            <div class="language-switcher">
+                <span class="lang-label" data-i18n="lang.switch">Language / Язык</span>
+                <button class="lang-button" data-lang="ru" title="Русский">🇷🇺 RU</button>
+                <button class="lang-button" data-lang="en" title="English">🇺🇸 EN</button>
+            </div>
             <div class="header-decoration right"></div>
         </header>
 
@@ -28,25 +36,25 @@
             <!-- Left Panel: Control Panel -->
             <section class="control-panel panel">
                 <div class="panel-header">
-                    <span class="panel-id">ПАНЕЛЬ УПРАВЛЕНИЯ</span>
-                    <span class="panel-status">ГОТОВ</span>
+                    <span class="panel-id" data-i18n="panel.control">ПАНЕЛЬ УПРАВЛЕНИЯ</span>
+                    <span class="panel-status" data-i18n="panel.status.ready">ГОТОВ</span>
                 </div>
 
                 <!-- File Loading Section -->
                 <div class="control-section">
-                    <h2 class="section-title">1. ЗАГРУЗКА ДАННЫХ</h2>
+                    <h2 class="section-title" data-i18n="section.load">1. ЗАГРУЗКА ДАННЫХ</h2>
                     <div class="input-group">
                         <label for="fileInput" class="input-label">
-                            <span class="label-text">Выбор файла данных:</span>
-                            <span class="label-desc">ASCII формат, столбцы: время, сигналы...</span>
+                            <span class="label-text" data-i18n="label.file">Выбор файла данных:</span>
+                            <span class="label-desc" data-i18n="desc.file">ASCII формат, столбцы: время, сигналы...</span>
                         </label>
                         <div class="file-input-wrapper">
                             <input type="file" id="fileInput" multiple accept=".txt,.dat,.csv,.asc" class="file-input">
                             <button type="button" class="file-button" onclick="document.getElementById('fileInput').click()">
                                 <span class="button-icon">📁</span>
-                                <span class="button-text">ОТКРЫТЬ ФАЙЛ</span>
+                                <span class="button-text" data-i18n="button.open">ОТКРЫТЬ ФАЙЛ</span>
                             </button>
-                            <div id="fileCount" class="file-count">Выбрано файлов: 0</div>
+                            <div id="fileCount" class="file-count" data-i18n="file.count" data-i18n-params='{"count": 0}'>Выбрано файлов: 0</div>
                         </div>
                     </div>
                     <div id="selectedFiles" class="selected-files-list"></div>
@@ -58,21 +66,21 @@
                         <label for="advancedToggle" class="toggle-label">
                             <input type="checkbox" id="advancedToggle" class="toggle-checkbox">
                             <span class="toggle-slider"></span>
-                            <span class="toggle-text">ОТКРЫТЬ КАПОТ (расширенные настройки)</span>
+                            <span class="toggle-text" data-i18n="toggle.advanced">ОТКРЫТЬ КАПОТ (расширенные настройки)</span>
                         </label>
-                        <span class="toggle-desc">Показать параметры настройки алгоритма</span>
+                        <span class="toggle-desc" data-i18n="desc.advanced">Показать параметры настройки алгоритма</span>
                     </div>
                 </div>
 
                 <!-- Advanced Parameters (Hidden by default) -->
                 <div id="advancedSettings" class="advanced-settings hidden">
-                    <h2 class="section-title">ПАРАМЕТРЫ АЛГОРИТМА</h2>
+                    <h2 class="section-title" data-i18n="section.params">ПАРАМЕТРЫ АЛГОРИТМА</h2>
 
                     <!-- Window Width Slider -->
                     <div class="slider-group">
                         <label class="slider-label">
-                            <span class="slider-name">Ширина окна</span>
-                            <span class="slider-desc">Размер скользящего окна (1-100)</span>
+                            <span class="slider-name" data-i18n="label.window">Ширина окна</span>
+                            <span class="slider-desc" data-i18n="desc.window">Размер скользящего окна (1-100)</span>
                         </label>
                         <div class="slider-control">
                             <input type="range" id="windowWidth" min="1" max="100" value="40" class="slider">
@@ -86,8 +94,8 @@
                     <!-- Threshold Slider -->
                     <div class="slider-group">
                         <label class="slider-label">
-                            <span class="slider-name">Пороговый коэффициент</span>
-                            <span class="slider-desc">Чувствительность обнаружения (0.1-2.0)</span>
+                            <span class="slider-name" data-i18n="label.threshold">Пороговый коэффициент</span>
+                            <span class="slider-desc" data-i18n="desc.threshold">Чувствительность обнаружения (0.1-2.0)</span>
                         </label>
                         <div class="slider-control">
                             <input type="range" id="threshold" min="0.1" max="2.0" step="0.1" value="1.4" class="slider">
@@ -100,8 +108,8 @@
                     <!-- Matrix Size Slider -->
                     <div class="slider-group">
                         <label class="slider-label">
-                            <span class="slider-name">Размер матрицы наводки</span>
-                            <span class="slider-desc">Размер сетки поиска параметров (10-50)</span>
+                            <span class="slider-name" data-i18n="label.matrix">Размер матрицы наводки</span>
+                            <span class="slider-desc" data-i18n="desc.matrix">Размер сетки поиска параметров (10-50)</span>
                         </label>
                         <div class="slider-control">
                             <input type="range" id="matrixSize" min="10" max="50" value="16" class="slider">
@@ -115,8 +123,8 @@
                     <!-- Relative Size Slider -->
                     <div class="slider-group">
                         <label class="slider-label">
-                            <span class="slider-name">Относительный размер 2 матрицы</span>
-                            <span class="slider-desc">Шаг грубого поиска (1-9)</span>
+                            <span class="slider-name" data-i18n="label.relative">Относительный размер 2 матрицы</span>
+                            <span class="slider-desc" data-i18n="desc.relative">Шаг грубого поиска (1-9)</span>
                         </label>
                         <div class="slider-control">
                             <input type="range" id="relativeSize" min="1" max="9" value="4" class="slider">
@@ -131,15 +139,15 @@
                         <div class="checkbox-group">
                             <label class="checkbox-label">
                                 <input type="checkbox" id="useChunks" checked class="checkbox">
-                                <span class="checkbox-text">Оптимизация через чанки</span>
-                                <span class="checkbox-desc">Ускоряет автоподбор в 5-10 раз</span>
+                                <span class="checkbox-text" data-i18n="checkbox.chunks">Оптимизация через чанки</span>
+                                <span class="checkbox-desc" data-i18n="desc.optimization">Ускоряет автоподбор в 5-10 раз</span>
                             </label>
                         </div>
 
                         <div class="slider-group">
                             <label class="slider-label">
-                                <span class="slider-name">Количество тестовых чанков</span>
-                                <span class="slider-desc">Чанк=25 точек (1-5)</span>
+                                <span class="slider-name" data-i18n="label.chunks">Количество тестовых чанков</span>
+                                <span class="slider-desc" data-i18n="desc.chunks">Чанк=25 точек (1-5)</span>
                             </label>
                             <div class="slider-control">
                                 <input type="range" id="numChunks" min="1" max="5" value="3" class="slider">
@@ -154,78 +162,78 @@
                     <!-- Fill Method Dropdown -->
                     <div class="dropdown-group">
                         <label class="dropdown-label">
-                            <span class="dropdown-name">Метод заполнения выбросов</span>
-                            <span class="dropdown-desc">Способ замещения обнаруженных аномалий</span>
+                            <span class="dropdown-name" data-i18n="label.fillMethod">Метод заполнения выбросов</span>
+                            <span class="dropdown-desc" data-i18n="desc.fillMethod">Способ замещения обнаруженных аномалий</span>
                         </label>
                         <select id="fillMethod" class="dropdown">
-                            <option value="extreme">↗∞ Экстремальное значение (маркировка)</option>
-                            <option value="center">Центральное значение (медиана/среднее)</option>
-                            <option value="clip">Пороговая обрезка</option>
-                            <option value="previous">Предыдущее верное</option>
-                            <option value="next">Следующее верное</option>
-                            <option value="nearest" selected>Ближайшее верное</option>
-                            <option value="linear">Линейная интерполяция</option>
-                            <option value="spline">Сплайн-интерполяция</option>
-                            <option value="pchip">Сплайн² (PCHIP)</option>
-                            <option value="makima">Модификатор Акимы</option>
+                            <option value="extreme" data-i18n="fillMethod.extreme">↗∞ Экстремальное значение (маркировка)</option>
+                            <option value="center" data-i18n="fillMethod.center">Центральное значение (медиана/среднее)</option>
+                            <option value="clip" data-i18n="fillMethod.clip">Пороговая обрезка</option>
+                            <option value="previous" data-i18n="fillMethod.previous">Предыдущее верное</option>
+                            <option value="next" data-i18n="fillMethod.next">Следующее верное</option>
+                            <option value="nearest" selected data-i18n="fillMethod.nearest">Ближайшее верное</option>
+                            <option value="linear" data-i18n="fillMethod.linear">Линейная интерполяция</option>
+                            <option value="spline" data-i18n="fillMethod.spline">Сплайн-интерполяция</option>
+                            <option value="pchip" data-i18n="fillMethod.pchip">Сплайн² (PCHIP)</option>
+                            <option value="makima" data-i18n="fillMethod.makima">Модификатор Акимы</option>
                         </select>
                     </div>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="control-section">
-                    <h2 class="section-title">2. ОПЕРАЦИИ</h2>
+                    <h2 class="section-title" data-i18n="section.operations">2. ОПЕРАЦИИ</h2>
                     <div class="button-grid">
                         <button id="loadBtn" class="action-button" disabled>
                             <span class="button-number">1.</span>
-                            <span class="button-label">ЗАГРУЗИТЬ</span>
-                            <span class="button-desc">Чтение файла данных</span>
+                            <span class="button-label" data-i18n="button.load">ЗАГРУЗИТЬ</span>
+                            <span class="button-desc" data-i18n="desc.load">Чтение файла данных</span>
                         </button>
 
                         <button id="tuneBtn" class="action-button" disabled>
                             <span class="button-number">2.</span>
-                            <span class="button-label">НАВЕСТЬСЯ</span>
-                            <span class="button-desc">Автоподбор параметров</span>
+                            <span class="button-label" data-i18n="button.tune">НАВЕСТЬСЯ</span>
+                            <span class="button-desc" data-i18n="desc.tune">Автоподбор параметров</span>
                         </button>
 
                         <button id="cleanBtn" class="action-button" disabled>
                             <span class="button-number">3.</span>
-                            <span class="button-label">ОЧИСТИТЬ</span>
-                            <span class="button-desc">Применить фильтрацию</span>
+                            <span class="button-label" data-i18n="button.clean">ОЧИСТИТЬ</span>
+                            <span class="button-desc" data-i18n="desc.clean">Применить фильтрацию</span>
                         </button>
 
                         <button id="saveBtn" class="action-button" disabled>
                             <span class="button-number">4.</span>
-                            <span class="button-label">СОХРАНИТЬ</span>
-                            <span class="button-desc">Экспорт результатов</span>
+                            <span class="button-label" data-i18n="button.save">СОХРАНИТЬ</span>
+                            <span class="button-desc" data-i18n="desc.save">Экспорт результатов</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- Save Options -->
                 <div class="control-section">
-                    <h2 class="section-title">3. ПАРАМЕТРЫ СОХРАНЕНИЯ</h2>
+                    <h2 class="section-title" data-i18n="section.save">3. ПАРАМЕТРЫ СОХРАНЕНИЯ</h2>
                     <div class="checkbox-group">
                         <label class="checkbox-label">
                             <input type="checkbox" id="saveRestored" checked class="checkbox">
                             <span class="checkbox-custom"></span>
-                            <span class="checkbox-text">Сохранить восстановленные данные</span>
+                            <span class="checkbox-text" data-i18n="checkbox.saveRestored">Сохранить восстановленные данные</span>
                         </label>
-                        <span class="checkbox-desc">Включить в результат восстановленные значения</span>
+                        <span class="checkbox-desc" data-i18n="desc.saveRestored">Включить в результат восстановленные значения</span>
                     </div>
                     <div class="checkbox-group">
                         <label class="checkbox-label" id="validityFlagWrapper">
                             <input type="checkbox" id="addValidityFlag" checked class="checkbox">
                             <span class="checkbox-custom"></span>
-                            <span class="checkbox-text">Дополнить признаком истинности</span>
+                            <span class="checkbox-text" data-i18n="checkbox.validityFlag">Дополнить признаком истинности</span>
                         </label>
-                        <span class="checkbox-desc">Добавить столбец с флагом корректности (0/1)</span>
+                        <span class="checkbox-desc" data-i18n="desc.validityFlag">Добавить столбец с флагом корректности (0/1)</span>
                     </div>
                 </div>
 
                 <!-- Progress Section -->
                 <div class="control-section">
-                    <h2 class="section-title">4. ХОД ПРОЦЕССА</h2>
+                    <h2 class="section-title" data-i18n="section.progress">4. ХОД ПРОЦЕССА</h2>
                     <div class="gauge-container">
                         <svg class="gauge" viewBox="0 0 180 100">
                             <defs>
@@ -251,11 +259,11 @@
 
                 <!-- Log Section -->
                 <div class="control-section log-section">
-                    <h2 class="section-title">5. ЖУРНАЛ ОПЕРАЦИЙ</h2>
+                    <h2 class="section-title" data-i18n="section.log">5. ЖУРНАЛ ОПЕРАЦИЙ</h2>
                     <div id="logArea" class="log-area">
                         <div class="log-entry log-info">
                             <span class="log-time">--:--:--</span>
-                            <span class="log-message">Система готова к работе. Приятного использования!</span>
+                            <span class="log-message" data-i18n="log.init">Система готова к работе. Приятного использования!</span>
                         </div>
                     </div>
                 </div>
@@ -264,19 +272,19 @@
             <!-- Right Panel: Visualization -->
             <section class="plot-panel panel">
                 <div class="panel-header">
-                    <span class="panel-id">ПАНЕЛЬ ВИЗУАЛИЗАЦИИ</span>
-                    <span class="panel-status">ОНЛАЙН</span>
+                    <span class="panel-id" data-i18n="panel.visualization">ПАНЕЛЬ ВИЗУАЛИЗАЦИИ</span>
+                    <span class="panel-status" data-i18n="panel.status.online">ОНЛАЙН</span>
                 </div>
 
                 <!-- Tab Navigation -->
                 <div class="tab-nav">
                     <button class="tab-button active" data-tab="data">
                         <span class="tab-icon">📊</span>
-                        <span class="tab-text">ДАННЫЕ</span>
+                        <span class="tab-text" data-i18n="tab.data">ДАННЫЕ</span>
                     </button>
                     <button class="tab-button" data-tab="heatmap">
                         <span class="tab-icon">🌡️</span>
-                        <span class="tab-text">КАРТА ПАРАМЕТРОВ</span>
+                        <span class="tab-text" data-i18n="tab.heatmap">КАРТА ПАРАМЕТРОВ</span>
                     </button>
                 </div>
 
@@ -290,8 +298,8 @@
                             </div>
                             <div id="noDataMessage" class="no-data-message">
                                 <span class="no-data-icon">📭</span>
-                                <span class="no-data-text">Нет загруженных данных</span>
-                                <span class="no-data-sub">Выберите файл для начала работы</span>
+                                <span class="no-data-text" data-i18n="noData.title">Нет загруженных данных</span>
+                                <span class="no-data-sub" data-i18n="noData.subtitle">Выберите файл для начала работы</span>
                             </div>
                         </div>
                     </div>
@@ -304,8 +312,8 @@
                             </div>
                             <div id="noHeatmapMessage" class="no-data-message">
                                 <span class="no-data-icon">🌡️</span>
-                                <span class="no-data-text">Карта параметров недоступна</span>
-                                <span class="no-data-sub">Выполните автоподбор для отображения</span>
+                                <span class="no-data-text" data-i18n="noHeatmap.title">Карта параметров недоступна</span>
+                                <span class="no-data-sub" data-i18n="noHeatmap.subtitle">Выполните автоподбор для отображения</span>
                             </div>
                         </div>
                     </div>
@@ -313,36 +321,36 @@
 
                 <!-- Metrics Display -->
                 <div class="metrics-panel">
-                    <h2 class="section-title">МЕТРИКИ КАЧЕСТВА</h2>
+                    <h2 class="section-title" data-i18n="section.metrics">МЕТРИКИ КАЧЕСТВА</h2>
                     <div class="metrics-grid">
                         <div class="metric-card">
                             <span class="metric-name">STDF</span>
-                            <span class="metric-desc">Гладкость</span>
+                            <span class="metric-desc" data-i18n="metric.STDF">Гладкость</span>
                             <span id="metricSTDF" class="metric-value">--</span>
                         </div>
                         <div class="metric-card">
                             <span class="metric-name">DF</span>
-                            <span class="metric-desc">Доля удалённых</span>
+                            <span class="metric-desc" data-i18n="metric.DF">Доля удалённых</span>
                             <span id="metricDF" class="metric-value">--</span>
                         </div>
                         <div class="metric-card">
                             <span class="metric-name">ASNR</span>
-                            <span class="metric-desc">С/Ш (дБ)</span>
+                            <span class="metric-desc" data-i18n="metric.ASNR">С/Ш (дБ)</span>
                             <span id="metricASNR" class="metric-value">--</span>
                         </div>
                         <div class="metric-card">
                             <span class="metric-name">RMSE</span>
-                            <span class="metric-desc">СКО</span>
+                            <span class="metric-desc" data-i18n="metric.RMSE">СКО</span>
                             <span id="metricRMSE" class="metric-value">--</span>
                         </div>
                         <div class="metric-card">
                             <span class="metric-name">R²</span>
-                            <span class="metric-desc">Детерминация</span>
+                            <span class="metric-desc" data-i18n="metric.RSquared">Детерминация</span>
                             <span id="metricRSquared" class="metric-value">--</span>
                         </div>
                         <div class="metric-card">
                             <span class="metric-name">R Пирсона</span>
-                            <span class="metric-desc">Корреляция</span>
+                            <span class="metric-desc" data-i18n="metric.Pearson">Корреляция</span>
                             <span id="metricPearson" class="metric-value">--</span>
                         </div>
                     </div>
@@ -350,30 +358,30 @@
 
                 <!-- File Info -->
                 <div class="file-info-panel">
-                    <h2 class="section-title">ИНФОРМАЦИЯ О ФАЙЛЕ</h2>
+                    <h2 class="section-title" data-i18n="section.fileInfo">ИНФОРМАЦИЯ О ФАЙЛЕ</h2>
                     <div class="info-grid">
                         <div class="info-item">
-                            <span class="info-label">Файл:</span>
+                            <span class="info-label" data-i18n="info.filename">Файл:</span>
                             <span id="infoFilename" class="info-value">--</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Размер:</span>
+                            <span class="info-label" data-i18n="info.size">Размер:</span>
                             <span id="infoSize" class="info-value">--</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Точек:</span>
+                            <span class="info-label" data-i18n="info.points">Точек:</span>
                             <span id="infoPoints" class="info-value">--</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Сериев:</span>
+                            <span class="info-label" data-i18n="info.series">Сериев:</span>
                             <span id="infoSeries" class="info-value">--</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Опт. окно:</span>
+                            <span class="info-label" data-i18n="info.optWindow">Опт. окно:</span>
                             <span id="infoOptWindow" class="info-value">--</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Опт. порог:</span>
+                            <span class="info-label" data-i18n="info.optThreshold">Опт. порог:</span>
                             <span id="infoOptThreshold" class="info-value">--</span>
                         </div>
                     </div>
@@ -385,11 +393,11 @@
         <footer class="telemetry-footer">
             <div class="footer-decoration"></div>
             <div class="footer-content">
-                <span class="footer-text">ОТК-001 /// СИСТЕМА ОЧИСТКИ ДАННЫХ ВРЕМЕННЫХ РЯДОВ</span>
+                <span class="footer-text" data-i18n="footer.text">ОТК-001 /// СИСТЕМА ОЧИСТКИ ДАННЫХ ВРЕМЕННЫХ РЯДОВ</span>
                 <span class="footer-separator">|</span>
-                <span class="footer-author">Разработчик: Фунтиков В.М.</span>
+                <span class="footer-author" data-i18n="footer.author">Разработчик: Фунтиков В.М.</span>
                 <span class="footer-separator">|</span>
-                <span class="footer-version">Версия: 2.0 (Web)</span>
+                <span class="footer-version" data-i18n="footer.version">Версия: 2.0 (Web)</span>
             </div>
             <div class="footer-decoration"></div>
         </footer>
@@ -398,7 +406,7 @@
     <!-- Fixed Progress Bar (Top) -->
     <div id="progressBar" class="progress-bar hidden">
         <div class="progress-bar-content">
-            <span class="progress-label">ХОД ПРОЦЕССА</span>
+            <span class="progress-label" data-i18n="progress.label">ХОД ПРОЦЕССА</span>
             <div class="progress-track">
                 <div id="progressFill" class="progress-fill"></div>
             </div>

@@ -48,8 +48,9 @@ let currentJobId = null;
 document.addEventListener('DOMContentLoaded', function() {
     initializeWorker();
     initializeUI();
+    initializeLanguageSwitcher();
     initializeCharts();
-    log('Система инициализирована. Готова к работе.', 'info');
+    log(I18n.t('log.systemInit'), 'info');
 
     // Handle window resize
     window.addEventListener('resize', function() {
@@ -79,7 +80,7 @@ function initializeWorker() {
     } catch (error) {
         // Fall back to inline worker (works without server)
         console.log('[Main] Ошибка загрузки внешнего worker, использую встроенный...', error);
-        log('Ошибка загрузки worker.js, использую встроенный worker...', 'warning');
+        log(I18n.t('error.workerLoad'), 'warning');
         console.error('Worker initialization error:', error);
         initializeInlineWorker();
     }
@@ -99,9 +100,9 @@ function initializeInlineWorker() {
         worker.onmessage = handleWorkerMessage;
         worker.onerror = handleWorkerError;
 
-        log('Встроенный Web Worker инициализирован.', 'success');
+        log(I18n.t('log.workerInit'), 'success');
     } catch (error) {
-        log('Ошибка инициализации встроенного Worker: ' + error.message, 'error');
+        log(I18n.t('error.workerInitInternal', {message: error.message}), 'error');
         console.error('Inline worker initialization error:', error);
     }
 }
@@ -138,7 +139,11 @@ function initializeUI() {
     // Optimization checkbox
     document.getElementById('useChunks').addEventListener('change', function() {
         appState.params.useChunks = this.checked;
-        log('Оптимизация через чанки: ' + (this.checked ? 'включена' : 'выключена'), 'info');
+        if (this.checked) {
+            log(I18n.t('msg.optimizationEnabled'), 'info');
+        } else {
+            log(I18n.t('msg.optimizationDisabled'), 'info');
+        }
     });
 
     // Fill method dropdown
@@ -166,6 +171,52 @@ function initializeUI() {
             switchTab(this.dataset.tab);
         });
     });
+}
+
+/**
+ * Initialize language switcher
+ */
+function initializeLanguageSwitcher() {
+    var langButtons = document.querySelectorAll('.lang-button');
+
+    langButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+            var lang = this.dataset.lang;
+
+            // Set active state
+            langButtons.forEach(function(btn) {
+                btn.classList.remove('active');
+            });
+            this.classList.add('active');
+
+            // Change language
+            I18n.setLanguage(lang);
+
+            // Update UI
+            updateAllUIText();
+        });
+    });
+
+    // Set initial active button
+    var currentLang = I18n.getLanguage();
+    langButtons.forEach(function(button) {
+        button.classList.toggle('active', button.dataset.lang === currentLang);
+    });
+}
+
+/**
+ * Update all UI text with current language
+ */
+function updateAllUIText() {
+    // Update chart labels
+    if (appState.dataChart) {
+        appState.dataChart.options.scales.x.title.text = I18n.t('chart.xAxis');
+        appState.dataChart.options.scales.y.title.text = I18n.t('chart.yAxis');
+        appState.dataChart.update('none');
+    }
+
+    // Update log messages are already handled by i18n.updateAllText()
+    I18n.updateAllText();
 }
 
 /**
@@ -362,14 +413,14 @@ function handleFileSelect(event) {
 
     document.getElementById('loadBtn').disabled = false;
 
-    log('Выбрано файлов: ' + files.length, 'info');
+    log(I18n.t('msg.filesSelected', {count: files.length}), 'info');
 }
 
 /**
  * Update file count display
  */
 function updateFileCount(count) {
-    document.getElementById('fileCount').textContent = 'Выбрано файлов: ' + count;
+    document.getElementById('fileCount').textContent = I18n.t('file.count', {count: count});
 }
 
 /**
@@ -403,14 +454,14 @@ function formatFileSize(bytes) {
  */
 function loadData() {
     if (appState.batchQueue.length === 0) {
-        log('Файлы не выбраны.', 'warning');
+        log(I18n.t('msg.noFiles'), 'warning');
         return;
     }
 
     var file = appState.batchQueue[0];
     appState.currentFile = file;
 
-    log('Загрузка файла: ' + file.name, 'info');
+    log(I18n.t('msg.loading', {name: file.name}), 'info');
 
     readFileContent(file).then(function(content) {
         var data = parseAsciiData(content);
@@ -446,11 +497,11 @@ function loadData() {
         document.getElementById('cleanBtn').disabled = true;
         document.getElementById('saveBtn').disabled = true;
 
-        log('Файл загружен: ' + data.length + ' точек, ' + (data[0].length - 1) + ' серий', 'success');
-        log('Готовы: 2. Навестись, 3. Очистить', 'info');
+        log(I18n.t('msg.loaded', {points: data.length, series: data[0].length - 1}), 'success');
+        log(I18n.t('msg.readyTune'), 'info');
 
     }).catch(function(error) {
-        log('Ошибка загрузки файла: ' + error.message, 'error');
+        log(I18n.t('error.fileLoad', {message: error.message}), 'error');
         console.error('File loading error:', error);
     });
 }
@@ -544,10 +595,10 @@ function toggleAdvancedSettings() {
 
     if (isVisible) {
         settings.classList.remove('hidden');
-        log('Расширенные настройки отображены', 'info');
+        log(I18n.t('msg.settingsShown'), 'info');
     } else {
         settings.classList.add('hidden');
-        log('Расширенные настройки скрыты', 'info');
+        log(I18n.t('msg.settingsHidden'), 'info');
     }
 }
 
@@ -812,7 +863,7 @@ function drawHeatmap(NTF, optimalParams) {
     var cellWidth = canvas.width / cols;
     var cellHeight = canvas.height / rows;
 
-    log('Отрисовка тепловой карты: ' + rows + 'x' + cols + ', NTF[0][0] = ' + NTF[0][0], 'info');
+    log(I18n.t('log.heatmapDraw', {rows: rows, cols: cols, ntf: NTF[0][0]}), 'info');
 
     // Draw heatmap
     for (var i = 0; i < rows; i++) {
@@ -859,7 +910,7 @@ function drawHeatmap(NTF, optimalParams) {
     // Draw color scale
     drawColorScale(ctx, canvas, minVal, maxVal);
 
-    log('Карта параметров отображена', 'success');
+    log(I18n.t('log.heatmapShown'), 'success');
 }
 
 /**
@@ -1005,7 +1056,7 @@ function handleWorkerMessage(event) {
  * Handle worker error
  */
 function handleWorkerError(error) {
-    log('Ошибка Worker: ' + error.message, 'error');
+    log(I18n.t('error.worker', {message: error.message}), 'error');
     showLoadingOverlay(false);
 }
 
@@ -1055,7 +1106,7 @@ function handleResult(data) {
  * Handle error from worker
  */
 function handleError(data) {
-    log('Ошибка выполнения: ' + data.message, 'error');
+    log(I18n.t('error.execution', {message: data.message}), 'error');
     showLoadingOverlay(false);
 }
 
@@ -1068,11 +1119,11 @@ function handleError(data) {
  */
 function autoTune() {
     if (!appState.originalData) {
-        log('Сначала загрузите данные', 'warning');
+        log(I18n.t('msg.noData'), 'warning');
         return;
     }
 
-    log('Начало автоподбора параметров...', 'info');
+    log(I18n.t('msg.tuning'), 'info');
 
     // Prepare data (remove time column for cleaning)
     var signalData = appState.originalData.map(function(row) {
@@ -1102,7 +1153,7 @@ function handleTuneResult(data) {
 
     if (!optimalParams) {
         console.error('[Main] Ошибка: optimalParams не определен!');
-        log('Ошибка автоподбора: параметры не найдены', 'error');
+        log(I18n.t('error.tuneFailed'), 'error');
         return;
     }
 
@@ -1129,8 +1180,8 @@ function handleTuneResult(data) {
     // Enable clean button
     document.getElementById('cleanBtn').disabled = false;
 
-    log('Параметры подобраны: окно=' + optimalParams.windowWidth.toFixed(0) + ', порог=' + optimalParams.threshold.toFixed(2), 'success');
-    log('Готов: 3. Очистить', 'info');
+    log(I18n.t('msg.tuned', {window: optimalParams.windowWidth.toFixed(0), threshold: optimalParams.threshold.toFixed(2)}), 'success');
+    log(I18n.t('msg.readyClean'), 'info');
 }
 
 // ============================================================================
@@ -1142,11 +1193,11 @@ function handleTuneResult(data) {
  */
 function cleanData() {
     if (!appState.originalData) {
-        log('Сначала загрузите данные', 'warning');
+        log(I18n.t('msg.noData'), 'warning');
         return;
     }
 
-    log('Начало очистки данных...', 'info');
+    log(I18n.t('msg.cleaning'), 'info');
 
     var numSeries = appState.originalData[0].length - 1;
 
@@ -1217,15 +1268,14 @@ function handleCleanSeriesResult(data) {
     appState.seriesCleaned++;
     var progress = (appState.seriesCleaned / appState.seriesToClean) * 100;
 
-    log('Очищена серия ' + seriesIndex + '/' + (appState.seriesToClean) +
-        ' (' + Math.round(progress) + '%)', 'info');
+    log(I18n.t('msg.cleanedSeries', {n: seriesIndex, total: appState.seriesToClean, percent: Math.round(progress)}), 'info');
 
     // Update progress bar
-    updateProgress(progress, 'Очистка серии ' + seriesIndex + ' из ' + appState.seriesToClean);
+    updateProgress(progress, I18n.t('msg.cleaningSeries', {n: seriesIndex, total: appState.seriesToClean}));
 
     // If all series are cleaned, update UI
     if (appState.seriesCleaned >= appState.seriesToClean) {
-        log('Очистка всех серий завершена.', 'success');
+        log(I18n.t('msg.cleanedAll'), 'success');
 
         // Update metrics (average of all series from worker results)
         var avgMetrics = computeAverageMetrics();
@@ -1238,7 +1288,7 @@ function handleCleanSeriesResult(data) {
         // Enable save button
         document.getElementById('saveBtn').disabled = false;
 
-        log('Готов: 4. Сохранить', 'info');
+        log(I18n.t('msg.readySave'), 'info');
     }
 }
 
@@ -1362,11 +1412,11 @@ function computeAllSeriesMetrics() {
  */
 function saveData() {
     if (!appState.cleanedData) {
-        log('Нет очищенных данных для сохранения', 'warning');
+        log(I18n.t('msg.noCleaned'), 'warning');
         return;
     }
 
-    log('Подготовка сохранения...', 'info');
+    log(I18n.t('msg.saving'), 'info');
 
     try {
         var saveRestored = document.getElementById('saveRestored').checked;
@@ -1433,10 +1483,10 @@ function saveData() {
         // Trigger download
         downloadFile(content, filename);
 
-        log('Файл сохранен: ' + filename + ' (' + outputData.length + ' строк)', 'success');
+        log(I18n.t('msg.saved', {name: filename, rows: outputData.length}), 'success');
 
     } catch (error) {
-        log('Ошибка сохранения: ' + error.message, 'error');
+        log(I18n.t('error.saving', {message: error.message}), 'error');
         console.error('Save error:', error);
     }
 }
@@ -1448,8 +1498,8 @@ function formatAsciiData(data) {
     var lines = [];
 
     // Header comment
-    lines.push('# Очищенные данные времени и сигналов');
-    lines.push('# Сгенерировано: ' + new Date().toISOString());
+    lines.push('# ' + I18n.t('msg.fileHeader'));
+    lines.push('# ' + I18n.t('msg.generated') + ' ' + new Date().toISOString());
 
     // Data rows
     for (var i = 0; i < data.length; i++) {

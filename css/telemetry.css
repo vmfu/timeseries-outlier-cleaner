@@ -1115,3 +1115,46 @@ body {
 canvas {
     max-width: 100%;
 }
+
+/* Language Switcher */
+.language-switcher {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    padding: 5px 10px;
+    background: rgba(0, 170, 255, 0.1);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.lang-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.lang-button {
+    padding: 5px 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: transparent;
+    border: 1px solid var(--text-muted);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 3px;
+}
+
+.lang-button:hover {
+    background: rgba(0, 170, 255, 0.2);
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
+}
+
+.lang-button.active {
+    background: rgba(0, 170, 255, 0.3);
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+    box-shadow: 0 0 15px rgba(0, 170, 255, 0.4);
+    text-shadow: 0 0 5px var(--accent-cyan);
+}
