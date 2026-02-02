@@ -246,6 +246,23 @@
             'footer.author': 'Разработчик: Фунтиков В.М.',
             'footer.version': 'Версия: 2.0 (Web)',
 
+            // Presets
+            'presets.title': 'Пресеты настроек',
+            'presets.select': '-- Выберите пресет --',
+            'presets.apply': 'Применить',
+            'presets.save': 'Сохранить',
+            'presets.delete': 'Удалить',
+            'presets.info': 'Быстрое переключение между параметрами',
+            'presets.conservative': 'Консервативный (минимум изменений)',
+            'presets.balanced': 'Сбалансированный (рекомендуется)',
+            'presets.aggressive': 'Агрессивный (максимум очистки)',
+            'presets.default': 'Настройки по умолчанию',
+            'presets.enterName': 'Введите название пресета:',
+            'presets.overwrite': 'Пресет уже существует. Перезаписать?',
+            'presets.deleted': 'Пресет удален',
+            'presets.saved': 'Пресет сохранен: {name}',
+            'presets.applied': 'Пресет применен: {name}',
+
             // Language Switcher
             'lang.ru': 'RU',
             'lang.en': 'EN',
@@ -486,6 +503,23 @@
             'footer.text': 'ODC-001 /// TIME SERIES DATA CLEANING SYSTEM',
             'footer.author': 'Developer: Vladimir M. Funtikov',
             'footer.version': 'Version: 2.0 (Web)',
+
+            // Presets
+            'presets.title': 'Settings Presets',
+            'presets.select': '-- Select preset --',
+            'presets.apply': 'Apply',
+            'presets.save': 'Save',
+            'presets.delete': 'Delete',
+            'presets.info': 'Quick parameter switching',
+            'presets.conservative': 'Conservative (minimal changes)',
+            'presets.balanced': 'Balanced (recommended)',
+            'presets.aggressive': 'Aggressive (maximum cleaning)',
+            'presets.default': 'Default Settings',
+            'presets.enterName': 'Enter preset name:',
+            'presets.overwrite': 'Preset already exists. Overwrite?',
+            'presets.deleted': 'Preset deleted',
+            'presets.saved': 'Preset saved: {name}',
+            'presets.applied': 'Preset applied: {name}',
 
             // Language Switcher
             'lang.ru': 'RU',

@@ -393,27 +393,27 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 2-3 hours
 
 **Tasks**:
-- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
-- [ ] Design preset structure
-  - [ ] Preset: name, parameters (window, threshold, methods)
-  - [ ] Default presets: conservative, balanced, aggressive
-  - [ ] Custom user presets
-- [ ] Add preset management UI
-  - [ ] Preset dropdown in advanced settings
-  - [ ] Save current settings as preset
-  - [ ] Delete custom presets
-- [ ] Implement preset logic
-  - [ ] Apply preset to current settings
-  - [ ] Save presets to localStorage
-  - [ ] Load presets on page load
-- [ ] Test preset functionality
-  - [ ] Apply different presets
-  - [ ] Create and delete presets
-  - [ ] Verify parameter values
-- [ ] Start, test, then stop the local server
-- [ ] Check off the completed items and sub-items
-- [ ] Create a commit and push to Git
-- [ ] Summarize the session to reduce the load on the LLM provider
+- [x] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
+- [x] Design preset structure
+  - [x] Preset: name, parameters (window, threshold, methods)
+  - [x] Default presets: conservative, balanced, aggressive
+  - [x] Custom user presets
+- [x] Add preset management UI
+  - [x] Preset dropdown in advanced settings
+  - [x] Save current settings as preset
+  - [x] Delete custom presets
+- [x] Implement preset logic
+  - [x] Apply preset to current settings
+  - [x] Save presets to localStorage
+  - [x] Load presets on page load
+- [x] Test preset functionality
+  - [x] Apply different presets
+  - [x] Create and delete presets
+  - [x] Verify parameter values
+- [x] Start, test, then stop the local server
+- [x] Check off the completed items and sub-items
+- [x] Create a commit and push to Git
+- [x] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit, bash (for testing)
 
 

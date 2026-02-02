@@ -190,6 +190,22 @@ function initializeUI() {
     document.getElementById('zoomOutBtn').addEventListener('click', zoomOut);
     document.getElementById('zoomResetBtn').addEventListener('click', resetZoom);
 
+    // Presets controls
+    document.getElementById('presetSelect').addEventListener('change', function() {
+        var presetName = this.value;
+        if (presetName && presetName !== '' && presetName !== '---') {
+            applyPreset(presetName);
+        }
+    });
+    document.getElementById('applyPresetBtn').addEventListener('click', function() {
+        var presetName = document.getElementById('presetSelect').value;
+        if (presetName && presetName !== '' && presetName !== '---') {
+            applyPreset(presetName);
+        }
+    });
+    document.getElementById('savePresetBtn').addEventListener('click', savePreset);
+    document.getElementById('deletePresetBtn').addEventListener('click', deletePreset);
+
     // Drag & Drop zone
     initializeDragAndDrop();
 
@@ -469,6 +485,7 @@ function initializeTooltips() {
     I18n.setLanguage = function(lang) {
         originalSetLanguage.call(I18n, lang);
         updateAllTooltips(tooltipMappings);
+        updatePresetSelect();
     };
 }
 
@@ -2840,4 +2857,259 @@ function exportTableToCSV() {
     downloadFile(csvContent, filename);
 
     log(I18n.t('msg.saved', { name: filename, rows: data.length }), 'success');
+}
+
+// ============================================================================
+//   PRESETS MANAGEMENT
+// ============================================================================
+
+/**
+ * Default presets configuration
+ */
+var defaultPresets = {
+    'conservative': {
+        windowWidth: 60,
+        threshold: 2.0,
+        matrixSize: 20,
+        relativeSize: 5,
+        fillMethod: 'nearest',
+        useChunks: true,
+        numChunks: 2
+    },
+    'balanced': {
+        windowWidth: 40,
+        threshold: 1.4,
+        matrixSize: 16,
+        relativeSize: 4,
+        fillMethod: 'nearest',
+        useChunks: true,
+        numChunks: 3
+    },
+    'aggressive': {
+        windowWidth: 20,
+        threshold: 0.8,
+        matrixSize: 12,
+        relativeSize: 3,
+        fillMethod: 'linear',
+        useChunks: true,
+        numChunks: 4
+    }
+};
+
+/**
+ * Get all presets (default + custom)
+ */
+function getAllPresets() {
+    var presets = JSON.parse(JSON.stringify(defaultPresets));
+    var customPresets = localStorage.getItem('presets');
+    if (customPresets) {
+        var parsed = JSON.parse(customPresets);
+        for (var key in parsed) {
+            presets[key] = parsed[key];
+        }
+    }
+    return presets;
+}
+
+/**
+ * Update preset dropdown options
+ */
+function updatePresetSelect() {
+    var presetSelect = document.getElementById('presetSelect');
+    if (!presetSelect) return;
+
+    var currentValue = presetSelect.value;
+    presetSelect.innerHTML = '';
+
+    // Add placeholder
+    var defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = I18n.t('presets.select');
+    presetSelect.appendChild(defaultOption);
+
+    // Add default presets
+    for (var key in defaultPresets) {
+        var option = document.createElement('option');
+        option.value = key;
+        option.textContent = I18n.t('presets.' + key);
+        presetSelect.appendChild(option);
+    }
+
+    // Add separator
+    var separator = document.createElement('option');
+    separator.value = '---';
+    separator.textContent = '--- ' + (currentLanguage === 'ru' ? 'Пользовательские пресеты' : 'Custom Presets') + ' ---';
+    separator.disabled = true;
+    presetSelect.appendChild(separator);
+
+    // Add custom presets
+    var customPresets = localStorage.getItem('presets');
+    if (customPresets) {
+        var parsed = JSON.parse(customPresets);
+        for (var key in parsed) {
+            var customOption = document.createElement('option');
+            customOption.value = key;
+            customOption.textContent = key;
+            presetSelect.appendChild(customOption);
+        }
+    }
+
+    // Restore selection if still valid
+    if (currentValue && (defaultPresets[currentValue] || (parsed && parsed[currentValue]))) {
+        presetSelect.value = currentValue;
+    }
+
+    updateDeleteButtonState();
+}
+
+/**
+ * Get current parameter values
+ */
+function getCurrentParams() {
+    return {
+        windowWidth: parseInt(document.getElementById('windowWidth').value),
+        threshold: parseFloat(document.getElementById('threshold').value),
+        matrixSize: parseInt(document.getElementById('matrixSize').value),
+        relativeSize: parseInt(document.getElementById('relativeSize').value),
+        fillMethod: document.getElementById('fillMethod').value,
+        useChunks: document.getElementById('useChunks').checked,
+        numChunks: parseInt(document.getElementById('numChunks').value)
+    };
+}
+
+/**
+ * Apply preset parameters
+ */
+function applyPreset(presetName) {
+    var presets = getAllPresets();
+    var preset = presets[presetName];
+
+    if (!preset) {
+        log('Preset not found: ' + presetName, 'error');
+        return;
+    }
+
+    // Apply parameters to UI
+    document.getElementById('windowWidth').value = preset.windowWidth;
+    document.getElementById('windowWidthValue').textContent = preset.windowWidth;
+
+    document.getElementById('threshold').value = preset.threshold;
+    document.getElementById('thresholdValue').textContent = preset.threshold;
+
+    document.getElementById('matrixSize').value = preset.matrixSize;
+    document.getElementById('matrixSizeValue').textContent = preset.matrixSize;
+
+    document.getElementById('relativeSize').value = preset.relativeSize;
+    document.getElementById('relativeSizeValue').textContent = preset.relativeSize;
+
+    document.getElementById('fillMethod').value = preset.fillMethod;
+
+    document.getElementById('useChunks').checked = preset.useChunks;
+    document.getElementById('numChunks').value = preset.numChunks;
+    document.getElementById('numChunksValue').textContent = preset.numChunks;
+
+    // Update app state
+    appState.params = getCurrentParams();
+
+    log(I18n.t('presets.applied', { name: presetName }), 'success');
+}
+
+/**
+ * Save current settings as preset
+ */
+function savePreset() {
+    var name = prompt(I18n.t('presets.enterName'));
+
+    if (!name || name.trim() === '') {
+        return;
+    }
+
+    name = name.trim();
+
+    // Get current parameters
+    var currentParams = getCurrentParams();
+
+    // Load existing custom presets
+    var customPresets = localStorage.getItem('presets');
+    var presets = {};
+    if (customPresets) {
+        presets = JSON.parse(customPresets);
+    }
+
+    // Check if preset already exists
+    if (presets[name]) {
+        if (!confirm(I18n.t('presets.overwrite'))) {
+            return;
+        }
+    }
+
+    // Save preset
+    presets[name] = currentParams;
+    localStorage.setItem('presets', JSON.stringify(presets));
+
+    // Update dropdown
+    updatePresetSelect();
+
+    // Select the new preset
+    document.getElementById('presetSelect').value = name;
+
+    log(I18n.t('presets.saved', { name: name }), 'success');
+
+    updateDeleteButtonState();
+}
+
+/**
+ * Delete current preset
+ */
+function deletePreset() {
+    var presetSelect = document.getElementById('presetSelect');
+    var presetName = presetSelect.value;
+
+    if (!presetName || presetName === '' || presetName === '---') {
+        return;
+    }
+
+    // Don't delete default presets
+    if (defaultPresets[presetName]) {
+        log('Cannot delete default preset: ' + presetName, 'error');
+        return;
+    }
+
+    if (!confirm(I18n.t('presets.deleted') + '?')) {
+        return;
+    }
+
+    // Load and update custom presets
+    var customPresets = localStorage.getItem('presets');
+    var presets = {};
+    if (customPresets) {
+        presets = JSON.parse(customPresets);
+    }
+
+    delete presets[presetName];
+    localStorage.setItem('presets', JSON.stringify(presets));
+
+    // Update dropdown
+    updatePresetSelect();
+
+    log(I18n.t('presets.deleted') + ': ' + presetName, 'success');
+}
+
+/**
+ * Update delete button state (disabled for default presets)
+ */
+function updateDeleteButtonState() {
+    var presetSelect = document.getElementById('presetSelect');
+    var deleteBtn = document.getElementById('deletePresetBtn');
+
+    if (!presetSelect || !deleteBtn) return;
+
+    var presetName = presetSelect.value;
+
+    // Disable delete for no selection, separator, or default presets
+    if (!presetName || presetName === '' || presetName === '---' || defaultPresets[presetName]) {
+        deleteBtn.disabled = true;
+    } else {
+        deleteBtn.disabled = false;
+    }
 }

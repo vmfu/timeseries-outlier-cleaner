@@ -528,6 +528,72 @@ body {
 }
 
 /* ============================================================================
+   PRESETS SECTION
+   ============================================================================*/
+
+.presets-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--border-color);
+}
+
+.presets-title {
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--accent-cyan);
+    margin-bottom: 10px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+}
+
+.presets-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.preset-select {
+    flex: 1;
+    min-width: 150px;
+}
+
+.preset-apply,
+.preset-save,
+.preset-delete {
+    padding: 8px 12px;
+    font-size: 14px;
+    min-width: 40px;
+}
+
+.preset-apply:hover {
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+    border-color: var(--accent-green);
+}
+
+.preset-save:hover {
+    box-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
+    border-color: var(--accent-cyan);
+}
+
+.preset-delete:hover {
+    box-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
+    border-color: var(--accent-red);
+}
+
+.preset-delete:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.presets-info {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    font-family: var(--font-mono);
+}
+
+/* ============================================================================
    ACTION BUTTONS
    ============================================================================
 */
