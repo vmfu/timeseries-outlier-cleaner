@@ -531,7 +531,7 @@ function initializeCharts() {
                     display: true,
                     title: {
                         display: true,
-                        text: 'Время / Индекс',
+                        text: I18n.t('chart.xAxis'),
                         color: '#00aaff',
                         font: {
                             size: 12,
@@ -571,7 +571,7 @@ function initializeCharts() {
                     display: true,
                     title: {
                         display: true,
-                        text: 'Значение сигнала',
+                        text: I18n.t('chart.yAxis'),
                         color: '#00aaff',
                         font: {
                             size: 12,
@@ -657,7 +657,38 @@ function initializeCharts() {
                         size: 11
                     },
                     padding: 10,
-                    displayColors: true
+                    displayColors: true,
+                    callbacks: {
+                        label: function(context) {
+                            var label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+
+                            // Check if this is an outlier dataset
+                            if (context.dataset.type === 'scatter' && context.dataset.label && context.dataset.label.includes('Выбросы')) {
+                                var point = context.raw;
+                                if (point) {
+                                    var x = point.x.toFixed(4);
+                                    var y = point.y.toFixed(4);
+                                    label += '(' + x + ', ' + y + ')\n';
+                                    if (point.originalValue !== undefined) {
+                                        label += 'Исходное: ' + point.originalValue.toFixed(4) + '\n';
+                                    }
+                                    if (point.cleanedValue !== null && point.cleanedValue !== undefined) {
+                                        label += 'Очищенное: ' + point.cleanedValue.toFixed(4);
+                                    }
+                                }
+                            } else {
+                                // Standard tooltip for line datasets
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y.toFixed(4);
+                                }
+                            }
+
+                            return label;
+                        }
+                    }
                 }
             }
         }
@@ -1071,6 +1102,54 @@ function updateDataChart(original, cleaned) {
                 pointHoverRadius: 3,
                 tension: 0.1
             });
+        }
+    }
+
+    // Outlier markers (scatter points with glow)
+    if (appState.outlierMasks && appState.outlierMasks.length > 0) {
+        var numSeries = original[0].length - 1;
+
+        for (var s = 0; s < numSeries; s++) {
+            var seriesIndex = s + 1;
+            var outlierMask = appState.outlierMasks[seriesIndex];
+
+            if (outlierMask) {
+                // Collect outlier points
+                var outlierData = [];
+                for (var i = 0; i < outlierMask.length && i < original.length; i++) {
+                    if (outlierMask[i] === 1) {
+                        outlierData.push({
+                            x: original[i][0],
+                            y: original[i][seriesIndex],
+                            originalValue: original[i][seriesIndex],
+                            cleanedValue: cleaned ? cleaned[i][seriesIndex] : null
+                        });
+                    }
+                }
+
+                // Limit outliers for performance
+                if (outlierData.length > 500) {
+                    outlierData = outlierData.filter(function(_, idx) {
+                        return idx % Math.ceil(outlierData.length / 500) === 0;
+                    });
+                }
+
+                if (outlierData.length > 0) {
+                    datasets.push({
+                        label: I18n.t('chart.outliers') + ' - Серия ' + (s + 1),
+                        data: outlierData,
+                        type: 'scatter',
+                        backgroundColor: '#ffaa00',
+                        borderColor: '#ffcc00',
+                        borderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 10,
+                        pointStyle: 'circle',
+                        showLine: false,
+                        order: 999 // Draw on top
+                    });
+                }
+            }
         }
     }
 
@@ -1530,6 +1609,7 @@ function handleCleanSeriesResult(data) {
     var cleanedData = data.cleanedData;
     var seriesIndex = data.seriesIndex;
     var metrics = data.metrics;
+    var outlierMask = data.outlierMask;
 
     // Update cleaned data for this series
     for (var i = 0; i < cleanedData.length && i < appState.cleanedData.length; i++) {
@@ -1539,6 +1619,14 @@ function handleCleanSeriesResult(data) {
     // Store metrics from worker
     if (appState.seriesMetrics) {
         appState.seriesMetrics[seriesIndex] = metrics;
+    }
+
+    // Store outlier mask from first iteration
+    if (outlierMask && !appState.outlierMasks) {
+        appState.outlierMasks = [];
+    }
+    if (outlierMask) {
+        appState.outlierMasks[seriesIndex] = outlierMask;
     }
 
     // Track progress

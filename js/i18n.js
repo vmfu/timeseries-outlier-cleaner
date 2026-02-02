@@ -155,6 +155,7 @@
             'chart.showOriginal': 'Исходные',
             'chart.showCleaned': 'Очищенные',
             'chart.showBoth': 'Оба',
+            'chart.outliers': 'Выбросы',
             'heatmap.title': 'Карта качества параметров',
 
             // Messages
@@ -349,6 +350,7 @@
             'chart.showOriginal': 'Original',
             'chart.showCleaned': 'Cleaned',
             'chart.showBoth': 'Both',
+            'chart.outliers': 'Outliers',
             'heatmap.title': 'Parameter Quality Map',
 
             // Messages

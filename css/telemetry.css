@@ -1415,3 +1415,13 @@ canvas {
 .info-label[data-tooltip] {
     cursor: help;
 }
+
+/* ============================================================================
+   OUTLIER MARKERS
+   ============================================================================
+*/
+
+/* Outlier glow effect */
+canvas#dataChart {
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+}

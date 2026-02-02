@@ -132,6 +132,7 @@ function handleCleanSeries(jobId, data) {
     const tfa = threshold * 100;
 
     let signal = originalSignal.slice(); // Create mutable copy
+    let firstIterationOutlierMask = null; // Track outliers from first iteration
 
     // Perform 100 iterations with adaptive parameters
     for (let i = 1; i <= 100; i++) {
@@ -147,6 +148,11 @@ function handleCleanSeries(jobId, data) {
                 windowLength: Math.round(adaptiveWin)
             }
         );
+
+        // Store outlier mask from first iteration (original outliers before cleaning)
+        if (i === 1 && result.outlierMask) {
+            firstIterationOutlierMask = result.outlierMask;
+        }
 
         signal = Array.from(result.cleanedData);
 
@@ -172,7 +178,8 @@ function handleCleanSeries(jobId, data) {
         data: {
             seriesIndex: seriesIndex,
             cleanedData: new Float64Array(signal),
-            metrics: metrics
+            metrics: metrics,
+            outlierMask: firstIterationOutlierMask // Include outliers from first iteration
         }
     });
 }
