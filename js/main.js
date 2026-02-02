@@ -174,6 +174,11 @@ function initializeUI() {
     document.getElementById('exportJsonBtn').addEventListener('click', exportJsonReport);
     document.getElementById('exportHtmlBtn').addEventListener('click', exportHtmlReport);
 
+    // Zoom controls
+    document.getElementById('zoomInBtn').addEventListener('click', zoomIn);
+    document.getElementById('zoomOutBtn').addEventListener('click', zoomOut);
+    document.getElementById('zoomResetBtn').addEventListener('click', resetZoom);
+
     // Drag & Drop zone
     initializeDragAndDrop();
 
@@ -2073,6 +2078,27 @@ function resetSession() {
     } catch (error) {
         console.error('Reset error:', error);
         alert('Error during reset: ' + error.message);
+    }
+}
+
+/**
+ * Zoom control functions
+ */
+function zoomIn() {
+    if (appState.dataChart) {
+        appState.dataChart.zoom(1.1);
+    }
+}
+
+function zoomOut() {
+    if (appState.dataChart) {
+        appState.dataChart.zoom(0.9);
+    }
+}
+
+function resetZoom() {
+    if (appState.dataChart) {
+        appState.dataChart.resetZoom();
     }
 }
 

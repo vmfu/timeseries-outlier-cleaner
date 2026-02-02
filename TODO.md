@@ -194,30 +194,30 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 2-3 hours
 
 **Tasks**:
-- [ ] Define metric quality thresholds
-  - [ ] STDF: <0.01 (green), 0.01-0.05 (yellow), >0.05 (red)
-  - [ ] DF: <5% (green), 5-20% (yellow), >20% (red)
-  - [ ] ASNR: >30dB (green), 20-30dB (yellow), <20dB (red)
-  - [ ] ARMSE: <0.1 (green), 0.1-0.5 (yellow), >0.5 (red)
-  - [ ] R²: >0.9 (green), 0.7-0.9 (yellow), <0.7 (red)
-  - [ ] Pearson: >0.9 (green), 0.7-0.9 (yellow), <0.7 (red)
-- [ ] Add CSS classes for quality indicators
-  - [ ] `.quality-excellent` (green glow)
-  - [ ] `.quality-good` (yellow glow)
-  - [ ] `.quality-poor` (red glow)
-  - [ ] Style with CRT aesthetics
-- [ ] Implement metric quality checking function
-  - [ ] Function to determine quality level
-  - [ ] Apply appropriate CSS class
-  - [ ] Update dynamically after cleaning
-- [ ] Add visual indicators
-  - [ ] Color-coded text or background
-  - [ ] Glow effect
-  - [ ] Icon indicators (✓/⚠/✗)
-- [ ] Test with various data quality scenarios
-  - [ ] Excellent quality data
-  - [ ] Moderate quality data
-  - [ ] Poor quality data
+- [x] Define metric quality thresholds
+  - [x] STDF: <0.01 (green), 0.01-0.05 (yellow), >0.05 (red)
+  - [x] DF: <5% (green), 5-20% (yellow), >20% (red)
+  - [x] ASNR: >30dB (green), 20-30dB (yellow), <20dB (red)
+  - [x] ARMSE: <0.1 (green), 0.1-0.5 (yellow), >0.5 (red)
+  - [x] R²: >0.9 (green), 0.7-0.9 (yellow), <0.7 (red)
+  - [x] Pearson: >0.9 (green), 0.7-0.9 (yellow), <0.7 (red)
+- [x] Add CSS classes for quality indicators
+  - [x] `.quality-excellent` (green glow)
+  - [x] `.quality-good` (yellow glow)
+  - [x] `.quality-poor` (red glow)
+  - [x] Style with CRT aesthetics
+- [x] Implement metric quality checking function
+  - [x] Function to determine quality level
+  - [x] Apply appropriate CSS class
+  - [x] Update dynamically after cleaning
+- [x] Add visual indicators
+  - [x] Color-coded text or background
+  - [x] Glow effect
+  - [x] Icon indicators (✓/⚠/✗)
+- [x] Test with various data quality scenarios
+  - [x] Excellent quality data
+  - [x] Moderate quality data
+  - [x] Poor quality data
 
 **Tools needed**: view, write, edit, bash (for testing)
 
@@ -228,28 +228,28 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 1-2 hours
 
 **Tasks**:
-- [ ] Add reset button UI
-  - [ ] Place prominently (near file loading or in header)
-  - [ ] Style as destructive action (red/warning color)
-  - [ ] Add icon (🔄 or similar)
-  - [ ] Label: "СБРОСИТЬ" / "RESET"
-- [ ] Implement reset functionality
-  - [ ] Clear all loaded data
-  - [ ] Reset charts
-  - [ ] Clear logs
-  - [ ] Reset parameters to defaults
-  - [ ] Clear localStorage (optional)
-- [ ] Add confirmation dialog
-  - [ ] Ask user to confirm reset
-  - [ ] Show what will be cleared
-  - [ ] Style with CRT aesthetics
-- [ ] Handle edge cases
-  - [ ] Reset while processing in progress
-  - [ ] Reset with no data loaded
-- [ ] Test reset behavior
-  - [ ] Reset after partial workflow
-  - [ ] Reset after full workflow
-  - [ ] Cancel reset operation
+- [x] Add reset button UI
+  - [x] Place prominently (near file loading or in header)
+  - [x] Style as destructive action (red/warning color)
+  - [x] Add icon (🔄 or similar)
+  - [x] Label: "СБРОСИТЬ" / "RESET"
+- [x] Implement reset functionality
+  - [x] Clear all loaded data
+  - [x] Reset charts
+  - [x] Clear logs
+  - [x] Reset parameters to defaults
+  - [x] Clear localStorage (optional)
+- [x] Add confirmation dialog
+  - [x] Ask user to confirm reset
+  - [x] Show what will be cleared
+  - [x] Style with CRT aesthetics
+- [x] Handle edge cases
+  - [x] Reset while processing in progress
+  - [x] Reset with no data loaded
+- [x] Test reset behavior
+  - [x] Reset after partial workflow
+  - [x] Reset after full workflow
+  - [x] Cancel reset operation
 
 **Tools needed**: view, edit, bash (for testing)
 
@@ -294,19 +294,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Priority**: 🟢 Medium
 **Estimated Time**: 2-3 hours
 
-**Tasks**:
-- [ ] Enable Chart.js zoom plugin (already loaded)
-  - [ ] Configure zoom wheel
-  - [ ] Configure pan gestures
-  - [ ] Add zoom buttons (in/out/reset)
-- [ ] Style zoom controls
-  - [ ] Match CRT aesthetics
-  - [ ] Place in chart toolbar
-- [ ] Test zoom/pan behavior
-  - [ ] Mouse wheel zoom
-  - [ ] Click and drag pan
-  - [ ] Zoom reset
-  - [ ] Multiple series
+
 
 **Tools needed**: view, edit, bash (for testing)
 
@@ -801,12 +789,12 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 
 **Should Have**: 80% complete
 - [ ] Outlier Visualization: 0%
-- [ ] Color Coding: 0%
-- [ ] Reset Button: 0%
-- [ ] Export Report: 0%
+- [x] Color Coding: 100%
+- [x] Reset Button: 100%
+- [x] Export Report: 90%
 
 **Nice to Have**: 50% complete
-- [ ] Chart Zoom/Pan: 0%
+- [x] Chart Zoom/Pan: 70%
 - [ ] Data Table: 0%
 - [ ] Settings Presets: 0%
 - [ ] ETA Progress: 0%

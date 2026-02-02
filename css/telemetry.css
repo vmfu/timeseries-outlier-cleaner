@@ -1086,6 +1086,51 @@ body {
     justify-content: center;
 }
 
+/* ============================================================================
+   ZOOM CONTROLS
+   ============================================================================
+*/
+
+.zoom-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+    z-index: 100;
+    background: var(--bg-secondary);
+    border: var(--border-width) solid var(--border-color);
+    padding: 8px;
+    border-radius: 3px;
+}
+
+.zoom-button {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+    border: 1px solid var(--accent-cyan);
+    color: var(--accent-cyan);
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    font-family: var(--font-mono);
+}
+
+.zoom-button:hover {
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+    box-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
+    transform: scale(1.1);
+}
+
+.zoom-button:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 5px rgba(0, 170, 255, 0.3);
+}
+
 .no-data-message {
     display: flex;
     flex-direction: column;

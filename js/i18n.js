@@ -218,6 +218,11 @@
             'msg.exportedJson': 'JSON отчет сохранен: {name}',
             'msg.exportedHtml': 'HTML отчет сохранен: {name}',
 
+            // Zoom Controls
+            'tooltip.zoomIn': 'Увеличить (прокрутка колеса)',
+            'tooltip.zoomOut': 'Уменьшить (прокрутка колеса)',
+            'tooltip.resetZoom': 'Сбросить масштаб',
+
             // Footer
             'footer.text': 'ОТК-001 /// СИСТЕМА ОЧИСТКИ ДАННЫХ ВРЕМЕННЫХ РЯДОВ',
             'footer.author': 'Разработчик: Фунтиков В.М.',
@@ -360,6 +365,11 @@
             'tooltip.RMSE': 'Root mean square error\n< 0.1 = very accurate\n0.1-0.5 = good accuracy\n> 0.5 = low accuracy',
             'tooltip.RSquared': 'Coefficient of determination (R²)\n> 0.9 = excellent fit\n0.7-0.9 = good fit\n< 0.7 = weak fit',
             'tooltip.Pearson': 'Pearson correlation coefficient\n> 0.9 = very strong correlation\n0.7-0.9 = strong correlation\n< 0.7 = weak correlation',
+
+            // Zoom Controls
+            'tooltip.zoomIn': 'Zoom in (scroll wheel)',
+            'tooltip.zoomOut': 'Zoom out (scroll wheel)',
+            'tooltip.resetZoom': 'Reset zoom',
 
             // File Info
             'section.fileInfo': 'FILE INFORMATION',
