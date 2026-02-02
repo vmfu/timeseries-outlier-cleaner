@@ -37,6 +37,11 @@ const appState = {
     seriesToClean: 0,
     seriesCleaned: 0,
 
+    // Operation tracking for ETA
+    operationStartTime: null,    // Timestamp when operation started
+    currentOperation: null,      // 'tune' or 'clean'
+    lastProgressUpdate: null,    // Last time progress was updated
+
     // Table view
     currentView: 'chart',     // 'chart' or 'table'
     tableState: {
@@ -1101,6 +1106,66 @@ function updateProgress(value, message) {
             log(message, 'info');
         }
     }
+
+    // Calculate and display ETA
+    var etaElement = document.getElementById('progressETA');
+    if (etaElement && appState.operationStartTime) {
+        var etaText = calculateETA(value);
+        if (etaText) {
+            etaElement.textContent = etaText;
+            etaElement.classList.remove('hidden');
+        } else {
+            etaElement.classList.add('hidden');
+        }
+    }
+}
+
+/**
+ * Calculate estimated time remaining (ETA)
+ * Returns formatted string like "~2m 30s remaining" or null if not enough data
+ */
+function calculateETA(currentProgress) {
+    // Don't calculate ETA for very small progress or at 100%
+    if (currentProgress < 5 || currentProgress >= 100) {
+        return null;
+    }
+
+    if (!appState.operationStartTime) {
+        return null;
+    }
+
+    var now = Date.now();
+    var elapsedMs = now - appState.operationStartTime;
+    var elapsedSeconds = elapsedMs / 1000;
+
+    // Calculate rate: progress per second
+    var rate = currentProgress / elapsedSeconds;
+
+    // If rate is too low or zero, don't calculate ETA
+    if (rate <= 0.01) {
+        return null;
+    }
+
+    // Calculate remaining time in seconds
+    var remainingProgress = 100 - currentProgress;
+    var estimatedSeconds = remainingProgress / rate;
+
+    // Format the ETA
+    var minutes = Math.floor(estimatedSeconds / 60);
+    var seconds = Math.round(estimatedSeconds % 60);
+
+    var etaText = '';
+    if (minutes > 0) {
+        etaText += '~' + minutes + 'm ';
+    }
+    if (seconds > 0 || etaText === '') {
+        etaText += seconds + 's';
+    }
+
+    // Get localized "remaining" text
+    var remainingKey = appState.currentLanguage === 'en' ? 'eta.remaining.en' : 'eta.remaining.ru';
+
+    return etaText + ' ' + I18n.t(remainingKey);
 }
 
 /**
@@ -1145,6 +1210,18 @@ function showLoadingOverlay(show) {
             setTimeout(function() {
                 progressBar.classList.add('hidden');
                 progressBar.classList.remove('visible');
+
+                // Hide ETA display
+                var etaElement = document.getElementById('progressETA');
+                if (etaElement) {
+                    etaElement.classList.add('hidden');
+                    etaElement.textContent = '';
+                }
+
+                // Reset ETA tracking
+                appState.operationStartTime = null;
+                appState.currentOperation = null;
+                appState.lastProgressUpdate = null;
             }, 1000); // Hide after 1 second delay
         }
         // Re-enable load button
@@ -1509,6 +1586,13 @@ function sendToWorker(type, data) {
     }
 
     currentJobId = generateJobId();
+
+    // Start tracking operation for ETA
+    if (type === 'TUNE' || type === 'CLEAN' || type === 'CLEAN_SERIES') {
+        appState.operationStartTime = Date.now();
+        appState.currentOperation = type.toLowerCase();
+        appState.lastProgressUpdate = Date.now();
+    }
 
     worker.postMessage({
         type: type,

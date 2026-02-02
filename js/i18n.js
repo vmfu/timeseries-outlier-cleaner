@@ -155,6 +155,10 @@
             // Progress Bar
             'progress.label': 'ХОД ПРОЦЕССА',
 
+            // ETA
+            'eta.remaining.ru': 'осталось',
+            'eta.remaining.en': 'remaining',
+
             // Chart
             'chart.xAxis': 'Время / Индекс',
             'chart.yAxis': 'Значение сигнала',
@@ -417,6 +421,10 @@
 
             // Progress Bar
             'progress.label': 'PROGRESS',
+
+            // ETA
+            'eta.remaining.ru': 'осталось',
+            'eta.remaining.en': 'remaining',
 
             // Chart
             'chart.xAxis': 'Time / Index',
