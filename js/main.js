@@ -172,6 +172,9 @@ function initializeUI() {
     // Chart visibility controls
     initializeVisibilityControls();
 
+    // Tooltips
+    initializeTooltips();
+
     // Tab navigation
     document.querySelectorAll('.tab-button').forEach(function(button) {
         button.addEventListener('click', function() {
@@ -401,6 +404,55 @@ function updateVisibilityButtonsState(hasOriginal, hasCleaned) {
             case 'both':
                 button.disabled = !hasOriginal && !hasCleaned;
                 break;
+        }
+    });
+}
+
+/**
+ * Initialize tooltips system
+ */
+function initializeTooltips() {
+    // Define tooltip mappings for elements
+    var tooltipMappings = [
+        // Metrics
+        { selector: '.metric-name[data-metric="STDF"]', key: 'tooltip.STDF' },
+        { selector: '.metric-name[data-metric="DF"]', key: 'tooltip.DF' },
+        { selector: '.metric-name[data-metric="ASNR"]', key: 'tooltip.ASNR' },
+        { selector: '.metric-name[data-metric="RMSE"]', key: 'tooltip.RMSE' },
+        { selector: '.metric-name[data-metric="RSquared"]', key: 'tooltip.RSquared' },
+        { selector: '.metric-name[data-metric="Pearson"]', key: 'tooltip.Pearson' },
+
+        // Parameters
+        { selector: '#windowWidthValue', key: 'tooltip.window' },
+        { selector: '#thresholdValue', key: 'tooltip.threshold' },
+        { selector: '#matrixSizeValue', key: 'tooltip.matrix' },
+        { selector: '#relativeSizeValue', key: 'tooltip.relative' }
+    ];
+
+    // Apply tooltips to elements
+    tooltipMappings.forEach(function(mapping) {
+        var element = document.querySelector(mapping.selector);
+        if (element) {
+            element.setAttribute('data-tooltip', I18n.t(mapping.key));
+        }
+    });
+
+    // Update tooltips on language change
+    var originalSetLanguage = I18n.setLanguage;
+    I18n.setLanguage = function(lang) {
+        originalSetLanguage.call(I18n, lang);
+        updateAllTooltips(tooltipMappings);
+    };
+}
+
+/**
+ * Update all tooltips with current language
+ */
+function updateAllTooltips(mappings) {
+    mappings.forEach(function(mapping) {
+        var element = document.querySelector(mapping.selector);
+        if (element) {
+            element.setAttribute('data-tooltip', I18n.t(mapping.key));
         }
     });
 }

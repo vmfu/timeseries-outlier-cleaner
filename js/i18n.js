@@ -38,13 +38,17 @@
             'label.window': 'Ширина окна',
             'desc.window': 'Размер скользящего окна (1-100)',
             'unit.window': 'ед.',
+            'tooltip.window': 'Размер окна для расчёта статистики\nБольшее окно = более плавная статистика\nМеньшее окно = более чувствительное обнаружение\nРекомендуемые значения: 20-60',
             'label.threshold': 'Пороговый коэффициент',
             'desc.threshold': 'Чувствительность обнаружения (0.1-2.0)',
+            'tooltip.threshold': 'Множитель стандартного отклонения\nНизкое значение = больше выбросов\nВысокое значение = меньше выбросов\nРекомендуемые значения: 1.0-1.8',
             'label.matrix': 'Размер матрицы наводки',
             'desc.matrix': 'Размер сетки поиска параметров (10-50)',
             'unit.matrix': '×{value}',
+            'tooltip.matrix': 'Размерность сетки параметров\nБольше = точный поиск, медленнее\nМеньше = быстрый поиск, менее точно\nРекомендуемые значения: 10-25',
             'label.relative': 'Относительный размер 2 матрицы',
             'desc.relative': 'Шаг грубого поиска (1-9)',
+            'tooltip.relative': 'Шаг для первого этапа оптимизации\n1 = точный, но медленный\n9 = быстрый, но грубый\nРекомендуемые значения: 2-5',
 
             // Optimization
             'label.chunks': 'Количество тестовых чанков',
@@ -123,6 +127,12 @@
             'metric.RMSE': 'СКО',
             'metric.RSquared': 'Детерминация',
             'metric.Pearson': 'Корреляция',
+            'tooltip.STDF': 'Показатель гладкости очищенного сигнала\n< 0.01 = отлично\n0.01-0.05 = хорошо\n> 0.05 = требует внимания',
+            'tooltip.DF': 'Процент точек, заменённых алгоритмом\n< 5% = мало удалений\n5-20% = умеренно\n> 20% = много удалений',
+            'tooltip.ASNR': 'Отношение сигнал/шум в децибелах\n> 30 дБ = отлично\n20-30 дБ = хорошо\n< 20 дБ = требуется улучшение',
+            'tooltip.RMSE': 'Среднеквадратическая ошибка\n< 0.1 = очень точная очистка\n0.1-0.5 = хорошая точность\n> 0.5 = низкая точность',
+            'tooltip.RSquared': 'Коэффициент детерминации (R²)\n> 0.9 = отличная аппроксимация\n0.7-0.9 = хорошая аппроксимация\n< 0.7 = слабая аппроксимация',
+            'tooltip.Pearson': 'Коэффициент корреляции Пирсона\n> 0.9 = очень сильная связь\n0.7-0.9 = сильная связь\n< 0.7 = слабая связь',
 
             // File Info
             'section.fileInfo': 'ИНФОРМАЦИЯ О ФАЙЛЕ',
@@ -222,13 +232,17 @@
             'label.window': 'Window Width',
             'desc.window': 'Sliding window size (1-100)',
             'unit.window': 'units',
+            'tooltip.window': 'Window size for statistics calculation\nLarger window = smoother statistics\nSmaller window = more sensitive detection\nRecommended: 20-60',
             'label.threshold': 'Threshold Factor',
             'desc.threshold': 'Detection sensitivity (0.1-2.0)',
+            'tooltip.threshold': 'Standard deviation multiplier\nLow value = more outliers detected\nHigh value = fewer outliers detected\nRecommended: 1.0-1.8',
             'label.matrix': 'Targeting Matrix Size',
             'desc.matrix': 'Parameter grid search size (10-50)',
             'unit.matrix': '×{value}',
+            'tooltip.matrix': 'Parameter grid dimensionality\nLarger = precise search, slower\nSmaller = fast search, less precise\nRecommended: 10-25',
             'label.relative': 'Relative Matrix 2 Size',
             'desc.relative': 'Coarse search step (1-9)',
+            'tooltip.relative': 'Step size for first optimization pass\n1 = precise but slow\n9 = fast but coarse\nRecommended: 2-5',
 
             // Optimization
             'label.chunks': 'Number of test chunks',
@@ -307,6 +321,12 @@
             'metric.RMSE': 'RMSE',
             'metric.RSquared': 'Determination',
             'metric.Pearson': 'Correlation',
+            'tooltip.STDF': 'Smoothness indicator of cleaned signal\n< 0.01 = excellent\n0.01-0.05 = good\n> 0.05 = needs attention',
+            'tooltip.DF': 'Percentage of points replaced by algorithm\n< 5% = few deletions\n5-20% = moderate\n> 20% = many deletions',
+            'tooltip.ASNR': 'Signal-to-noise ratio in decibels\n> 30 dB = excellent\n20-30 dB = good\n< 20 dB = needs improvement',
+            'tooltip.RMSE': 'Root mean square error\n< 0.1 = very accurate\n0.1-0.5 = good accuracy\n> 0.5 = low accuracy',
+            'tooltip.RSquared': 'Coefficient of determination (R²)\n> 0.9 = excellent fit\n0.7-0.9 = good fit\n< 0.7 = weak fit',
+            'tooltip.Pearson': 'Pearson correlation coefficient\n> 0.9 = very strong correlation\n0.7-0.9 = strong correlation\n< 0.7 = weak correlation',
 
             // File Info
             'section.fileInfo': 'FILE INFORMATION',
