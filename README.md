@@ -1,5 +1,10 @@
 # Outlier Cleaner Web Application
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES6-orange.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![MATLAB Compatible](https://img.shields.io/badge/MATLAB-Compatible-blue.svg)](https://www.mathworks.com/products/matlab.html)
+[![Status: Stable](https://img.shields.io/badge/Status-Stable-green.svg)](https://github.com/vmfu/timeseries-outlier-cleaner)
+
 A web-based tool for cleaning time series data from noise and outliers, ported from MATLAB to HTML/CSS/JavaScript.
 
 ## Overview
@@ -202,6 +207,22 @@ See `ARCHITECTURE.md` for detailed system architecture.
 2. For new metrics: Edit `metrics.js`
 3. For UI changes: Edit `index.html` and `css/telemetry.css`
 4. For algorithm changes: Edit `js/worker.js`
+
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for a history of changes.
+
+## Code of Conduct
+
+Please read our [Code of Conduct](.github/CODE_OF_CONDUCT.md) before participating.
+
+## Security
+
+For security policies and vulnerability reporting, see [SECURITY.md](.github/SECURITY.md).
 
 ## Credits
 
