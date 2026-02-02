@@ -252,6 +252,15 @@
                 <!-- Save Options -->
                 <div class="control-section">
                     <h2 class="section-title" data-i18n="section.save">3. ПАРАМЕТРЫ СОХРАНЕНИЯ</h2>
+                    
+                    <div class="control-group">
+                        <label class="control-label" for="exportFormat" data-i18n="label.exportFormat">Формат экспорта:</label>
+                        <select id="exportFormat" class="control-select">
+                            <option value="csv" data-i18n="exportFormat.csv">CSV (Comma Separated Values)</option>
+                            <option value="txt" data-i18n="exportFormat.txt">TXT (ASCII)</option>
+                        </select>
+                    </div>
+
                     <div class="checkbox-group">
                         <label class="checkbox-label">
                             <input type="checkbox" id="saveRestored" checked class="checkbox">

@@ -93,6 +93,9 @@
 
             // Save Options
             'section.save': '3. ПАРАМЕТРЫ СОХРАНЕНИЯ',
+            'label.exportFormat': 'Формат экспорта:',
+            'exportFormat.csv': 'CSV (разделитель - запятая)',
+            'exportFormat.txt': 'TXT (ASCII)',
             'checkbox.saveRestored': 'Сохранить восстановленные данные',
             'desc.saveRestored': 'Включить в результат восстановленные значения',
             'checkbox.validityFlag': 'Дополнить признаком истинности',
@@ -360,6 +363,9 @@
 
             // Save Options
             'section.save': '3. SAVE PARAMETERS',
+            'label.exportFormat': 'Export format:',
+            'exportFormat.csv': 'CSV (comma separated)',
+            'exportFormat.txt': 'TXT (ASCII)',
             'checkbox.saveRestored': 'Save restored data',
             'desc.saveRestored': 'Include restored values in results',
             'checkbox.validityFlag': 'Add validity flag',
@@ -673,6 +679,15 @@
             const key = element.getAttribute('data-i18n-title');
             const text = t(key);
             element.title = text;
+        });
+
+        // Update option elements with data-i18n attribute
+        const optionElements = document.querySelectorAll('option[data-i18n]');
+
+        optionElements.forEach(function(element) {
+            const key = element.getAttribute('data-i18n');
+            const text = t(key);
+            element.textContent = text;
         });
 
         console.log('[i18n] Updated all text elements');

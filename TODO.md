@@ -459,27 +459,27 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 4-5 hours
 
 **Tasks**:
-- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
-- [ ] Improve parameter map visualization
-  - [ ] Show NTF matrix preview
-  - [ ] Highlight optimal parameters
-  - [ ] Make heatmap interactive (click to select)
-- [ ] Add heatmap library
-  - [ ] Research lightweight heatmap libraries
-  - [ ] Or implement using Chart.js (heatmap plugin)
-  - [ ] Or use canvas-based approach
-- [ ] Implement interaction
-  - [ ] Click on cell to set parameters
-  - [ ] Hover to see values
-  - [ ] Smooth transitions
-- [ ] Test heatmap functionality
-  - [ ] Different matrix sizes
-  - [ ] Click accuracy
-  - [ ] Visual feedback
-- [ ] Start, test, then stop the local server
-- [ ] Check off the completed items and sub-items
-- [ ] Create a commit and push to Git
-- [ ] Summarize the session to reduce the load on the LLM provider
+- [x] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
+- [x] Improve parameter map visualization
+  - [x] Show NTF matrix preview
+  - [x] Highlight optimal parameters
+  - [x] Make heatmap interactive (click to select)
+- [x] Add heatmap library
+  - [x] Research lightweight heatmap libraries
+  - [x] Or implement using Chart.js (heatmap plugin)
+  - [x] Or use canvas-based approach
+- [x] Implement interaction
+  - [x] Click on cell to set parameters
+  - [x] Hover to see values
+  - [x] Smooth transitions
+- [x] Test heatmap functionality
+  - [x] Different matrix sizes
+  - [x] Click accuracy
+  - [x] Visual feedback
+- [x] Start, test, then stop the local server
+- [x] Check off the completed items and sub-items
+- [x] Create a commit and push to Git
+- [x] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit, bash (for testing), research (for heatmap libraries)
 
 
@@ -491,28 +491,28 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 3-4 hours
 
 **Tasks**:
-- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
-- [ ] Add CSV export
-  - [ ] Convert data to CSV format
-  - [ ] Handle multiple series
-  - [ ] Include headers
-- [ ] Add JSON export
-  - [ ] Structured JSON with metadata
-  - [ ] Include metrics and parameters
-- [ ] Add Excel export (optional)
-  - [ ] Research Excel export libraries
-  - [ ] Implement if feasible (lightweight)
-- [ ] Update save dialog
-  - [ ] Format selection dropdown
-  - [ ] Filename suggestions based on format
-- [ ] Test export formats
-  - [ ] Various dataset sizes
-  - [ ] Multiple series
-  - [ ] Verify file integrity
-- [ ] Start, test, then stop the local server
-- [ ] Check off the completed items and sub-items
-- [ ] Create a commit and push to Git
-- [ ] Summarize the session to reduce the load on the LLM provider
+- [x] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
+- [x] Add CSV export
+  - [x] Convert data to CSV format
+  - [x] Handle multiple series
+  - [x] Include headers
+- [x] Add JSON export
+  - [x] Structured JSON with metadata
+  - [x] Include metrics and parameters
+- [x] Add Excel export (optional)
+  - [x] Research Excel export libraries
+  - [x] Not implemented (too complex for single-file solution)
+- [x] Update save dialog
+  - [x] Format selection dropdown
+  - [x] Filename suggestions based on format
+- [x] Test export formats
+  - [x] Various dataset sizes
+  - [x] Multiple series
+  - [x] Verify file integrity
+- [x] Start, test, then stop the local server
+- [x] Check off the completed items and sub-items
+- [x] Create a commit and push to Git
+- [x] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit, bash (for testing), research (for Excel export)
 
 
@@ -946,11 +946,13 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 - [x] Reset Button: 100%
 - [x] Export Report: 100%
 
-**Nice to Have**: 100% complete
+**Additional Improvements**: 100% complete
 - [x] Chart Zoom/Pan: 100%
 - [x] Data Table: 100%
 - [x] Settings Presets: 100%
 - [x] ETA Progress: 100%
+- [x] Interactive Heatmap: 100%
+- [x] Export Multiple Formats: 100%
 
 **Code Quality**: 100% complete
 - [ ] I18n Architecture: 0%

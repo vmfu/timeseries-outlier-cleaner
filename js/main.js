@@ -2199,6 +2199,7 @@ function saveData() {
     try {
         var saveRestored = document.getElementById('saveRestored').checked;
         var addValidityFlag = document.getElementById('addValidityFlag').checked;
+        var exportFormat = document.getElementById('exportFormat').value;
 
         // Prepare output data
         var outputData = [];
@@ -2249,14 +2250,20 @@ function saveData() {
             }
         }
 
-        // Format as ASCII
-        var content = formatAsciiData(outputData);
+        // Format based on selected export format
+        var content;
+        if (exportFormat === 'csv') {
+            content = formatCsvData(outputData);
+        } else {
+            content = formatAsciiData(outputData);
+        }
 
-        // Generate filename
+        // Generate filename with appropriate extension
         var originalName = appState.currentFile.name;
         var dotIndex = originalName.lastIndexOf('.');
         var baseName = dotIndex > 0 ? originalName.substring(0, dotIndex) : originalName;
-        var filename = baseName + '_cleansed.txt';
+        var extension = exportFormat === 'csv' ? '.csv' : '.txt';
+        var filename = baseName + '_cleansed' + extension;
 
         // Trigger download
         downloadFile(content, filename);
@@ -2686,6 +2693,26 @@ function formatAsciiData(data) {
     for (var i = 0; i < data.length; i++) {
         var row = data[i];
         var formatted = row.map(function(v) { return v.toFixed(6); }).join('\t');
+        lines.push(formatted);
+    }
+
+    return lines.join('\n');
+}
+
+/**
+ * Format data as CSV
+ */
+function formatCsvData(data) {
+    var lines = [];
+
+    // Header comment
+    lines.push('# ' + I18n.t('msg.fileHeader'));
+    lines.push('# ' + I18n.t('msg.generated') + ' ' + new Date().toISOString());
+
+    // Data rows with comma separator
+    for (var i = 0; i < data.length; i++) {
+        var row = data[i];
+        var formatted = row.map(function(v) { return v.toFixed(6); }).join(',');
         lines.push(formatted);
     }
 

@@ -265,6 +265,51 @@ body {
     cursor: pointer;
 }
 
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.control-label {
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.control-select {
+    flex: 1;
+    background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+    border: var(--border-width) solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    outline: none;
+}
+
+.control-select:hover {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
+}
+
+.control-select:focus {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 15px rgba(0, 170, 255, 0.5);
+}
+
+.control-select option {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    padding: 8px;
+}
+
 .label-text {
     display: block;
     font-weight: bold;
