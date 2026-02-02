@@ -293,34 +293,34 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 4-5 hours
 
 **Tasks**:
-- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
-- [ ] Design report format
-  - [ ] JSON: structured data with metrics
-  - [ ] PDF: formatted report with charts
-  - [ ] HTML: printable web page
-- [ ] Add export button
-  - [ ] Place in save section or create new section
-  - [ ] Options: Export JSON, Export HTML
-  - [ ] Style with CRT aesthetics
-- [ ] Implement JSON export
-  - [ ] Include: filename, timestamp, parameters, metrics, outlier indices
-  - [ ] Export to file download
-  - [ ] Validate JSON structure
-- [ ] Implement HTML/PDF export
-  - [ ] Create printable HTML template
-  - [ ] Include: summary, charts (images), metrics table
-  - [ ] Style with print-friendly CSS
-  - [ ] Option to print to PDF
-- [ ] Add report preview (optional)
-  - [ ] Show report in modal before export
-- [ ] Test export functionality
-  - [ ] Various dataset sizes
-  - [ Different browsers (print behavior)
-  - [ ] Verify data integrity
-- [ ] Start, test, then stop the local server
-- [ ] Check off the completed items and sub-items
-- [ ] Create a commit and push to Git
-- [ ] Summarize the session to reduce the load on the LLM provider
+- [x] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
+- [x] Design report format
+  - [x] JSON: structured data with metrics
+  - [x] PDF: formatted report with charts
+  - [x] HTML: printable web page
+- [x] Add export button
+  - [x] Place in save section or create new section
+  - [x] Options: Export JSON, Export HTML
+  - [x] Style with CRT aesthetics
+- [x] Implement JSON export
+  - [x] Include: filename, timestamp, parameters, metrics, outlier indices
+  - [x] Export to file download
+  - [x] Validate JSON structure
+- [x] Implement HTML/PDF export
+  - [x] Create printable HTML template
+  - [x] Include: summary, charts (images), metrics table
+  - [x] Style with print-friendly CSS
+  - [x] Option to print to PDF
+- [x] Add report preview (optional)
+  - [x] Show report in modal before export
+- [x] Test export functionality
+  - [x] Various dataset sizes
+  - [x] Different browsers (print behavior)
+  - [x] Verify data integrity
+- [x] Start, test, then stop the local server
+- [x] Check off the completed items and sub-items
+- [x] Create a commit and push to Git
+- [x] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit, bash (for testing), research (for PDF generation)
 
 
