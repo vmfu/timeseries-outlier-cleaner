@@ -15,6 +15,8 @@
             // Header
             'title.prefix': 'ОТК-001',
             'title.main': 'СИСТЕМА ОЧИСТКИ ДАННЫХ',
+            'title.full': 'Outlier Cleaner - Обработка телеметрических данных',
+            'title.full': 'Outlier Cleaner - Обработка телеметрических данных',
 
             // Control Panel
             'panel.control': 'ПАНЕЛЬ УПРАВЛЕНИЯ',
@@ -304,6 +306,31 @@
             'presets.saved': 'Пресет сохранен: {name}',
             'presets.applied': 'Пресет применен: {name}',
 
+            // HTML Report
+            'report.title': 'ОТЧЕТ ОБ ОЧИСТКЕ ДАННЫХ',
+            'report.subtitle': 'Отчет об очистке данных',
+            'report.metadata': 'Метаданные',
+            'report.parameter': 'Параметр',
+            'report.value': 'Значение',
+            'report.filename': 'Имя файла',
+            'report.created': 'Дата создания',
+            'report.cleaningParams': 'Параметры очистки',
+            'report.windowWidth': 'Ширина окна',
+            'report.threshold': 'Пороговый коэффициент',
+            'report.matrixSize': 'Размер матрицы',
+            'report.relativeSize': 'Относительный размер',
+            'report.fillMethod': 'Метод заполнения',
+            'report.qualityMetrics': 'Метрики качества',
+            'report.series': 'Серия',
+            'report.count': 'Количество',
+            'report.total': 'Всего',
+            'report.outlierStats': 'Статистика выбросов',
+            'report.visualization': 'Визуализация',
+            'report.dataChart': 'Данные',
+            'report.parameterMap': 'Карта параметров',
+            'report.footer': 'ОТК-001 /// СИСТЕМА ОЧИСТКИ ДАННЫХ ВРЕМЕННЫХ РЯДОВ',
+            'report.author': 'Разработчик: Фунтиков В.М.',
+
             // Language Switcher
             'lang.ru': 'RU',
             'lang.en': 'EN',
@@ -314,6 +341,7 @@
             // Header
             'title.prefix': 'ODC-001',
             'title.main': 'DATA CLEANING SYSTEM',
+            'title.full': 'Outlier Cleaner - Telemetry Data Processing',
 
             // Control Panel
             'panel.control': 'CONTROL PANEL',
@@ -705,6 +733,9 @@
         // Update HTML lang attribute
         document.documentElement.lang = currentLanguage;
 
+        // Update all translatable text
+        updateAllText();
+
         console.log('[i18n] Initialized with language:', currentLanguage);
     }
 
@@ -718,7 +749,12 @@
         elements.forEach(function(element) {
             const key = element.getAttribute('data-i18n');
             const text = t(key);
-            element.textContent = text;
+            // Special handling for title element
+            if (element.tagName === 'TITLE') {
+                element.text = text;
+            } else {
+                element.textContent = text;
+            }
         });
 
         // Update elements with data-i18n-placeholder attribute
