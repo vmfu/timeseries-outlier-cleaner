@@ -80,7 +80,6 @@ primary prompt is a human task.txt
 # Project Startup Scripts (personal/local)
 start_crush.bat
 start_new_project.bat
-start_and_open.bat
-start_auto.bat
-start_server.bat
-open_app.bat
+
+# MATLAB Core Functions (local only)
+filloutliers.m
