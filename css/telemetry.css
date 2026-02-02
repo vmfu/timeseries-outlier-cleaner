@@ -1489,6 +1489,70 @@ body {
 }
 
 /* ============================================================================
+   PROMINENT FILE INFO DISPLAY
+   ============================================================================
+*/
+
+.prominent-file-info {
+    margin: 10px 0;
+    padding: 0;
+    border: none;
+}
+
+.file-info-display {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: var(--bg-secondary);
+    border: 2px solid var(--accent-cyan);
+    padding: 12px 15px;
+    position: relative;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+.file-info-display::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 255, 136, 0.03) 2px,
+        rgba(0, 255, 136, 0.03) 4px
+    );
+    pointer-events: none;
+}
+
+.info-display-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+    z-index: 1;
+}
+
+.info-display-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.info-display-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--accent-cyan);
+    text-shadow: 0 0 10px var(--accent-cyan),
+                 0 0 20px rgba(0, 255, 136, 0.5);
+    font-family: 'Courier New', monospace;
+}
+
+/* ============================================================================
    FOOTER
    ============================================================================
 */

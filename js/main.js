@@ -776,6 +776,7 @@ function handleFileSelect(event) {
  */
 function updateFileCount(count) {
     document.getElementById('fileCount').textContent = I18n.t('file.count', {count: count});
+    document.getElementById('prominentFileCount').textContent = count;
 }
 
 /**
@@ -929,6 +930,10 @@ function updateFileInfo(file, data) {
     document.getElementById('infoSeries').textContent = data[0].length - 1;
     document.getElementById('infoOptWindow').textContent = '--';
     document.getElementById('infoOptThreshold').textContent = '--';
+
+    // Update prominent file info display
+    document.getElementById('prominentPoints').textContent = data.length;
+    document.getElementById('prominentSeries').textContent = data[0].length - 1;
 }
 
 /**
