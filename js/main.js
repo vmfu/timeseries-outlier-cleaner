@@ -880,12 +880,111 @@ function updateFileInfo(file, data) {
  * Update metrics display
  */
 function updateMetrics(metrics) {
-    document.getElementById('metricSTDF').textContent = metrics.STDF ? metrics.STDF.toFixed(4) : '--';
-    document.getElementById('metricDF').textContent = metrics.DF ? metrics.DF.toFixed(4) : '--';
-    document.getElementById('metricASNR').textContent = metrics.ASNR ? metrics.ASNR.toFixed(2) : '--';
-    document.getElementById('metricRMSE').textContent = metrics.ARMSE ? metrics.ARMSE.toFixed(4) : '--';
-    document.getElementById('metricRSquared').textContent = metrics.R_squared ? metrics.R_squared.toFixed(4) : '--';
-    document.getElementById('metricPearson').textContent = metrics.R_Pirs ? metrics.R_Pirs.toFixed(4) : '--';
+    // STDF - Smoothness
+    var stdfElement = document.getElementById('metricSTDF');
+    if (metrics.STDF !== undefined && metrics.STDF !== null) {
+        stdfElement.textContent = metrics.STDF.toFixed(4);
+        stdfElement.className = 'metric-value ' + getQualityClass('STDF', metrics.STDF);
+    } else {
+        stdfElement.textContent = '--';
+        stdfElement.className = 'metric-value';
+    }
+
+    // DF - Deleted Fraction
+    var dfElement = document.getElementById('metricDF');
+    if (metrics.DF !== undefined && metrics.DF !== null) {
+        dfElement.textContent = metrics.DF.toFixed(4);
+        dfElement.className = 'metric-value ' + getQualityClass('DF', metrics.DF);
+    } else {
+        dfElement.textContent = '--';
+        dfElement.className = 'metric-value';
+    }
+
+    // ASNR - Signal-to-Noise Ratio
+    var asnrElement = document.getElementById('metricASNR');
+    if (metrics.ASNR !== undefined && metrics.ASNR !== null) {
+        asnrElement.textContent = metrics.ASNR.toFixed(2);
+        asnrElement.className = 'metric-value ' + getQualityClass('ASNR', metrics.ASNR);
+    } else {
+        asnrElement.textContent = '--';
+        asnrElement.className = 'metric-value';
+    }
+
+    // RMSE - Root Mean Square Error
+    var rmseElement = document.getElementById('metricRMSE');
+    if (metrics.ARMSE !== undefined && metrics.ARMSE !== null) {
+        rmseElement.textContent = metrics.ARMSE.toFixed(4);
+        rmseElement.className = 'metric-value ' + getQualityClass('RMSE', metrics.ARMSE);
+    } else {
+        rmseElement.textContent = '--';
+        rmseElement.className = 'metric-value';
+    }
+
+    // RSquared - Coefficient of Determination
+    var rsquaredElement = document.getElementById('metricRSquared');
+    if (metrics.R_squared !== undefined && metrics.R_squared !== null) {
+        rsquaredElement.textContent = metrics.R_squared.toFixed(4);
+        rsquaredElement.className = 'metric-value ' + getQualityClass('RSquared', metrics.R_squared);
+    } else {
+        rsquaredElement.textContent = '--';
+        rsquaredElement.className = 'metric-value';
+    }
+
+    // Pearson - Pearson Correlation
+    var pearsonElement = document.getElementById('metricPearson');
+    if (metrics.R_Pirs !== undefined && metrics.R_Pirs !== null) {
+        pearsonElement.textContent = metrics.R_Pirs.toFixed(4);
+        pearsonElement.className = 'metric-value ' + getQualityClass('Pearson', metrics.R_Pirs);
+    } else {
+        pearsonElement.textContent = '--';
+        pearsonElement.className = 'metric-value';
+    }
+}
+
+/**
+ * Get quality class based on metric type and value
+ */
+function getQualityClass(metricType, value) {
+    switch (metricType) {
+        case 'STDF':
+            // Smoothness: lower is better
+            if (value < 0.01) return 'quality-excellent';
+            if (value < 0.05) return 'quality-good';
+            return 'quality-poor';
+
+        case 'DF':
+            // Deleted Fraction: lower is better (as percentage)
+            if (value < 5) return 'quality-excellent';
+            if (value < 20) return 'quality-good';
+            return 'quality-poor';
+
+        case 'ASNR':
+            // SNR (dB): higher is better
+            if (value > 30) return 'quality-excellent';
+            if (value >= 20) return 'quality-good';
+            return 'quality-poor';
+
+        case 'RMSE':
+            // RMSE: lower is better
+            if (value < 0.1) return 'quality-excellent';
+            if (value < 0.5) return 'quality-good';
+            return 'quality-poor';
+
+        case 'RSquared':
+            // R²: higher is better
+            if (value > 0.9) return 'quality-excellent';
+            if (value >= 0.7) return 'quality-good';
+            return 'quality-poor';
+
+        case 'Pearson':
+            // Pearson: higher is better
+            if (value > 0.9) return 'quality-excellent';
+            if (value >= 0.7) return 'quality-good';
+            return 'quality-poor';
+
+        default:
+            return '';
+    }
 }
 
 /**
