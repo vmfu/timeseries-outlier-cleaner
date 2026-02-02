@@ -13,6 +13,9 @@ const appState = {
     cleanedData: null,         // Processed data (2D array)
     currentFile: null,         // Current file being processed
     batchQueue: [],            // Files to process
+    batchResults: [],          // Results from batch processing
+    batchProcessing: false,    // Is batch processing active
+    batchCancelled: false,     // Was batch processing cancelled
 
     // Parameters
     params: {
@@ -195,9 +198,14 @@ function initializeUI() {
     document.getElementById('cancelResetBtn').addEventListener('click', hideResetModal);
     document.querySelector('.modal-close').addEventListener('click', hideResetModal);
 
+    // Batch processing buttons
+    document.getElementById('batchProcessBtn').addEventListener('click', processBatchQueue);
+    document.getElementById('batchCancelBtn').addEventListener('click', cancelBatchProcessing);
+
     // Export buttons
     document.getElementById('exportJsonBtn').addEventListener('click', exportJsonReport);
     document.getElementById('exportHtmlBtn').addEventListener('click', exportHtmlReport);
+    document.getElementById('exportBatchBtn').addEventListener('click', exportBatchResults);
 
     // Zoom controls
     document.getElementById('zoomInBtn').addEventListener('click', zoomIn);
@@ -815,14 +823,61 @@ function updateParamsPreview() {
  */
 function displaySelectedFiles(files) {
     var container = document.getElementById('selectedFiles');
+    var batchControls = document.getElementById('batchControls');
     container.innerHTML = '';
 
     files.forEach(function(file, index) {
         var div = document.createElement('div');
         div.className = 'file-item';
-        div.textContent = (index + 1) + '. ' + file.name + ' (' + formatFileSize(file.size) + ')';
+        div.id = 'fileItem_' + index;
+
+        var infoDiv = document.createElement('div');
+        infoDiv.className = 'file-item-info';
+        infoDiv.textContent = (index + 1) + '. ' + file.name + ' (' + formatFileSize(file.size) + ')';
+
+        var actionsDiv = document.createElement('div');
+        actionsDiv.className = 'file-item-actions';
+
+        var cancelButton = document.createElement('button');
+        cancelButton.className = 'file-item-cancel';
+        cancelButton.textContent = '✕';
+        cancelButton.onclick = (function(idx) {
+            return function() {
+                cancelBatchItem(idx);
+            };
+        })(index);
+        cancelButton.title = I18n.t('button.cancelItem');
+
+        var progressDiv = document.createElement('div');
+        progressDiv.className = 'file-item-progress';
+        progressDiv.id = 'fileProgress_' + index;
+
+        var progressBar = document.createElement('div');
+        progressBar.className = 'file-item-progress-bar';
+        progressBar.id = 'fileProgressBar_' + index;
+        progressBar.style.width = '0%';
+        progressDiv.appendChild(progressBar);
+
+        var statusSpan = document.createElement('span');
+        statusSpan.className = 'file-item-status pending';
+        statusSpan.id = 'fileStatus_' + index;
+        statusSpan.textContent = '⏳';
+
+        actionsDiv.appendChild(cancelButton);
+        actionsDiv.appendChild(progressDiv);
+        actionsDiv.appendChild(statusSpan);
+
+        div.appendChild(infoDiv);
+        div.appendChild(actionsDiv);
         container.appendChild(div);
     });
+
+    // Show batch controls if more than 1 file
+    if (files.length > 1) {
+        batchControls.style.display = 'flex';
+    } else {
+        batchControls.style.display = 'none';
+    }
 }
 
 /**
@@ -834,6 +889,238 @@ function formatFileSize(bytes) {
     var sizes = ['B', 'KB', 'MB', 'GB'];
     var i = Math.floor(Math.log(bytes) / Math.log(k));
     return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+}
+
+/**
+ * Cancel individual item from batch queue
+ */
+function cancelBatchItem(index) {
+    if (appState.batchProcessing) {
+        log(I18n.t('batch.cannotCancelDuring'), 'warning');
+        return;
+    }
+    appState.batchQueue.splice(index, 1);
+    displaySelectedFiles(appState.batchQueue);
+    updateFileCount(appState.batchQueue.length);
+    document.getElementById('prominentFileCount').textContent = appState.batchQueue.length;
+    log(I18n.t('batch.itemRemoved'), 'info');
+}
+
+/**
+ * Process all files in batch queue
+ */
+function processBatchQueue() {
+    if (appState.batchQueue.length === 0) {
+        log(I18n.t('msg.noFiles'), 'warning');
+        return;
+    }
+
+    if (appState.batchProcessing) {
+        log(I18n.t('batch.alreadyProcessing'), 'warning');
+        return;
+    }
+
+    appState.batchProcessing = true;
+    appState.batchCancelled = false;
+    appState.batchResults = [];
+
+    log(I18n.t('batch.started', {count: appState.batchQueue.length}), 'info');
+
+    // Disable controls
+    document.getElementById('batchProcessBtn').disabled = true;
+    document.getElementById('loadBtn').disabled = true;
+
+    processNextBatchItem(0);
+}
+
+/**
+ * Process next item in batch queue
+ */
+function processNextBatchItem(index) {
+    if (index >= appState.batchQueue.length || appState.batchCancelled) {
+        completeBatchProcessing();
+        return;
+    }
+
+    var file = appState.batchQueue[index];
+    appState.currentFile = file;
+
+    // Update status
+    updateBatchItemStatus(index, 'processing', 0);
+    log(I18n.t('batch.processing', {index: index + 1, total: appState.batchQueue.length, name: file.name}), 'info');
+
+    // Load file
+    readFileContent(file).then(function(content) {
+        var data = parseAsciiData(content);
+
+        if (data.length === 0) {
+            throw new Error('Файл не содержит данных');
+        }
+
+        appState.originalData = data;
+
+        // Use current parameters for batch processing (no auto-tune per file)
+        // This is more practical for batch operations
+        return sendToWorkerAsync('CLEAN', {
+            originalData: data.map(function(row) { return row.slice(1); }),
+            params: appState.params
+        });
+    }).then(function(result) {
+        // Store result
+        appState.batchResults.push({
+            filename: file.name,
+            originalData: appState.originalData,
+            cleanedData: result.cleanedData,
+            metrics: result.metrics,
+            params: appState.params
+        });
+
+        // Update status
+        updateBatchItemStatus(index, 'completed', 100);
+
+        // Process next item
+        setTimeout(function() {
+            processNextBatchItem(index + 1);
+        }, 100);
+    }).catch(function(error) {
+        console.error('Batch processing error:', error);
+        updateBatchItemStatus(index, 'error', 0);
+        log(I18n.t('batch.itemError', {name: file.name, message: error.message}), 'error');
+
+        // Continue to next item
+        setTimeout(function() {
+            processNextBatchItem(index + 1);
+        }, 100);
+    });
+}
+
+/**
+ * Send message to worker and return Promise
+ */
+function sendToWorkerAsync(type, data) {
+    return new Promise(function(resolve, reject) {
+        if (!worker) {
+            reject(new Error(I18n.t('error.workerInit')));
+            return;
+        }
+
+        var jobId = generateJobId();
+        var messageHandler = function(event) {
+            if (event.data.jobId === jobId) {
+                worker.removeEventListener('message', messageHandler);
+                if (event.data.type === 'RESULT') {
+                    resolve(event.data.data);
+                } else if (event.data.type === 'ERROR') {
+                    reject(new Error(event.data.data.message || 'Worker error'));
+                }
+            }
+        };
+
+        worker.addEventListener('message', messageHandler);
+
+        worker.postMessage({
+            type: type,
+            jobId: jobId,
+            data: data
+        });
+    });
+}
+
+/**
+ * Update batch item status and progress
+ */
+function updateBatchItemStatus(index, status, progress) {
+    var progressBar = document.getElementById('fileProgressBar_' + index);
+    var statusSpan = document.getElementById('fileStatus_' + index);
+
+    if (progressBar) {
+        progressBar.style.width = progress + '%';
+    }
+
+    if (statusSpan) {
+        statusSpan.className = 'file-item-status ' + status;
+        switch (status) {
+            case 'pending':
+                statusSpan.textContent = '⏳';
+                break;
+            case 'processing':
+                statusSpan.textContent = '⚙️';
+                break;
+            case 'completed':
+                statusSpan.textContent = '✓';
+                break;
+            case 'error':
+                statusSpan.textContent = '✗';
+                break;
+        }
+    }
+}
+
+/**
+ * Complete batch processing
+ */
+function completeBatchProcessing() {
+    appState.batchProcessing = false;
+
+    // Re-enable controls
+    document.getElementById('batchProcessBtn').disabled = false;
+    document.getElementById('loadBtn').disabled = false;
+
+    if (appState.batchCancelled) {
+        log(I18n.t('batch.cancelled'), 'warning');
+    } else {
+        log(I18n.t('batch.completed', {count: appState.batchResults.length}), 'success');
+        log(I18n.t('batch.exportHint'), 'info');
+
+        // Show batch export button
+        var exportBtn = document.getElementById('exportBatchBtn');
+        if (exportBtn) {
+            exportBtn.style.display = 'block';
+        }
+    }
+}
+
+/**
+ * Cancel batch processing
+ */
+function cancelBatchProcessing() {
+    if (!appState.batchProcessing) {
+        return;
+    }
+
+    if (confirm(I18n.t('batch.confirmCancel'))) {
+        appState.batchCancelled = true;
+        log(I18n.t('batch.cancelling'), 'warning');
+    }
+}
+
+/**
+ * Export all batch results
+ */
+function exportBatchResults() {
+    if (appState.batchResults.length === 0) {
+        log(I18n.t('batch.noResults'), 'warning');
+        return;
+    }
+
+    log(I18n.t('batch.exporting'), 'info');
+
+    // Export each result as a separate file
+    appState.batchResults.forEach(function(result, index) {
+        var saveOptions = {
+            saveRestored: true,
+            includeValidityFlag: false
+        };
+
+        var saveData = prepareSaveData(result.originalData, result.cleanedData, saveOptions);
+        var filename = 'cleaned_' + result.filename;
+
+        downloadFile(saveData, filename);
+
+        log(I18n.t('batch.saved', {name: filename}), 'success');
+    });
+
+    log(I18n.t('batch.exportComplete', {count: appState.batchResults.length}), 'success');
 }
 
 /**

@@ -58,6 +58,18 @@
                         </div>
                     </div>
                     <div id="selectedFiles" class="selected-files-list"></div>
+
+                    <!-- Batch Processing Controls -->
+                    <div class="batch-controls" id="batchControls" style="display: none;">
+                        <button type="button" id="batchProcessBtn" class="batch-button batch-process">
+                            <span class="button-icon">▶️</span>
+                            <span class="button-text" data-i18n="button.batchProcess">ОБРАБОТАТЬ ВСЕ ФАЙЛЫ</span>
+                        </button>
+                        <button type="button" id="batchCancelBtn" class="batch-button batch-cancel">
+                            <span class="button-icon">⏹️</span>
+                            <span class="button-text" data-i18n="button.batchCancel">ОТМЕНИТЬ</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Prominent File Info Display -->
@@ -248,6 +260,13 @@
                         <span class="button-icon">⚠</span>
                         <span class="button-label" data-i18n="button.reset">СБРОС СЕССИИ</span>
                         <span class="button-desc" data-i18n="desc.reset">Очистить все данные и начать заново</span>
+                    </button>
+
+                    <!-- Batch Export Button -->
+                    <button id="exportBatchBtn" class="action-button batch-export" style="display: none;">
+                        <span class="button-icon">📦</span>
+                        <span class="button-label" data-i18n="button.exportBatch">ЭКСПОРТ ВСЕХ РЕЗУЛЬТАТОВ</span>
+                        <span class="button-desc" data-i18n="desc.save">Экспорт всех файлов</span>
                     </button>
                 </div>
 

@@ -85,6 +85,9 @@
             'desc.save': 'Экспорт результатов',
             'button.reset': 'СБРОС СЕССИИ',
             'desc.reset': 'Очистить все данные и начать заново',
+            'button.batchProcess': 'ОБРАБОТАТЬ ВСЕ ФАЙЛЫ',
+            'button.batchCancel': 'ОТМЕНИТЬ',
+            'button.exportBatch': 'ЭКСПОРТ ВСЕХ РЕЗУЛЬТАТОВ',
 
             // Export Report
             'section.report': '4. ЭКСПОРТ ОТЧЕТА',
@@ -250,6 +253,24 @@
             'msg.exportedJson': 'JSON отчет сохранен: {name}',
             'msg.exportedHtml': 'HTML отчет сохранен: {name}',
 
+            // Batch Processing
+            'batch.started': 'Начало пакетной обработки {count} файлов...',
+            'batch.alreadyProcessing': 'Уже выполняется пакетная обработка',
+            'batch.processing': 'Обработка [{index}/{total}]: {name}',
+            'batch.itemError': 'Ошибка файла {name}: {message}',
+            'batch.itemRemoved': 'Файл удален из очереди',
+            'batch.cannotCancelDuring': 'Невозможно удалить файл во время обработки',
+            'batch.completed': 'Пакетная обработка завершена: {count} файлов',
+            'batch.cancelled': 'Пакетная обработка отменена',
+            'batch.cancelling': 'Отмена пакетной обработки...',
+            'batch.confirmCancel': 'Вы уверены, что хотите отменить обработку?',
+            'batch.exporting': 'Экспорт всех результатов...',
+            'batch.saved': 'Сохранен: {name}',
+            'batch.exportComplete': 'Экспорт завершен: {count} файлов',
+            'batch.noResults': 'Нет результатов для экспорта',
+            'batch.exportHint': 'Нажмите "Экспорт всех результатов" для сохранения',
+            'button.cancelItem': 'Удалить из очереди',
+
             // Zoom Controls
             'tooltip.zoomIn': 'Увеличить (прокрутка колеса)',
             'tooltip.zoomOut': 'Уменьшить (прокрутка колеса)',
@@ -363,6 +384,9 @@
             'desc.save': 'Export results',
             'button.reset': 'RESET SESSION',
             'desc.reset': 'Clear all data and start fresh',
+            'button.batchProcess': 'PROCESS ALL FILES',
+            'button.batchCancel': 'CANCEL',
+            'button.exportBatch': 'EXPORT ALL RESULTS',
 
             // Export Report
             'section.report': '4. EXPORT REPORT',
@@ -538,6 +562,24 @@
             'msg.noCleanedForReport': 'No cleaned data to export',
             'msg.exportedJson': 'JSON report saved: {name}',
             'msg.exportedHtml': 'HTML report saved: {name}',
+
+            // Batch Processing
+            'batch.started': 'Starting batch processing of {count} files...',
+            'batch.alreadyProcessing': 'Batch processing already in progress',
+            'batch.processing': 'Processing [{index}/{total}]: {name}',
+            'batch.itemError': 'Error in file {name}: {message}',
+            'batch.itemRemoved': 'File removed from queue',
+            'batch.cannotCancelDuring': 'Cannot remove file during processing',
+            'batch.completed': 'Batch processing completed: {count} files',
+            'batch.cancelled': 'Batch processing cancelled',
+            'batch.cancelling': 'Cancelling batch processing...',
+            'batch.confirmCancel': 'Are you sure you want to cancel processing?',
+            'batch.exporting': 'Exporting all results...',
+            'batch.saved': 'Saved: {name}',
+            'batch.exportComplete': 'Export completed: {count} files',
+            'batch.noResults': 'No results to export',
+            'batch.exportHint': 'Click "Export All Results" to save',
+            'button.cancelItem': 'Remove from queue',
 
             // Footer
             'footer.text': 'ODC-001 /// TIME SERIES DATA CLEANING SYSTEM',

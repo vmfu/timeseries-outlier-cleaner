@@ -399,6 +399,143 @@ body {
     font-size: 11px;
     padding: 3px 5px;
     border-bottom: 1px dashed var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.file-item-info {
+    flex: 1;
+}
+
+.file-item-actions {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.file-item-cancel {
+    background: var(--primary-red);
+    border: none;
+    color: #000;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.file-item-cancel:hover {
+    background: #ff6b6b;
+    box-shadow: 0 0 10px var(--primary-red);
+}
+
+.file-item-progress {
+    flex: 1;
+    height: 4px;
+    background: rgba(0, 255, 255, 0.1);
+    border: 1px solid var(--accent-cyan);
+    margin-left: 10px;
+    min-width: 50px;
+}
+
+.file-item-progress-bar {
+    height: 100%;
+    background: var(--accent-cyan);
+    transition: width 0.3s;
+    box-shadow: 0 0 5px var(--accent-cyan);
+}
+
+.file-item-status {
+    font-size: 10px;
+    margin-left: 8px;
+    min-width: 40px;
+    text-align: center;
+}
+
+.file-item-status.pending {
+    color: var(--text-muted);
+}
+
+.file-item-status.processing {
+    color: var(--accent-amber);
+    animation: blink 1s infinite;
+}
+
+.file-item-status.completed {
+    color: var(--accent-green);
+}
+
+.file-item-status.error {
+    color: var(--primary-red);
+}
+
+/* ============================================================================
+   BATCH CONTROLS
+   ============================================================================
+*/
+
+.batch-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.batch-button {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: bold;
+    border: 2px solid;
+    background: rgba(0, 0, 0, 0.8);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all 0.2s;
+}
+
+.batch-button .button-icon {
+    font-size: 14px;
+}
+
+.batch-button:hover {
+    transform: translateY(-2px);
+}
+
+.batch-button:active {
+    transform: translateY(0);
+}
+
+.batch-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.batch-process {
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+    text-shadow: 0 0 5px var(--accent-green);
+}
+
+.batch-process:hover {
+    background: rgba(0, 255, 100, 0.2);
+    box-shadow: 0 0 15px var(--accent-green);
+}
+
+.batch-cancel {
+    border-color: var(--primary-red);
+    color: var(--primary-red);
+    text-shadow: 0 0 5px var(--primary-red);
+}
+
+.batch-cancel:hover {
+    background: rgba(255, 0, 100, 0.2);
+    box-shadow: 0 0 15px var(--primary-red);
 }
 
 /* ============================================================================
@@ -771,6 +908,24 @@ body {
 }
 
 .reset-button:active {
+    background: linear-gradient(180deg, #2a1515 0%, #1a0f0f 100%);
+    transform: translateY(0);
+}
+
+/* ============================================================================
+   BATCH EXPORT BUTTON
+   ============================================================================
+*/
+
+.batch-export {
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+}
+
+.batch-export:hover:not(:disabled) {
+    border-color: #00ffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
     transform: translateY(0);
 }
 
