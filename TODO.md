@@ -425,27 +425,27 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 1-2 hours
 
 **Tasks**:
-- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
-- [ ] Implement time tracking
-  - [ ] Track start time of operation
-  - [ ] Estimate based on progress and elapsed time
-  - [ ] Update ETA in real-time
-- [ ] Add ETA display
-  - [ ] Show next to progress bar or in log
-  - [ ] Format: "~2m 30s remaining"
-  - [ ] Style with CRT aesthetics
-- [ ] Handle edge cases
-  - [ ] First few iterations (no ETA yet)
-  - [ ] Fluctuating progress rates
-  - [ ] Very fast operations (<1s)
-- [ ] Test ETA accuracy
-  - [ ] Various dataset sizes
-  - [ ] Different parameter settings
-  - [ ] Verify accuracy over time
-- [ ] Start, test, then stop the local server
-- [ ] Check off the completed items and sub-items
-- [ ] Create a commit and push to Git
-- [ ] Summarize the session to reduce the load on the LLM provider
+- [x] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
+- [x] Implement time tracking
+  - [x] Track start time of operation
+  - [x] Estimate based on progress and elapsed time
+  - [x] Update ETA in real-time
+- [x] Add ETA display
+  - [x] Show next to progress bar or in log
+  - [x] Format: "~2m 30s remaining"
+  - [x] Style with CRT aesthetics
+- [x] Handle edge cases
+  - [x] First few iterations (no ETA yet)
+  - [x] Fluctuating progress rates
+  - [x] Very fast operations (<1s)
+- [x] Test ETA accuracy
+  - [x] Various dataset sizes
+  - [x] Different parameter settings
+  - [x] Verify accuracy over time
+- [x] Start, test, then stop the local server
+- [x] Check off the completed items and sub-items
+- [x] Create a commit and push to Git
+- [x] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, edit, bash (for testing)
 
 
@@ -946,11 +946,11 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 - [x] Reset Button: 100%
 - [x] Export Report: 100%
 
-**Nice to Have**: 75% complete
+**Nice to Have**: 100% complete
 - [x] Chart Zoom/Pan: 100%
 - [x] Data Table: 100%
 - [x] Settings Presets: 100%
-- [ ] ETA Progress: 0%
+- [x] ETA Progress: 100%
 
 **Code Quality**: 100% complete
 - [ ] I18n Architecture: 0%
