@@ -118,16 +118,16 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
   - [x] Modify Chart.js datasets
   - [x] Maintain colors (red = original, green = cleaned)
   - [x] Ensure legend updates correctly
-- [ ] Test all visibility modes
-  - [ ] Original only
-  - [ ] Cleaned only
-  - [ ] Both (default)
+- [x] Test all visibility modes
+  - [x] Original only
+  - [x] Cleaned only
+  - [x] Both (default)
 - [x] Add keyboard shortcuts (optional)
   - [x] 1/2/3 keys to toggle visibility
 - [x] Start, test, then stop the local server
-- [ ] Check off the completed items and sub-items
-- [ ] Create a commit and push to Git
-- [ ] Summarize the session to reduce the load on the LLM provider
+- [x] Check off the completed items and sub-items
+- [x] Create a commit and push to Git
+- [x] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, edit, bash (for testing)
 
 
