@@ -1152,6 +1152,49 @@ body {
     justify-content: center;
 }
 
+.heatmap-tooltip {
+    position: absolute;
+    background: rgba(10, 10, 15, 0.95);
+    border: 1px solid var(--accent-cyan);
+    border-radius: 4px;
+    padding: 10px;
+    pointer-events: none;
+    z-index: 1000;
+    font-family: 'Consolas', monospace;
+    font-size: 12px;
+    color: var(--text-primary);
+    box-shadow: 0 0 20px rgba(0, 170, 255, 0.3);
+    backdrop-filter: blur(5px);
+    min-width: 150px;
+}
+
+.heatmap-tooltip.hidden {
+    display: none;
+}
+
+.heatmap-tooltip strong {
+    color: var(--accent-cyan);
+    text-shadow: 0 0 5px var(--accent-cyan-glow);
+    display: block;
+    margin-bottom: 5px;
+}
+
+.heatmap-tooltip .tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 3px;
+}
+
+.heatmap-tooltip .tooltip-label {
+    color: var(--text-muted);
+}
+
+.heatmap-tooltip .tooltip-value {
+    color: var(--accent-amber);
+    font-weight: bold;
+}
+
 /* ============================================================================
    ZOOM CONTROLS
    ============================================================================

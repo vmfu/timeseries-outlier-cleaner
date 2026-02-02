@@ -33,6 +33,10 @@ const appState = {
     NTF: null,                // Normalized Target Function matrix
     chartVisibility: 'both',   // 'original', 'cleaned', or 'both'
 
+    // Heatmap interaction
+    heatmapMatrix: null,         // Original NTF matrix for heatmap interaction
+    heatmapOptimal: null,        // Optimal parameters from tune
+
     // Series cleaning progress
     seriesToClean: 0,
     seriesCleaned: 0,
@@ -1572,6 +1576,173 @@ function drawColorScale(ctx, canvas, minVal, maxVal) {
     ctx.fillText('Карта качества параметров', canvas.width / 2, 15);
 }
 
+/**
+ * Initialize heatmap interactivity (hover and click)
+ */
+function initializeHeatmapInteraction() {
+    var canvas = document.getElementById('heatmapCanvas');
+    if (!canvas) return;
+
+    canvas.addEventListener('mousemove', handleHeatmapMouseMove);
+    canvas.addEventListener('click', handleHeatmapClick);
+    canvas.addEventListener('mouseleave', handleHeatmapMouseLeave);
+}
+
+/**
+ * Handle heatmap mouse move - show tooltip
+ */
+function handleHeatmapMouseMove(event) {
+    var canvas = event.target;
+    var rect = canvas.getBoundingClientRect();
+    var x = event.clientX - rect.left;
+    var y = event.clientY - rect.top;
+
+    var cellInfo = getHeatmapCellFromCoords(x, y);
+    if (!cellInfo) return;
+
+    showHeatmapTooltip(cellInfo, event.clientX, event.clientY, rect);
+}
+
+/**
+ * Handle heatmap click - apply parameters
+ */
+function handleHeatmapClick(event) {
+    var canvas = event.target;
+    var rect = canvas.getBoundingClientRect();
+    var x = event.clientX - rect.left;
+    var y = event.clientY - rect.top;
+
+    var cellInfo = getHeatmapCellFromCoords(x, y);
+    if (!cellInfo) return;
+
+    // Apply parameters from clicked cell
+    applyHeatmapParameters(cellInfo.windowWidth, cellInfo.threshold);
+}
+
+/**
+ * Handle heatmap mouse leave - hide tooltip
+ */
+function handleHeatmapMouseLeave() {
+    var tooltip = document.getElementById('heatmapTooltip');
+    if (tooltip) {
+        tooltip.classList.add('hidden');
+    }
+}
+
+/**
+ * Get heatmap cell information from coordinates
+ */
+function getHeatmapCellFromCoords(x, y) {
+    if (!appState.heatmapMatrix) return null;
+
+    var canvas = document.getElementById('heatmapCanvas');
+    if (!canvas) return null;
+
+    var rows = appState.heatmapMatrix.length;
+    var cols = appState.heatmapMatrix[0].length;
+    var cellWidth = canvas.width / cols;
+    var cellHeight = canvas.height / rows;
+
+    // Calculate cell indices
+    var colIndex = Math.floor(x / cellWidth);
+    var rowIndex = Math.floor(y / cellHeight);
+
+    // Check bounds
+    if (colIndex < 0 || colIndex >= cols || rowIndex < 0 || rowIndex >= rows) {
+        return null;
+    }
+
+    // Calculate actual parameter values based on grid search algorithm
+    // The grid searches from baseWindow + (matrixSize * step / 2) to baseWindow - ...
+    var matrixSize = appState.params.matrixSize;
+    var step = appState.params.relativeSize;
+
+    // Reverse calculation from worker's performGridSearch
+    var baseWindow = appState.params.windowWidth;
+    var baseThreshold = appState.params.threshold;
+
+    // Calculate window width for this column
+    var windowWidth = Math.abs(baseWindow + (matrixSize * step / 2) - (rowIndex * step) - 1) + 1;
+
+    // Calculate threshold for this row (using colIndex for threshold)
+    var threshFactor = baseThreshold * 100;
+    var threshold = (threshFactor + (matrixSize * step / 2) - step * colIndex) / 100;
+
+    // Get NTF value
+    var ntfValue = appState.heatmapMatrix[rowIndex][colIndex];
+
+    return {
+        row: rowIndex,
+        col: colIndex,
+        windowWidth: windowWidth,
+        threshold: threshold,
+        ntfValue: ntfValue
+    };
+}
+
+/**
+ * Show heatmap tooltip at position
+ */
+function showHeatmapTooltip(cellInfo, mouseX, mouseY, canvasRect) {
+    var tooltip = document.getElementById('heatmapTooltip');
+    if (!tooltip) return;
+
+    // Build tooltip content
+    var tooltipContent = '<strong>' + I18n.t('heatmap.tooltip.title') + '</strong>';
+    tooltipContent += '<div class="tooltip-row">';
+    tooltipContent += '<span class="tooltip-label">' + I18n.t('heatmap.tooltip.window') + ':</span>';
+    tooltipContent += '<span class="tooltip-value">' + cellInfo.windowWidth.toFixed(0) + '</span>';
+    tooltipContent += '</div>';
+    tooltipContent += '<div class="tooltip-row">';
+    tooltipContent += '<span class="tooltip-label">' + I18n.t('heatmap.tooltip.threshold') + ':</span>';
+    tooltipContent += '<span class="tooltip-value">' + cellInfo.threshold.toFixed(3) + '</span>';
+    tooltipContent += '</div>';
+    tooltipContent += '<div class="tooltip-row">';
+    tooltipContent += '<span class="tooltip-label">' + I18n.t('heatmap.tooltip.ntf') + ':</span>';
+    tooltipContent += '<span class="tooltip-value">' + cellInfo.ntfValue.toFixed(4) + '</span>';
+    tooltipContent += '</div>';
+
+    tooltip.innerHTML = tooltipContent;
+    tooltip.classList.remove('hidden');
+
+    // Position tooltip near mouse but avoid overflow
+    var tooltipWidth = tooltip.offsetWidth;
+    var tooltipHeight = tooltip.offsetHeight;
+    var pageX = mouseX + 15;
+    var pageY = mouseY + 15;
+
+    // Adjust if too close to right edge
+    if (pageX + tooltipWidth > window.innerWidth) {
+        pageX = mouseX - tooltipWidth - 15;
+    }
+
+    // Adjust if too close to bottom edge
+    if (pageY + tooltipHeight > window.innerHeight) {
+        pageY = mouseY - tooltipHeight - 15;
+    }
+
+    tooltip.style.left = pageX + 'px';
+    tooltip.style.top = pageY + 'px';
+}
+
+/**
+ * Apply parameters from heatmap cell
+ */
+function applyHeatmapParameters(windowWidth, threshold) {
+    // Update appState
+    appState.params.windowWidth = windowWidth;
+    appState.params.threshold = threshold;
+
+    // Update UI elements
+    document.getElementById('windowWidth').value = windowWidth.toFixed(0);
+    document.getElementById('windowWidthValue').textContent = windowWidth.toFixed(0);
+    document.getElementById('threshold').value = threshold.toFixed(3);
+    document.getElementById('thresholdValue').textContent = threshold.toFixed(3);
+
+    // Log the parameter change
+    log(I18n.t('heatmap.selected', {window: windowWidth.toFixed(0), threshold: threshold.toFixed(3)}), 'info');
+}
+
 // ============================================================================
 // WORKER COMMUNICATION
 // ============================================================================
@@ -1764,8 +1935,13 @@ function handleTuneResult(data) {
     document.getElementById('infoOptWindow').textContent = optimalParams.windowWidth.toFixed(0);
     document.getElementById('infoOptThreshold').textContent = optimalParams.threshold.toFixed(2);
 
-    // NTF heatmap is NOT displayed in JS version (only for MATLAB debugging)
-    // The heatmap requires full NTF matrix which is memory-intensive and not needed for final results
+    // Draw NTF heatmap with interactivity
+    if (data.NTF) {
+        appState.heatmapMatrix = data.NTF;
+        appState.heatmapOptimal = optimalParams;
+        drawHeatmap(data.NTF, optimalParams);
+        initializeHeatmapInteraction();
+    }
 
     // Enable clean button
     document.getElementById('cleanBtn').disabled = false;

@@ -170,6 +170,11 @@
             'chart.showBoth': 'Оба',
             'chart.outliers': 'Выбросы',
             'heatmap.title': 'Карта качества параметров',
+            'heatmap.tooltip.title': 'Параметры ячейки',
+            'heatmap.tooltip.window': 'Окно',
+            'heatmap.tooltip.threshold': 'Порог',
+            'heatmap.tooltip.ntf': 'NTF',
+            'heatmap.selected': 'Выбраны параметры: окно {window}, порог {threshold}',
 
             // View Toggle
             'chart.view': 'График',
@@ -437,6 +442,11 @@
             'chart.showBoth': 'Both',
             'chart.outliers': 'Outliers',
             'heatmap.title': 'Parameter Quality Map',
+            'heatmap.tooltip.title': 'Cell Parameters',
+            'heatmap.tooltip.window': 'Window',
+            'heatmap.tooltip.threshold': 'Threshold',
+            'heatmap.tooltip.ntf': 'NTF',
+            'heatmap.selected': 'Parameters selected: window {window}, threshold {threshold}',
 
             // View Toggle
             'chart.view': 'Chart',
