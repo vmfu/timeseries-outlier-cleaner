@@ -292,6 +292,24 @@
                 <div class="tab-content">
                     <!-- Data Plot Tab -->
                     <div id="dataTab" class="tab-pane active">
+                        <!-- Chart Visibility Toolbar -->
+                        <div class="chart-toolbar">
+                            <span class="toolbar-label" data-i18n="chart.visibility">Visibility:</span>
+                            <div class="visibility-buttons">
+                                <button class="visibility-btn" data-visibility="original" title="Show original data">
+                                    <span class="vis-icon">🔴</span>
+                                    <span class="vis-text" data-i18n="chart.showOriginal">Original</span>
+                                </button>
+                                <button class="visibility-btn" data-visibility="cleaned" title="Show cleaned data">
+                                    <span class="vis-icon">🟢</span>
+                                    <span class="vis-text" data-i18n="chart.showCleaned">Cleaned</span>
+                                </button>
+                                <button class="visibility-btn active" data-visibility="both" title="Show both datasets">
+                                    <span class="vis-icon">📊</span>
+                                    <span class="vis-text" data-i18n="chart.showBoth">Both</span>
+                                </button>
+                            </div>
+                        </div>
                         <div class="chart-container" id="dropZone">
                             <div class="chart-wrapper">
                                 <canvas id="dataChart"></canvas>

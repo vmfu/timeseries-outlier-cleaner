@@ -141,6 +141,10 @@
             'chart.yAxis': 'Значение сигнала',
             'chart.original': 'Исходные - Серия {n}',
             'chart.cleaned': 'Очищенные - Серия {n}',
+            'chart.visibility': 'Видимость:',
+            'chart.showOriginal': 'Исходные',
+            'chart.showCleaned': 'Очищенные',
+            'chart.showBoth': 'Оба',
             'heatmap.title': 'Карта качества параметров',
 
             // Messages
@@ -321,6 +325,10 @@
             'chart.yAxis': 'Signal Value',
             'chart.original': 'Original - Series {n}',
             'chart.cleaned': 'Cleaned - Series {n}',
+            'chart.visibility': 'Visibility:',
+            'chart.showOriginal': 'Original',
+            'chart.showCleaned': 'Cleaned',
+            'chart.showBoth': 'Both',
             'heatmap.title': 'Parameter Quality Map',
 
             // Messages

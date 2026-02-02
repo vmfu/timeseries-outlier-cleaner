@@ -31,6 +31,7 @@ const appState = {
     // Charts
     dataChart: null,
     NTF: null,                // Normalized Target Function matrix
+    chartVisibility: 'both',   // 'original', 'cleaned', or 'both'
 
     // Series cleaning progress
     seriesToClean: 0,
@@ -168,6 +169,9 @@ function initializeUI() {
     // Drag & Drop zone
     initializeDragAndDrop();
 
+    // Chart visibility controls
+    initializeVisibilityControls();
+
     // Tab navigation
     document.querySelectorAll('.tab-button').forEach(function(button) {
         button.addEventListener('click', function() {
@@ -297,6 +301,141 @@ function handleDrop(event) {
     document.getElementById('loadBtn').disabled = false;
 
     log(I18n.t('msg.filesSelected', {count: validFiles.length}), 'info');
+}
+
+/**
+ * Initialize chart visibility controls
+ */
+function initializeVisibilityControls() {
+    var buttons = document.querySelectorAll('.visibility-btn');
+
+    // Load saved preference
+    var savedVisibility = localStorage.getItem('chartVisibility');
+    if (savedVisibility && ['original', 'cleaned', 'both'].includes(savedVisibility)) {
+        appState.chartVisibility = savedVisibility;
+    }
+
+    // Set initial state
+    updateVisibilityButtons();
+
+    // Add click handlers
+    buttons.forEach(function(button) {
+        button.addEventListener('click', function() {
+            var mode = this.dataset.visibility;
+            setChartVisibility(mode);
+        });
+    });
+
+    // Keyboard shortcuts (1/2/3)
+    document.addEventListener('keydown', function(event) {
+        // Only if not typing in input
+        if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+            return;
+        }
+
+        switch (event.key) {
+            case '1':
+                setChartVisibility('original');
+                break;
+            case '2':
+                setChartVisibility('cleaned');
+                break;
+            case '3':
+                setChartVisibility('both');
+                break;
+        }
+    });
+}
+
+/**
+ * Set chart visibility mode
+ * @param {string} mode - 'original', 'cleaned', or 'both'
+ */
+function setChartVisibility(mode) {
+    if (!['original', 'cleaned', 'both'].includes(mode)) {
+        console.warn('Invalid visibility mode:', mode);
+        return;
+    }
+
+    appState.chartVisibility = mode;
+    localStorage.setItem('chartVisibility', mode);
+
+    // Update button states
+    updateVisibilityButtons();
+
+    // Update chart datasets
+    updateChartDatasetsVisibility();
+}
+
+/**
+ * Update visibility button active states
+ */
+function updateVisibilityButtons() {
+    var buttons = document.querySelectorAll('.visibility-btn');
+
+    buttons.forEach(function(button) {
+        if (button.dataset.visibility === appState.chartVisibility) {
+            button.classList.add('active');
+        } else {
+            button.classList.remove('active');
+        }
+    });
+}
+
+/**
+ * Update visibility buttons enabled/disabled state based on data
+ */
+function updateVisibilityButtonsState(hasOriginal, hasCleaned) {
+    var buttons = document.querySelectorAll('.visibility-btn');
+
+    buttons.forEach(function(button) {
+        var mode = button.dataset.visibility;
+
+        switch (mode) {
+            case 'original':
+                button.disabled = !hasOriginal;
+                break;
+            case 'cleaned':
+                button.disabled = !hasCleaned;
+                break;
+            case 'both':
+                button.disabled = !hasOriginal && !hasCleaned;
+                break;
+        }
+    });
+}
+
+/**
+ * Update chart datasets visibility based on current mode
+ */
+function updateChartDatasetsVisibility() {
+    if (!appState.dataChart) {
+        return;
+    }
+
+    var chart = appState.dataChart;
+    var mode = appState.chartVisibility;
+
+    chart.data.datasets.forEach(function(dataset, index) {
+        // Original datasets are even indices (0, 2, 4, ...)
+        // Cleaned datasets are odd indices (1, 3, 5, ...)
+        var isOriginal = (index % 2 === 0);
+
+        switch (mode) {
+            case 'original':
+                dataset.hidden = !isOriginal;
+                break;
+            case 'cleaned':
+                dataset.hidden = isOriginal;
+                break;
+            case 'both':
+                dataset.hidden = false;
+                break;
+        }
+    });
+
+    // Update chart without animation for better performance
+    chart.update('none');
 }
 
 /**
@@ -897,6 +1036,12 @@ function updateDataChart(original, cleaned) {
 
     // Update chart without animation
     chart.update('none');
+
+    // Apply visibility settings
+    updateChartDatasetsVisibility();
+
+    // Update buttons state based on available data
+    updateVisibilityButtonsState(!!original, !!cleaned);
 
     // Force another resize after update
     setTimeout(function() {
