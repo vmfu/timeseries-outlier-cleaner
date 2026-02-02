@@ -35,26 +35,32 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 4-6 hours
 
 **Tasks**:
-- [ ] Create i18n system structure
-  - [ ] Add `js/i18n.js` with language dictionaries
-  - [ ] Define translation keys for all UI elements
-  - [ ] Create RU/EN dictionaries
-- [ ] Add language switcher UI component
-  - [ ] Place in header (top-right corner)
-  - [ ] Style with CRT aesthetics (toggle switch or button)
-  - [ ] Add icons (🇷🇺/🇺🇸 or text labels)
-- [ ] Implement language switching logic
-  - [ ] Function to switch language dynamically
-  - [ ] Update all text elements
-  - [ ] Preserve user choice in localStorage
-  - [ ] Set language on page load
+- [x] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
+- [x] Add `js/i18n.js` with language dictionaries
+  - [x] Define translation keys for all UI elements
+  - [x] Create RU/EN dictionaries
+- [x] Add language switcher UI component
+  - [x] Place in header (top-right corner)
+  - [x] Style with CRT aesthetics (toggle switch or button)
+  - [x] Add icons (🇷🇺/🇺🇸 or text labels)
+- [x] Implement language switching logic
+  - [x] Function to switch language dynamically
+  - [x] Update all text elements
+  - [x] Preserve user choice in localStorage
+  - [x] Set language on page load
 - [ ] Test all UI elements in both languages
   - [ ] Check all labels, buttons, tooltips
   - [ ] Verify charts (if they have labels)
   - [ ] Check log messages
-- [ ] Add language indicator in header
+- [x] Add language indicator in header
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 
 **Tools needed**: view, write, edit, bash (for testing)
+
+
 
 ---
 
@@ -63,28 +69,34 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 3-4 hours
 
 **Tasks**:
-- [ ] Add drag & drop zone to visualization panel
-  - [ ] Create drop zone overlay when no data loaded
-  - [ ] Style with CRT aesthetics (dashed border, glowing effect)
-  - [ ] Add instruction text in both RU/EN
-- [ ] Implement drag & drop event handlers
-  - [ ] Handle dragenter, dragover, dragleave, drop
-  - [ ] Prevent default browser behavior
-  - [ ] Visual feedback on drag events
-- [ ] Integrate with existing file loading logic
-  - [ ] Use existing `fileInput` handler or adapt
-  - [ ] Support multiple files (as per existing functionality)
-  - [ ] Show file count and names
-- [ ] Add error handling
-  - [ ] Invalid file types
-  - [ ] Multiple drag events
-  - [ ] Browser compatibility check
+- [x] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
+- [x] Add drag & drop zone to visualization panel
+  - [x] Create drop zone overlay when no data loaded
+  - [x] Style with CRT aesthetics (dashed border, glowing effect)
+  - [x] Add instruction text in both RU/EN
+- [x] Implement drag & drop event handlers
+  - [x] Handle dragenter, dragover, dragleave, drop
+  - [x] Prevent default browser behavior
+  - [x] Visual feedback on drag events
+- [x] Integrate with existing file loading logic
+  - [x] Use existing `fileInput` handler or adapt
+  - [x] Support multiple files (as per existing functionality)
+  - [x] Show file count and names
+- [x] Add error handling
+  - [x] Invalid file types
+  - [x] Multiple drag events
+  - [x] Browser compatibility check
 - [ ] Test with various file types and sizes
   - [ ] TXT, DAT, CSV, ASC
   - [ ] Small and large files
   - [ ] Multiple files at once
-
+- [x] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit, bash (for testing)
+
+
 
 ---
 
@@ -93,26 +105,32 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 2-3 hours
 
 **Tasks**:
-- [ ] Add chart visibility controls
-  - [ ] Create toggle buttons/switch in chart toolbar
-  - [ ] Options: Show Original, Show Cleaned, Show Both
-  - [ ] Style with CRT aesthetics
-- [ ] Implement chart visibility logic
-  - [ ] Function to toggle dataset visibility
-  - [ ] Update chart dynamically
-  - [ ] Store preference in localStorage
-- [ ] Update chart configuration
-  - [ ] Modify Chart.js datasets
-  - [ ] Maintain colors (red = original, green = cleaned)
-  - [ ] Ensure legend updates correctly
+- [x] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
+- [x] Add chart visibility controls
+  - [x] Create toggle buttons/switch in chart toolbar
+  - [x] Options: Show Original, Show Cleaned, Show Both
+  - [x] Style with CRT aesthetics
+- [x] Implement chart visibility logic
+  - [x] Function to toggle dataset visibility
+  - [x] Update chart dynamically
+  - [x] Store preference in localStorage
+- [x] Update chart configuration
+  - [x] Modify Chart.js datasets
+  - [x] Maintain colors (red = original, green = cleaned)
+  - [x] Ensure legend updates correctly
 - [ ] Test all visibility modes
   - [ ] Original only
   - [ ] Cleaned only
   - [ ] Both (default)
-- [ ] Add keyboard shortcuts (optional)
-  - [ ] 1/2/3 keys to toggle visibility
-
+- [x] Add keyboard shortcuts (optional)
+  - [x] 1/2/3 keys to toggle visibility
+- [x] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, edit, bash (for testing)
+
+
 
 ---
 
@@ -121,39 +139,45 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 3-4 hours
 
 **Tasks**:
-- [ ] Create tooltip system
-  - [ ] Add `css/tooltip.css` or extend `telemetry.css`
-  - [ ] Create tooltip HTML component
-  - [ ] Style with CRT aesthetics (glowing, monospace)
-- [ ] Define tooltips for all metrics
-  - [ ] STDF (Smoothness): "STDF < 0.01 = отлично, 0.01-0.05 = хорошо, >0.05 = требует внимания"
-  - [ ] DF (Deleted Fraction): "Процент удаленных точек"
-  - [ ] ASNR (Signal-to-Noise): "Отношение сигнал/шум в dB"
-  - [ ] ARMSE (RMSE): "Среднеквадратическая ошибка"
-  - [ ] R² (R-squared): "Коэффициент детерминации (ближе к 1 = лучше)"
-  - [ ] Pearson: "Корреляция Пирсона (-1 to 1)"
-- [ ] Define tooltips for parameters
-  - [ ] Window Width: "Размер скользящего окна для статистики"
-  - [ ] Threshold: "Чувствительность обнаружения выбросов"
-  - [ ] Matrix Size: "Размер сетки для оптимизации"
-  - [ ] Fill Method: "Метод заполнения выбросов"
-  - [ ] Detection Method: "Метод обнаружения выбросов"
-- [ ] Implement tooltip triggers
-  - [ ] Hover events on metric values
-  - [ ] Hover events on parameter labels
-  - [ ] Click to show/hide (for mobile)
-  - [ ] Auto-dismiss on mouse leave
-- [ ] Add tooltips for advanced settings
-  - [ ] Explain what each slider does
-  - [ ] Show recommended ranges
-- [ ] Add internationalization for tooltips
-  - [ ] Include in i18n dictionaries
+- [x] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
+- [x] Create tooltip system
+  - [x] Add `css/tooltip.css` or extend `telemetry.css`
+  - [x] Create tooltip HTML component
+  - [x] Style with CRT aesthetics (glowing, monospace)
+- [x] Define tooltips for all metrics
+  - [x] STDF (Smoothness): "STDF < 0.01 = отлично, 0.01-0.05 = хорошо, >0.05 = требует внимания"
+  - [x] DF (Deleted Fraction): "Процент удаленных точек"
+  - [x] ASNR (Signal-to-Noise): "Отношение сигнал/шум в dB"
+  - [x] ARMSE (RMSE): "Среднеквадратическая ошибка"
+  - [x] R² (R-squared): "Коэффициент детерминации (ближе к 1 = лучше)"
+  - [x] Pearson: "Корреляция Пирсона (-1 to 1)"
+- [x] Define tooltips for parameters
+  - [x] Window Width: "Размер скользящего окна для статистики"
+  - [x] Threshold: "Чувствительность обнаружения выбросов"
+  - [x] Matrix Size: "Размер сетки для оптимизации"
+  - [x] Fill Method: "Метод заполнения выбросов"
+  - [x] Detection Method: "Метод обнаружения выбросов"
+- [x] Implement tooltip triggers
+  - [x] Hover events on metric values
+  - [x] Hover events on parameter labels
+  - [x] Click to show/hide (for mobile)
+  - [x] Auto-dismiss on mouse leave
+- [x] Add tooltips for advanced settings
+  - [x] Explain what each slider does
+  - [x] Show recommended ranges
+- [x] Add internationalization for tooltips
+  - [x] Include in i18n dictionaries
 - [ ] Test tooltip behavior
   - [ ] Hover timing
   - [ ] Positioning (avoid edges)
   - [ ] Mobile touch support
-
+- [x] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit, bash (for testing)
+
+- [ ] Создать коммит и запушить на гит.
 
 ---
 
@@ -164,6 +188,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 3-4 hours
 
 **Tasks**:
+- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [ ] Identify outlier points
   - [ ] Track which points were flagged as outliers
   - [ ] Store outlier indices during cleaning process
@@ -184,8 +209,13 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
   - [ ] Multiple consecutive outliers
   - [ ] Random outliers
   - [ ] Edge cases (start/end of series)
-
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, edit, bash (for testing)
+
+
 
 ---
 
@@ -194,6 +224,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 2-3 hours
 
 **Tasks**:
+- [x] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [x] Define metric quality thresholds
   - [x] STDF: <0.01 (green), 0.01-0.05 (yellow), >0.05 (red)
   - [x] DF: <5% (green), 5-20% (yellow), >20% (red)
@@ -253,6 +284,8 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 
 **Tools needed**: view, edit, bash (for testing)
 
+
+
 ---
 
 ### 8. Export Report Functionality
@@ -260,6 +293,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 4-5 hours
 
 **Tasks**:
+- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [ ] Design report format
   - [ ] JSON: structured data with metrics
   - [ ] PDF: formatted report with charts
@@ -283,8 +317,13 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
   - [ ] Various dataset sizes
   - [ Different browsers (print behavior)
   - [ ] Verify data integrity
-
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit, bash (for testing), research (for PDF generation)
+
+
 
 ---
 
@@ -294,9 +333,27 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Priority**: 🟢 Medium
 **Estimated Time**: 2-3 hours
 
-
-
+**Tasks**:
+- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
+- [ ] Enable Chart.js zoom plugin (already loaded)
+  - [x] Configure zoom wheel
+  - [x] Configure pan gestures
+  - [x] Add zoom buttons (in/out/reset)
+- [x] Style zoom controls
+  - [x] Match CRT aesthetics
+  - [x] Place in chart toolbar
+- [ ] Test zoom/pan behavior
+  - [ ] Mouse wheel zoom
+  - [ ] Click and drag pan
+  - [ ] Zoom reset
+  - [ ] Multiple series
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, edit, bash (for testing)
+
+- [x] Создать коммит и запушить на гит.
 
 ---
 
@@ -305,6 +362,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 3-4 hours
 
 **Tasks**:
+- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [ ] Create table view component
   - [ ] Toggle between chart/table view
   - [ ] Table with columns: Index, Time, Signal Original, Signal Cleaned, Status
@@ -320,8 +378,13 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
   - [ ] Small datasets (<1000 rows)
   - [ ] Large datasets (>10000 rows)
   - [ ] Multiple series
-
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit, bash (for testing)
+
+
 
 ---
 
@@ -330,6 +393,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 2-3 hours
 
 **Tasks**:
+- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [ ] Design preset structure
   - [ ] Preset: name, parameters (window, threshold, methods)
   - [ ] Default presets: conservative, balanced, aggressive
@@ -346,8 +410,13 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
   - [ ] Apply different presets
   - [ ] Create and delete presets
   - [ ] Verify parameter values
-
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit, bash (for testing)
+
+
 
 ---
 
@@ -356,6 +425,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 1-2 hours
 
 **Tasks**:
+- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [ ] Implement time tracking
   - [ ] Track start time of operation
   - [ ] Estimate based on progress and elapsed time
@@ -372,8 +442,13 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
   - [ ] Various dataset sizes
   - [ ] Different parameter settings
   - [ ] Verify accuracy over time
-
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, edit, bash (for testing)
+
+
 
 ---
 
@@ -384,6 +459,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 4-5 hours
 
 **Tasks**:
+- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [ ] Improve parameter map visualization
   - [ ] Show NTF matrix preview
   - [ ] Highlight optimal parameters
@@ -400,8 +476,13 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
   - [ ] Different matrix sizes
   - [ ] Click accuracy
   - [ ] Visual feedback
-
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit, bash (for testing), research (for heatmap libraries)
+
+
 
 ---
 
@@ -410,6 +491,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 3-4 hours
 
 **Tasks**:
+- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [ ] Add CSV export
   - [ ] Convert data to CSV format
   - [ ] Handle multiple series
@@ -427,8 +509,13 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
   - [ ] Various dataset sizes
   - [ ] Multiple series
   - [ ] Verify file integrity
-
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit, bash (for testing), research (for Excel export)
+
+
 
 ---
 
@@ -437,6 +524,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 1 hour
 
 **Tasks**:
+- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [ ] Clarify status meaning
   - [ ] "СИСТЕМА ГОТОВА" (System Ready)
   - [ ] "ВЕБ-РАБОЧИЙ: АКТИВЕН" (Web Worker: Active)
@@ -449,8 +537,13 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
   - [ ] During processing
   - [ ] After completion
   - [ ] Error states
-
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, edit, bash (for testing)
+
+
 
 ---
 
@@ -459,6 +552,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 1-2 hours
 
 **Tasks**:
+- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [ ] Move file info to more visible location
   - [ ] Show in header or top of control panel
   - [ ] Display: file count, total points, series count
@@ -470,8 +564,13 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
   - [ ] Single file
   - [ ] Multiple files
   - [ ] Various sizes
-
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, edit, bash (for testing)
+
+
 
 ---
 
@@ -480,6 +579,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 1-2 hours
 
 **Tasks**:
+- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [ ] Add parameter preview
   - [ ] Show summary of advanced settings
   - [ ] Display before opening hood
@@ -491,8 +591,13 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 - [ ] Test preview functionality
   - [ ] Verify accuracy
   - [ ] Check with different parameters
-
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, edit, bash (for testing)
+
+
 
 ---
 
@@ -501,6 +606,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 4-5 hours
 
 **Tasks**:
+- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [ ] Design queue interface
   - [ ] Show processing queue
   - [ ] Progress for each file
@@ -518,8 +624,13 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
   - [ ] Large number of files (10+)
   - [ ] Mixed file sizes
   - [ ] Cancel during processing
-
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit, bash (for testing)
+
+
 
 ---
 
@@ -530,6 +641,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 2-3 hours
 
 **Tasks**:
+- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [ ] Design i18n system
   - [ ] Create `js/i18n.js` module
   - [ ] Define translation dictionary structure
@@ -550,8 +662,13 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
   - [ ] All elements translate
   - [ ] No untranslated strings
   - [ ] Language switching works
-
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit, bash (for testing)
+
+
 
 ---
 
@@ -560,6 +677,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 3-4 hours
 
 **Tasks**:
+- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [ ] Separate concerns into modules
   - [ ] `js/ui.js` - UI components and interactions
   - [ ] `js/chart.js` - Chart.js configuration
@@ -578,8 +696,13 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
   - [ ] All functionality works
   - [ ] No console errors
   - [ ] Performance maintained
-
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit, bash (for testing)
+
+
 
 ---
 
@@ -588,6 +711,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 2-3 hours
 
 **Tasks**:
+- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [ ] Add comprehensive error handling
   - [ ] File loading errors
   - [ ] Processing errors
@@ -605,8 +729,13 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
   - [ ] Simulate various errors
   - [ ] Verify user-friendliness
   - [ ] Check recovery options
-
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit, bash (for testing)
+
+
 
 ---
 
@@ -615,6 +744,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 3-4 hours
 
 **Tasks**:
+- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [ ] Profile current performance
   - [ ] Identify bottlenecks
   - [ ] Measure processing time
@@ -636,8 +766,13 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
   - [ ] Medium datasets (1000-10000 points)
   - [ ] Large datasets (>10000 points)
   - [ ] Multiple series
-
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, edit, bash (for testing), browser dev tools
+
+
 
 ---
 
@@ -646,6 +781,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 2-3 hours
 
 **Tasks**:
+- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [ ] Add ARIA labels
   - [ ] All interactive elements
   - [ ] Chart containers
@@ -664,8 +800,13 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
   - [ ] Screen reader testing
   - [ ] Keyboard navigation testing
   - [ ] Contrast checking tools
-
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, edit, bash (for testing), accessibility tools
+
+
 
 ---
 
@@ -674,6 +815,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 6-8 hours
 
 **Tasks**:
+- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [ ] Set up testing framework
   - [ ] Research lightweight JS testing frameworks
   - [ ] Configure test runner
@@ -689,8 +831,14 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 - [ ] Add test coverage reporting
 - [ ] Run tests before commits
 - [ ] Fix failing tests
-
+- [ ] Закомить и запуш на гит
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, bash (for testing), research (for testing frameworks)
+
+
 
 ---
 
@@ -699,6 +847,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 2-3 hours
 
 **Tasks**:
+- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [ ] Update README
   - [ ] Add screenshots of new features
   - [ ] Update feature list
@@ -713,13 +862,17 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
   - [ ] Update coding standards
 - [ ] Create user guide (optional)
   - [ ] Step-by-step tutorials
-  - [ ] Video tutorials (optional)
   - [ ] FAQ section
 - [ ] Update CHANGELOG.md
   - [ ] Document all changes
   - [ ] Follow semantic versioning
-
+- [ ] Start, test, then stop the local server
+- [ ] Check off the completed items and sub-items
+- [ ] Create a commit and push to Git
+- [ ] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit
+
+
 
 ---
 
@@ -782,10 +935,10 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 ### Version 2.0.0 Target (Current Focus)
 
 **Must Have**: 100% complete
-- [ ] Language Switcher: 0%
-- [ ] Drag & Drop: 0%
-- [ ] Chart Toggle: 0%
-- [ ] Tooltips: 0%
+- [x] Language Switcher: 100%
+- [x] Drag & Drop: 100%
+- [x] Chart Toggle: 100%
+- [x] Tooltips: 100%
 
 **Should Have**: 80% complete
 - [ ] Outlier Visualization: 0%
