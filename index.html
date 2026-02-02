@@ -337,6 +337,14 @@
                     <div id="dataTab" class="tab-pane active">
                         <!-- Chart Visibility Toolbar -->
                         <div class="chart-toolbar">
+                            <div class="view-toggle">
+                                <button id="chartViewBtn" class="view-btn active" data-i18n="chart.view" title="Chart view">
+                                    <span class="view-icon">📊</span>
+                                </button>
+                                <button id="tableViewBtn" class="view-btn" data-i18n="table.view" title="Table view">
+                                    <span class="view-icon">📋</span>
+                                </button>
+                            </div>
                             <span class="toolbar-label" data-i18n="chart.visibility">Visibility:</span>
                             <div class="visibility-buttons">
                                 <button class="visibility-btn" data-visibility="original" title="Show original data">
@@ -371,6 +379,46 @@
                                 <span class="drop-icon">📂</span>
                                 <span class="drop-text" data-i18n="dropZone.text">Отпустите файл здесь</span>
                                 <span class="drop-sub" data-i18n="dropZone.sub">TXT, DAT, CSV, ASC</span>
+                            </div>
+                        </div>
+
+                        <!-- Table Container -->
+                        <div class="table-container" id="tableContainer" style="display: none;">
+                            <div class="table-toolbar">
+                                <div class="table-controls">
+                                    <select id="tableSeriesSelect" class="crt-select">
+                                        <option value="all" data-i18n="table.allSeries">Все серии</option>
+                                    </select>
+                                    <input type="text" id="tableFilter" class="crt-input" placeholder="Фильтр..." data-i18n-placeholder="table.filterPlaceholder">
+                                    <button id="exportTableBtn" class="crt-button" data-i18n="table.export" title="Export table to CSV">
+                                        <span class="button-icon">📤</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="data-table-wrapper">
+                                <table id="dataTable" class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th data-sort="index" onclick="handleTableSort('index')" data-i18n="table.index">№</th>
+                                            <th data-sort="time" onclick="handleTableSort('time')" data-i18n="table.time">Время</th>
+                                            <th id="tableSeriesHeader" data-sort="series" onclick="handleTableSort('series')" data-i18n="table.series" style="display: none;">Серия</th>
+                                            <th data-sort="original" onclick="handleTableSort('original')" data-i18n="table.original">Исходный</th>
+                                            <th data-sort="cleaned" onclick="handleTableSort('cleaned')" data-i18n="table.cleaned">Очищенный</th>
+                                            <th data-sort="status" onclick="handleTableSort('status')" data-i18n="table.status">Статус</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="tablePagination" class="table-pagination">
+                                <button id="prevPageBtn" class="crt-button" disabled>◀</button>
+                                <span id="pageInfo" class="page-info">Стр. 1-50 из 100</span>
+                                <button id="nextPageBtn" class="crt-button" disabled>▶</button>
+                            </div>
+                            <div id="tableNoData" class="no-data-message" style="display: none;">
+                                <span class="no-data-icon">📋</span>
+                                <span class="no-data-text" data-i18n="noData.title">Нет загруженных данных</span>
                             </div>
                         </div>
                     </div>

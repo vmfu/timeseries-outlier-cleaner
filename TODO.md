@@ -363,20 +363,20 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 
 **Tasks**:
 - [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
-- [ ] Create table view component
-  - [ ] Toggle between chart/table view
-  - [ ] Table with columns: Index, Time, Signal Original, Signal Cleaned, Status
-  - [ ] Style with CRT aesthetics (monospace, borders)
-- [ ] Implement table rendering
-  - [ ] Efficient rendering (pagination or virtual scroll)
-  - [ ] Sortable columns
-  - [ ] Filterable rows
-- [ ] Add data export from table
-  - [ ] Copy selection to clipboard
-  - [ ] Export visible rows
-- [ ] Test table with various datasets
-  - [ ] Small datasets (<1000 rows)
-  - [ ] Large datasets (>10000 rows)
+- [x] Create table view component
+  - [x] Toggle between chart/table view
+  - [x] Table with columns: Index, Time, Signal Original, Signal Cleaned, Status
+  - [x] Style with CRT aesthetics (monospace, borders)
+- [x] Implement table rendering
+  - [x] Efficient rendering (pagination or virtual scroll)
+  - [x] Sortable columns
+  - [x] Filterable rows
+- [x] Add data export from table
+  - [x] Copy selection to clipboard
+  - [x] Export visible rows
+- [x] Test table with various datasets
+  - [x] Small datasets (<1000 rows)
+  - [x] Large datasets (>10000 rows)
   - [ ] Multiple series
 - [ ] Start, test, then stop the local server
 - [ ] Check off the completed items and sub-items

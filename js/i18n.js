@@ -167,6 +167,24 @@
             'chart.outliers': 'Выбросы',
             'heatmap.title': 'Карта качества параметров',
 
+            // View Toggle
+            'chart.view': 'График',
+            'table.view': 'Таблица',
+
+            // Table
+            'table.allSeries': 'Все серии',
+            'table.filterPlaceholder': 'Фильтр...',
+            'table.export': 'Экспорт CSV',
+            'table.index': '№',
+            'table.time': 'Время',
+            'table.series': 'Серия',
+            'table.original': 'Исходный',
+            'table.cleaned': 'Очищенный',
+            'table.status': 'Статус',
+            'table.status.valid': '✓',
+            'table.status.outlier': '⚠',
+            'table.pagination': 'Стр. {start}-{end} из {total}',
+
             // Messages
             'msg.noFiles': 'Файлы не выбраны.',
             'msg.fileHeader': 'Очищенные данные времени и сигналов',
@@ -394,6 +412,24 @@
             'chart.showBoth': 'Both',
             'chart.outliers': 'Outliers',
             'heatmap.title': 'Parameter Quality Map',
+
+            // View Toggle
+            'chart.view': 'Chart',
+            'table.view': 'Table',
+
+            // Table
+            'table.allSeries': 'All Series',
+            'table.filterPlaceholder': 'Filter...',
+            'table.export': 'Export CSV',
+            'table.index': '#',
+            'table.time': 'Time',
+            'table.series': 'Series',
+            'table.original': 'Original',
+            'table.cleaned': 'Cleaned',
+            'table.status': 'Status',
+            'table.status.valid': '✓',
+            'table.status.outlier': '⚠',
+            'table.pagination': 'Page {start}-{end} of {total}',
 
             // Messages
             'msg.noFiles': 'No files selected.',

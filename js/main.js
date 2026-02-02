@@ -36,6 +36,17 @@ const appState = {
     // Series cleaning progress
     seriesToClean: 0,
     seriesCleaned: 0,
+
+    // Table view
+    currentView: 'chart',     // 'chart' or 'table'
+    tableState: {
+        currentPage: 1,
+        pageSize: 50,
+        sortColumn: null,
+        sortDirection: 'asc',
+        filterText: '',
+        selectedSeries: 'all'
+    }
 };
 
 // Worker reference
@@ -184,6 +195,9 @@ function initializeUI() {
 
     // Chart visibility controls
     initializeVisibilityControls();
+
+    // Table view controls
+    initializeViewToggle();
 
     // Tooltips
     initializeTooltips();
@@ -1769,6 +1783,9 @@ function handleCleanSeriesResult(data) {
         switchTab('data');
         updateDataChart(appState.originalData, appState.cleanedData);
 
+        // Update table series select
+        updateTableSeriesSelect();
+
         // Enable save button
         document.getElementById('saveBtn').disabled = false;
 
@@ -2412,4 +2429,415 @@ function downloadFile(content, filename) {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+}
+
+// ============================================================================
+// TABLE VIEW FUNCTIONS
+// ============================================================================
+
+/**
+ * Initialize view toggle (chart/table)
+ */
+function initializeViewToggle() {
+    var chartViewBtn = document.getElementById('chartViewBtn');
+    var tableViewBtn = document.getElementById('tableViewBtn');
+
+    if (chartViewBtn) {
+        chartViewBtn.addEventListener('click', function() {
+            switchView('chart');
+        });
+    }
+
+    if (tableViewBtn) {
+        tableViewBtn.addEventListener('click', function() {
+            switchView('table');
+        });
+    }
+
+    // Table controls
+    var tableFilter = document.getElementById('tableFilter');
+    if (tableFilter) {
+        tableFilter.addEventListener('input', function() {
+            appState.tableState.filterText = this.value.toLowerCase();
+            appState.tableState.currentPage = 1;
+            renderTable();
+        });
+    }
+
+    var tableSeriesSelect = document.getElementById('tableSeriesSelect');
+    if (tableSeriesSelect) {
+        tableSeriesSelect.addEventListener('change', function() {
+            appState.tableState.selectedSeries = this.value;
+            appState.tableState.currentPage = 1;
+            renderTable();
+        });
+    }
+
+    var exportTableBtn = document.getElementById('exportTableBtn');
+    if (exportTableBtn) {
+        exportTableBtn.addEventListener('click', exportTableToCSV);
+    }
+
+    // Pagination
+    var prevPageBtn = document.getElementById('prevPageBtn');
+    var nextPageBtn = document.getElementById('nextPageBtn');
+
+    if (prevPageBtn) {
+        prevPageBtn.addEventListener('click', function() {
+            if (appState.tableState.currentPage > 1) {
+                appState.tableState.currentPage--;
+                renderTable();
+            }
+        });
+    }
+
+    if (nextPageBtn) {
+        nextPageBtn.addEventListener('click', function() {
+            var filteredData = getFilteredTableData();
+            var maxPage = Math.ceil(filteredData.length / appState.tableState.pageSize);
+            if (appState.tableState.currentPage < maxPage) {
+                appState.tableState.currentPage++;
+                renderTable();
+            }
+        });
+    }
+}
+
+/**
+ * Switch between chart and table views
+ */
+function switchView(view) {
+    appState.currentView = view;
+
+    var chartContainer = document.getElementById('chartContainer');
+    var tableContainer = document.getElementById('tableContainer');
+    var chartViewBtn = document.getElementById('chartViewBtn');
+    var tableViewBtn = document.getElementById('tableViewBtn');
+
+    if (view === 'chart') {
+        chartContainer.style.display = 'block';
+        tableContainer.style.display = 'none';
+        chartViewBtn.classList.add('active');
+        tableViewBtn.classList.remove('active');
+    } else {
+        chartContainer.style.display = 'none';
+        tableContainer.style.display = 'flex';
+        chartViewBtn.classList.remove('active');
+        tableViewBtn.classList.add('active');
+        updateTableSeriesSelect();
+        renderTable();
+    }
+}
+
+/**
+ * Update table series select options
+ */
+function updateTableSeriesSelect() {
+    var tableSeriesSelect = document.getElementById('tableSeriesSelect');
+    if (!tableSeriesSelect) return;
+
+    // Save current selection
+    var currentValue = tableSeriesSelect.value;
+
+    // Clear options
+    tableSeriesSelect.innerHTML = '';
+
+    // Add "All Series" option
+    var allOption = document.createElement('option');
+    allOption.value = 'all';
+    allOption.textContent = I18n.t('table.allSeries');
+    tableSeriesSelect.appendChild(allOption);
+
+    // Add series options if data exists
+    if (appState.originalData && appState.originalData.length > 0) {
+        var numSeries = appState.originalData[0].length - 1;
+        for (var i = 0; i < numSeries; i++) {
+            var option = document.createElement('option');
+            option.value = (i + 1).toString();
+            option.textContent = 'Серия ' + (i + 1);
+            tableSeriesSelect.appendChild(option);
+        }
+    }
+
+    // Restore selection if possible
+    if (currentValue && tableSeriesSelect.querySelector('option[value="' + currentValue + '"]')) {
+        tableSeriesSelect.value = currentValue;
+    }
+}
+
+/**
+ * Get filtered and sorted table data
+ */
+function getFilteredTableData() {
+    if (!appState.originalData || !appState.cleanedData) {
+        return [];
+    }
+
+    var data = [];
+
+    // Build table rows
+    for (var i = 0; i < appState.originalData.length; i++) {
+        var time = appState.originalData[i][0];
+        var originalSeries = appState.originalData[i].slice(1);
+        var cleanedSeries = appState.cleanedData[i].slice(1);
+
+        // Determine if this row has outliers
+        var hasOutlier = false;
+        for (var j = 0; j < originalSeries.length; j++) {
+            if (originalSeries[j] !== cleanedSeries[j]) {
+                hasOutlier = true;
+                break;
+            }
+        }
+
+        data.push({
+            index: i,
+            time: time,
+            original: originalSeries,
+            cleaned: cleanedSeries,
+            hasOutlier: hasOutlier
+        });
+    }
+
+    // Apply series filter
+    if (appState.tableState.selectedSeries !== 'all') {
+        var seriesIndex = parseInt(appState.tableState.selectedSeries) - 1;
+        data = data.map(function(row) {
+            return {
+                index: row.index,
+                time: row.time,
+                original: row.original[seriesIndex],
+                cleaned: row.cleaned[seriesIndex],
+                hasOutlier: row.original[seriesIndex] !== row.cleaned[seriesIndex]
+            };
+        });
+    } else {
+        // For all series, flatten data
+        var flatData = [];
+        for (var i = 0; i < data.length; i++) {
+            for (var j = 0; j < data[i].original.length; j++) {
+                flatData.push({
+                    index: data[i].index,
+                    time: data[i].time,
+                    series: j + 1,
+                    original: data[i].original[j],
+                    cleaned: data[i].cleaned[j],
+                    hasOutlier: data[i].original[j] !== data[i].cleaned[j]
+                });
+            }
+        }
+        data = flatData;
+    }
+
+    // Apply text filter
+    if (appState.tableState.filterText) {
+        data = data.filter(function(row) {
+            var text = row.time.toString() + ' ' +
+                      row.original.toString() + ' ' +
+                      row.cleaned.toString() + ' ' +
+                      (row.series ? row.series.toString() : '');
+            return text.toLowerCase().includes(appState.tableState.filterText);
+        });
+    }
+
+    // Apply sorting
+    if (appState.tableState.sortColumn) {
+        var col = appState.tableState.sortColumn;
+        var dir = appState.tableState.sortDirection === 'asc' ? 1 : -1;
+
+        data.sort(function(a, b) {
+            var valA, valB;
+
+            switch (col) {
+                case 'index':
+                    valA = a.index;
+                    valB = b.index;
+                    break;
+                case 'time':
+                    valA = a.time;
+                    valB = b.time;
+                    break;
+                case 'original':
+                    valA = a.original;
+                    valB = b.original;
+                    break;
+                case 'cleaned':
+                    valA = a.cleaned;
+                    valB = b.cleaned;
+                    break;
+                case 'status':
+                    valA = a.hasOutlier ? 1 : 0;
+                    valB = b.hasOutlier ? 1 : 0;
+                    break;
+                default:
+                    return 0;
+            }
+
+            if (valA < valB) return -1 * dir;
+            if (valA > valB) return 1 * dir;
+            return 0;
+        });
+    }
+
+    return data;
+}
+
+/**
+ * Render table with current state
+ */
+function renderTable() {
+    var tableBody = document.getElementById('tableBody');
+    var tableSeriesHeader = document.getElementById('tableSeriesHeader');
+    var tableNoData = document.getElementById('tableNoData');
+    var pageInfo = document.getElementById('pageInfo');
+    var prevPageBtn = document.getElementById('prevPageBtn');
+    var nextPageBtn = document.getElementById('nextPageBtn');
+
+    if (!tableBody) return;
+
+    // Show/hide series column based on selection
+    if (tableSeriesHeader) {
+        tableSeriesHeader.style.display = appState.tableState.selectedSeries === 'all' ? 'table-cell' : 'none';
+    }
+
+    var data = getFilteredTableData();
+
+    // Show/hide no data message
+    if (data.length === 0) {
+        tableBody.innerHTML = '';
+        tableNoData.classList.add('active');
+        pageInfo.textContent = '';
+        prevPageBtn.disabled = true;
+        nextPageBtn.disabled = true;
+        return;
+    }
+
+    tableNoData.classList.remove('active');
+
+    // Pagination
+    var currentPage = appState.tableState.currentPage;
+    var pageSize = appState.tableState.pageSize;
+    var totalPages = Math.ceil(data.length / pageSize);
+
+    // Adjust current page if out of range
+    if (currentPage > totalPages) {
+        currentPage = totalPages;
+        appState.tableState.currentPage = currentPage;
+    }
+
+    var startIndex = (currentPage - 1) * pageSize;
+    var endIndex = Math.min(startIndex + pageSize, data.length);
+    var pageData = data.slice(startIndex, endIndex);
+
+    // Render rows
+    var html = '';
+
+    for (var i = 0; i < pageData.length; i++) {
+        var row = pageData[i];
+
+        html += '<tr>';
+        html += '<td>' + (row.index + 1) + '</td>';
+        html += '<td>' + row.time.toFixed(6) + '</td>';
+
+        if (row.series !== undefined) {
+            html += '<td>' + row.series + '</td>';
+        }
+
+        html += '<td>' + (typeof row.original === 'number' ? row.original.toFixed(6) : row.original.join(', ')) + '</td>';
+        html += '<td>' + (typeof row.cleaned === 'number' ? row.cleaned.toFixed(6) : row.cleaned.join(', ')) + '</td>';
+        html += '<td class="' + (row.hasOutlier ? 'status-outlier' : 'status-valid') + '">';
+        html += row.hasOutlier ? I18n.t('table.status.outlier') : I18n.t('table.status.valid');
+        html += '</td>';
+        html += '</tr>';
+    }
+
+    tableBody.innerHTML = html;
+
+    // Update pagination info
+    pageInfo.textContent = I18n.t('table.pagination', {
+        start: startIndex + 1,
+        end: endIndex,
+        total: data.length
+    });
+
+    // Update button states
+    prevPageBtn.disabled = currentPage === 1;
+    nextPageBtn.disabled = currentPage === totalPages;
+
+    // Update sort indicators
+    updateTableSortIndicators();
+}
+
+/**
+ * Update table column sort indicators
+ */
+function updateTableSortIndicators() {
+    var headers = document.querySelectorAll('#dataTable th[data-sort]');
+
+    headers.forEach(function(header) {
+        header.classList.remove('sort-asc', 'sort-desc');
+
+        if (header.dataset.sort === appState.tableState.sortColumn) {
+            header.classList.add(appState.tableState.sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+        }
+    });
+}
+
+/**
+ * Handle table column click for sorting
+ */
+function handleTableSort(column) {
+    if (appState.tableState.sortColumn === column) {
+        // Toggle direction
+        appState.tableState.sortDirection = appState.tableState.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+        appState.tableState.sortColumn = column;
+        appState.tableState.sortDirection = 'asc';
+    }
+
+    renderTable();
+}
+
+/**
+ * Export table to CSV
+ */
+function exportTableToCSV() {
+    var data = getFilteredTableData();
+
+    if (data.length === 0) {
+        log(I18n.t('msg.noCleanedForReport'), 'error');
+        return;
+    }
+
+    var lines = [];
+
+    // Header
+    var header = [I18n.t('table.index'), I18n.t('table.time')];
+    if (appState.tableState.selectedSeries !== 'all') {
+        header.push('Series', I18n.t('table.original'), I18n.t('table.cleaned'));
+    } else {
+        header.push('Series', I18n.t('table.original'), I18n.t('table.cleaned'));
+    }
+    header.push(I18n.t('table.status'));
+    lines.push(header.join(','));
+
+    // Data rows
+    for (var i = 0; i < data.length; i++) {
+        var row = [
+            data[i].index + 1,
+            data[i].time.toFixed(6),
+            data[i].series !== undefined ? data[i].series : '',
+            typeof data[i].original === 'number' ? data[i].original.toFixed(6) : data[i].original.join(';'),
+            typeof data[i].cleaned === 'number' ? data[i].cleaned.toFixed(6) : data[i].cleaned.join(';'),
+            data[i].hasOutlier ? 'Outlier' : 'Valid'
+        ];
+        lines.push(row.join(','));
+    }
+
+    // Download
+    var csvContent = lines.join('\n');
+    var filename = (appState.currentFile ? appState.currentFile.name.replace(/\.[^/.]+$/, '') : 'data') + '_table.csv';
+    downloadFile(csvContent, filename);
+
+    log(I18n.t('msg.saved', { name: filename, rows: data.length }), 'success');
 }
