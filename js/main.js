@@ -1,4 +1,4 @@
-/**
+﻿/**
  * main.js - Main application logic
  * Handles UI interactions, file loading, batch processing, and visualization
  */
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeUI();
     initializeLanguageSwitcher();
     initializeCharts();
-    log(I18n.t('log.systemInit'), 'info');
+    UI.log(I18n.t('log.systemInit'), 'info');
 
     // Handle window resize
     window.addEventListener('resize', function() {
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 function initializeWorker() {
     try {
-        console.log('[Main] Попытка загрузить внешний worker...');
+        console.UI.log('[Main] Попытка загрузить внешний worker...');
 
         // Add timestamp to prevent caching
         var workerUrl = 'js/worker.js?v=' + Date.now();
@@ -100,11 +100,11 @@ function initializeWorker() {
         worker = new Worker(workerUrl);
         worker.onmessage = handleWorkerMessage;
         worker.onerror = handleWorkerError;
-        log('Web Worker успешно инициализирован (внешний).', 'success');
+        UI.log('Web Worker успешно инициализирован (внешний).', 'success');
     } catch (error) {
         // Fall back to inline worker (works without server)
-        console.log('[Main] Ошибка загрузки внешнего worker, использую встроенный...', error);
-        log(I18n.t('error.workerLoad'), 'warning');
+        console.UI.log('[Main] Ошибка загрузки внешнего worker, использую встроенный...', error);
+        UI.log(I18n.t('error.workerLoad'), 'warning');
         console.error('Worker initialization error:', error);
         initializeInlineWorker();
     }
@@ -124,9 +124,9 @@ function initializeInlineWorker() {
         worker.onmessage = handleWorkerMessage;
         worker.onerror = handleWorkerError;
 
-        log(I18n.t('log.workerInit'), 'success');
+        UI.log(I18n.t('log.workerInit'), 'success');
     } catch (error) {
-        log(I18n.t('error.workerInitInternal', {message: error.message}), 'error');
+        UI.log(I18n.t('error.workerInitInternal', {message: error.message}), 'error');
         console.error('Inline worker initialization error:', error);
     }
 }
@@ -168,9 +168,9 @@ function initializeUI() {
     document.getElementById('useChunks').addEventListener('change', function() {
         appState.params.useChunks = this.checked;
         if (this.checked) {
-            log(I18n.t('msg.optimizationEnabled'), 'info');
+            UI.log(I18n.t('msg.optimizationEnabled'), 'info');
         } else {
-            log(I18n.t('msg.optimizationDisabled'), 'info');
+            UI.log(I18n.t('msg.optimizationDisabled'), 'info');
         }
     });
 
@@ -357,21 +357,21 @@ function handleDrop(event) {
     });
 
     if (validFiles.length === 0) {
-        log(I18n.t('dropZone.invalidType'), 'warning');
+        UI.log(I18n.t('dropZone.invalidType'), 'warning');
         return;
     }
 
     if (validFiles.length !== files.length) {
-        log(I18n.t('dropZone.someSkipped'), 'warning');
+        UI.log(I18n.t('dropZone.someSkipped'), 'warning');
     }
 
     // Load files
-    appState.batchQueue = validFiles;
+    Queue.addToQueue(validFiles);
     updateFileCount(validFiles.length);
     displaySelectedFiles(validFiles);
     document.getElementById('loadBtn').disabled = false;
 
-    log(I18n.t('msg.filesSelected', {count: validFiles.length}), 'info');
+    UI.log(I18n.t('msg.filesSelected', {count: validFiles.length}), 'info');
 }
 
 /**
@@ -381,7 +381,7 @@ function initializeVisibilityControls() {
     var buttons = document.querySelectorAll('.visibility-btn');
 
     // Load saved preference
-    var savedVisibility = localStorage.getItem('chartVisibility');
+    var savedVisibility = Storage.loadChartVisibility();
     if (savedVisibility && ['original', 'cleaned', 'both'].includes(savedVisibility)) {
         appState.chartVisibility = savedVisibility;
     }
@@ -429,7 +429,7 @@ function setChartVisibility(mode) {
     }
 
     appState.chartVisibility = mode;
-    localStorage.setItem('chartVisibility', mode);
+    Storage.saveChartVisibility(mode);
 
     // Update button states
     updateVisibilityButtons();
@@ -778,13 +778,13 @@ function handleFileSelect(event) {
         return;
     }
 
-    appState.batchQueue = files;
+    Queue.addToQueue(files);
     updateFileCount(files.length);
     displaySelectedFiles(files);
 
     document.getElementById('loadBtn').disabled = false;
 
-    log(I18n.t('msg.filesSelected', {count: files.length}), 'info');
+    UI.log(I18n.t('msg.filesSelected', {count: files.length}), 'info');
 }
 
 /**
@@ -887,7 +887,7 @@ function formatFileSize(bytes) {
     if (bytes === 0) return '0 B';
     var k = 1024;
     var sizes = ['B', 'KB', 'MB', 'GB'];
-    var i = Math.floor(Math.log(bytes) / Math.log(k));
+    var i = Math.floor(Math.UI.log(bytes) / Math.UI.log(k));
     return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
 }
 
@@ -895,36 +895,32 @@ function formatFileSize(bytes) {
  * Cancel individual item from batch queue
  */
 function cancelBatchItem(index) {
-    if (appState.batchProcessing) {
-        log(I18n.t('batch.cannotCancelDuring'), 'warning');
+    if (Queue.getStatus().isProcessing) {
+        UI.log(I18n.t('batch.cannotCancelDuring'), 'warning');
         return;
     }
-    appState.batchQueue.splice(index, 1);
-    displaySelectedFiles(appState.batchQueue);
-    updateFileCount(appState.batchQueue.length);
-    document.getElementById('prominentFileCount').textContent = appState.batchQueue.length;
-    log(I18n.t('batch.itemRemoved'), 'info');
+    Queue.removeFromQueue(index);
+    displaySelectedFiles(Queue.getStatus().queue);
+    UI.updateFileCount(Queue.getStatus().queue.length);
+    document.getElementById('prominentFileCount').textContent = Queue.getStatus().queue.length;
+    UI.log(I18n.t('batch.itemRemoved'), 'info');
 }
 
 /**
  * Process all files in batch queue
  */
 function processBatchQueue() {
-    if (appState.batchQueue.length === 0) {
-        log(I18n.t('msg.noFiles'), 'warning');
+    if (Queue.getStatus().queue.length === 0) {
+        UI.log(I18n.t('msg.noFiles'), 'warning');
         return;
     }
 
-    if (appState.batchProcessing) {
-        log(I18n.t('batch.alreadyProcessing'), 'warning');
+    if (Queue.getStatus().isProcessing) {
+        UI.log(I18n.t('batch.alreadyProcessing'), 'warning');
         return;
     }
 
-    appState.batchProcessing = true;
-    appState.batchCancelled = false;
-    appState.batchResults = [];
-
-    log(I18n.t('batch.started', {count: appState.batchQueue.length}), 'info');
+    Queue.startProcessing();UI.log(I18n.t('batch.started', {count: Queue.getStatus().queue.length}), 'info');
 
     // Disable controls
     document.getElementById('batchProcessBtn').disabled = true;
@@ -937,7 +933,7 @@ function processBatchQueue() {
  * Process next item in batch queue
  */
 function processNextBatchItem(index) {
-    if (index >= appState.batchQueue.length || appState.batchCancelled) {
+    if (index >= Queue.getStatus().queue.length || Queue.getStatus().isCancelled) {
         completeBatchProcessing();
         return;
     }
@@ -947,7 +943,7 @@ function processNextBatchItem(index) {
 
     // Update status
     updateBatchItemStatus(index, 'processing', 0);
-    log(I18n.t('batch.processing', {index: index + 1, total: appState.batchQueue.length, name: file.name}), 'info');
+    UI.log(I18n.t('batch.processing', {index: index + 1, total: Queue.getStatus().queue.length, name: file.name}), 'info');
 
     // Load file
     readFileContent(file).then(function(content) {
@@ -967,7 +963,7 @@ function processNextBatchItem(index) {
         });
     }).then(function(result) {
         // Store result
-        appState.batchResults.push({
+        Queue.addResult({
             filename: file.name,
             originalData: appState.originalData,
             cleanedData: result.cleanedData,
@@ -985,7 +981,7 @@ function processNextBatchItem(index) {
     }).catch(function(error) {
         console.error('Batch processing error:', error);
         updateBatchItemStatus(index, 'error', 0);
-        log(I18n.t('batch.itemError', {name: file.name, message: error.message}), 'error');
+        UI.log(I18n.t('batch.itemError', {name: file.name, message: error.message}), 'error');
 
         // Continue to next item
         setTimeout(function() {
@@ -1066,11 +1062,11 @@ function completeBatchProcessing() {
     document.getElementById('batchProcessBtn').disabled = false;
     document.getElementById('loadBtn').disabled = false;
 
-    if (appState.batchCancelled) {
-        log(I18n.t('batch.cancelled'), 'warning');
+    if (Queue.getStatus().isCancelled) {
+        UI.log(I18n.t('batch.cancelled'), 'warning');
     } else {
-        log(I18n.t('batch.completed', {count: appState.batchResults.length}), 'success');
-        log(I18n.t('batch.exportHint'), 'info');
+        UI.log(I18n.t('batch.completed', {count: Queue.getStatus().results.length}), 'success');
+        UI.log(I18n.t('batch.exportHint'), 'info');
 
         // Show batch export button
         var exportBtn = document.getElementById('exportBatchBtn');
@@ -1084,13 +1080,13 @@ function completeBatchProcessing() {
  * Cancel batch processing
  */
 function cancelBatchProcessing() {
-    if (!appState.batchProcessing) {
+    if (!Queue.getStatus().isProcessing) {
         return;
     }
 
     if (confirm(I18n.t('batch.confirmCancel'))) {
-        appState.batchCancelled = true;
-        log(I18n.t('batch.cancelling'), 'warning');
+        Queue.cancelProcessing();
+        UI.log(I18n.t('batch.cancelling'), 'warning');
     }
 }
 
@@ -1098,15 +1094,15 @@ function cancelBatchProcessing() {
  * Export all batch results
  */
 function exportBatchResults() {
-    if (appState.batchResults.length === 0) {
-        log(I18n.t('batch.noResults'), 'warning');
+    if (Queue.getStatus().results.length === 0) {
+        UI.log(I18n.t('batch.noResults'), 'warning');
         return;
     }
 
-    log(I18n.t('batch.exporting'), 'info');
+    UI.log(I18n.t('batch.exporting'), 'info');
 
     // Export each result as a separate file
-    appState.batchResults.forEach(function(result, index) {
+    Queue.getStatus().results.forEach(function(result, index) {
         var saveOptions = {
             saveRestored: true,
             includeValidityFlag: false
@@ -1115,27 +1111,27 @@ function exportBatchResults() {
         var saveData = prepareSaveData(result.originalData, result.cleanedData, saveOptions);
         var filename = 'cleaned_' + result.filename;
 
-        downloadFile(saveData, filename);
+        Export.downloadFile(saveData, filename);
 
-        log(I18n.t('batch.saved', {name: filename}), 'success');
+        UI.log(I18n.t('batch.saved', {name: filename}), 'success');
     });
 
-    log(I18n.t('batch.exportComplete', {count: appState.batchResults.length}), 'success');
+    UI.log(I18n.t('batch.exportComplete', {count: Queue.getStatus().results.length}), 'success');
 }
 
 /**
  * Load and parse data from selected files
  */
 function loadData() {
-    if (appState.batchQueue.length === 0) {
-        log(I18n.t('msg.noFiles'), 'warning');
+    if (Queue.getStatus().queue.length === 0) {
+        UI.log(I18n.t('msg.noFiles'), 'warning');
         return;
     }
 
     var file = appState.batchQueue[0];
     appState.currentFile = file;
 
-    log(I18n.t('msg.loading', {name: file.name}), 'info');
+    UI.log(I18n.t('msg.loading', {name: file.name}), 'info');
 
     readFileContent(file).then(function(content) {
         var data = parseAsciiData(content);
@@ -1173,11 +1169,11 @@ function loadData() {
         document.getElementById('exportJsonBtn').disabled = true;
         document.getElementById('exportHtmlBtn').disabled = true;
 
-        log(I18n.t('msg.loaded', {points: data.length, series: data[0].length - 1}), 'success');
-        log(I18n.t('msg.readyTune'), 'info');
+        UI.log(I18n.t('msg.loaded', {points: data.length, series: data[0].length - 1}), 'success');
+        UI.log(I18n.t('msg.readyTune'), 'info');
 
     }).catch(function(error) {
-        log(I18n.t('error.fileLoad', {message: error.message}), 'error');
+        UI.log(I18n.t('error.fileLoad', {message: error.message}), 'error');
         console.error('File loading error:', error);
     });
 }
@@ -1374,10 +1370,10 @@ function toggleAdvancedSettings() {
 
     if (isVisible) {
         settings.classList.remove('hidden');
-        log(I18n.t('msg.settingsShown'), 'info');
+        UI.log(I18n.t('msg.settingsShown'), 'info');
     } else {
         settings.classList.add('hidden');
-        log(I18n.t('msg.settingsHidden'), 'info');
+        UI.log(I18n.t('msg.settingsHidden'), 'info');
     }
 }
 
@@ -1430,7 +1426,7 @@ function updateProgress(value, message) {
         progressMessage.textContent = message;
         // Log progress messages periodically
         if (value % 10 === 0 || value === 100) {
-            log(message, 'info');
+            UI.log(message, 'info');
         }
     }
 
@@ -1495,22 +1491,6 @@ function calculateETA(currentProgress) {
     return etaText + ' ' + I18n.t(remainingKey);
 }
 
-/**
- * Add log entry
- */
-function log(message, type) {
-    type = type || 'info';
-    var logArea = document.getElementById('logArea');
-    var now = new Date();
-    var time = now.toTimeString().split(' ')[0];
-
-    var entry = document.createElement('div');
-    entry.className = 'log-entry log-' + type;
-    entry.innerHTML = '<span class="log-time">' + time + '</span><span class="log-message">' + message + '</span>';
-
-    logArea.appendChild(entry);
-    logArea.scrollTop = logArea.scrollHeight;
-}
 
 /**
  * Show/hide progress bar (replaces old loading overlay)
@@ -1558,7 +1538,7 @@ function showLoadingOverlay(show) {
         setStatus('ready');
 
         // Re-enable load button
-        document.getElementById('loadBtn').disabled = appState.batchQueue.length === 0;
+        document.getElementById('loadBtn').disabled = Queue.getStatus().queue.length === 0;
         document.getElementById('fileInput').disabled = false;
         // Re-enable tune button
         document.getElementById('tuneBtn').disabled = !appState.originalData;
@@ -1809,7 +1789,7 @@ function drawHeatmap(NTF, optimalParams) {
     var cellWidth = canvas.width / cols;
     var cellHeight = canvas.height / rows;
 
-    log(I18n.t('log.heatmapDraw', {rows: rows, cols: cols, ntf: NTF[0][0]}), 'info');
+    UI.log(I18n.t('log.heatmapDraw', {rows: rows, cols: cols, ntf: NTF[0][0]}), 'info');
 
     // Draw heatmap
     for (var i = 0; i < rows; i++) {
@@ -1856,7 +1836,7 @@ function drawHeatmap(NTF, optimalParams) {
     // Draw color scale
     drawColorScale(ctx, canvas, minVal, maxVal);
 
-    log(I18n.t('log.heatmapShown'), 'success');
+    UI.log(I18n.t('log.heatmapShown'), 'success');
 }
 
 /**
@@ -2099,7 +2079,7 @@ function applyHeatmapParameters(windowWidth, threshold) {
     document.getElementById('thresholdValue').textContent = threshold.toFixed(3);
 
     // Log the parameter change
-    log(I18n.t('heatmap.selected', {window: windowWidth.toFixed(0), threshold: threshold.toFixed(3)}), 'info');
+    UI.log(I18n.t('heatmap.selected', {window: windowWidth.toFixed(0), threshold: threshold.toFixed(3)}), 'info');
 }
 
 // ============================================================================
@@ -2111,7 +2091,7 @@ function applyHeatmapParameters(windowWidth, threshold) {
  */
 function sendToWorker(type, data) {
     if (!worker) {
-        log('Worker не инициализирован', 'error');
+        UI.log('Worker не инициализирован', 'error');
         return;
     }
 
@@ -2141,18 +2121,18 @@ function handleWorkerMessage(event) {
     var jobId = event.data.jobId;
     var data = event.data.data;
 
-    console.log('[Main] Получено сообщение:', {type, jobId, data});
+    console.UI.log('[Main] Получено сообщение:', {type, jobId, data});
 
     // Ignore old messages (but allow CLEAN_SERIES results to pass through)
     if (jobId !== currentJobId && type !== 'RESULT') {
-        console.log('[Main] Игнорирую старое сообщение:', {receivedJobId: jobId, currentJobId: currentJobId});
+        console.UI.log('[Main] Игнорирую старое сообщение:', {receivedJobId: jobId, currentJobId: currentJobId});
         return;
     }
 
     // For CLEAN_SERIES results, we need to handle them even if jobId differs
     // because we send multiple series with the same initial jobId
     if (type === 'RESULT' && data.seriesIndex !== undefined) {
-        console.log('[Main] Обработка CLEAN_SERIES результата');
+        console.UI.log('[Main] Обработка CLEAN_SERIES результата');
         handleResult(data);
         return;
     }
@@ -2162,11 +2142,11 @@ function handleWorkerMessage(event) {
             handleProgress(data);
             break;
         case 'RESULT':
-            console.log('[Main] Обработка RESULT, данные:', data);
+            console.UI.log('[Main] Обработка RESULT, данные:', data);
             handleResult(data);
             break;
         case 'ERROR':
-            console.log('[Main] Обработка ERROR');
+            console.UI.log('[Main] Обработка ERROR');
             handleError(data);
             break;
     }
@@ -2176,7 +2156,7 @@ function handleWorkerMessage(event) {
  * Handle worker error
  */
 function handleWorkerError(error) {
-    log(I18n.t('error.worker', {message: error.message}), 'error');
+    UI.log(I18n.t('error.worker', {message: error.message}), 'error');
     showLoadingOverlay(false);
 }
 
@@ -2198,14 +2178,14 @@ function handleProgress(data) {
  * Handle result from worker
  */
 function handleResult(data) {
-    console.log('[Main] В handleResult, данные:', data);
+    console.UI.log('[Main] В handleResult, данные:', data);
 
     showLoadingOverlay(false);
 
     // Determine operation type based on current state
     // Check for optimalParams (auto-tune result) FIRST
     if (data.optimalParams !== undefined) {
-        console.log('[Main] Распознан результат автоподбора, вызываю handleTuneResult');
+        console.UI.log('[Main] Распознан результат автоподбора, вызываю handleTuneResult');
         // Auto-tune result
         handleTuneResult(data);
     } else if (data.seriesIndex !== undefined) {
@@ -2226,7 +2206,7 @@ function handleResult(data) {
  * Handle error from worker
  */
 function handleError(data) {
-    log(I18n.t('error.execution', {message: data.message}), 'error');
+    UI.log(I18n.t('error.execution', {message: data.message}), 'error');
     showLoadingOverlay(false);
 }
 
@@ -2239,11 +2219,11 @@ function handleError(data) {
  */
 function autoTune() {
     if (!appState.originalData) {
-        log(I18n.t('msg.noData'), 'warning');
+        UI.log(I18n.t('msg.noData'), 'warning');
         return;
     }
 
-    log(I18n.t('msg.tuning'), 'info');
+    UI.log(I18n.t('msg.tuning'), 'info');
 
     // Prepare data (remove time column for cleaning)
     var signalData = appState.originalData.map(function(row) {
@@ -2268,16 +2248,16 @@ function autoTune() {
  * Handle auto-tune result
  */
 function handleTuneResult(data) {
-    console.log('[Main] Получен результат автоподбора:', data);
+    console.UI.log('[Main] Получен результат автоподбора:', data);
     var optimalParams = data.optimalParams;
 
     if (!optimalParams) {
         console.error('[Main] Ошибка: optimalParams не определен!');
-        log(I18n.t('error.tuneFailed'), 'error');
+        UI.log(I18n.t('error.tuneFailed'), 'error');
         return;
     }
 
-    console.log('[Main] Оптимальные параметры:', optimalParams);
+    console.UI.log('[Main] Оптимальные параметры:', optimalParams);
 
     appState.optimalParams = optimalParams;
 
@@ -2305,8 +2285,8 @@ function handleTuneResult(data) {
     // Enable clean button
     document.getElementById('cleanBtn').disabled = false;
 
-    log(I18n.t('msg.tuned', {window: optimalParams.windowWidth.toFixed(0), threshold: optimalParams.threshold.toFixed(2)}), 'success');
-    log(I18n.t('msg.readyClean'), 'info');
+    UI.log(I18n.t('msg.tuned', {window: optimalParams.windowWidth.toFixed(0), threshold: optimalParams.threshold.toFixed(2)}), 'success');
+    UI.log(I18n.t('msg.readyClean'), 'info');
 }
 
 // ============================================================================
@@ -2318,11 +2298,11 @@ function handleTuneResult(data) {
  */
 function cleanData() {
     if (!appState.originalData) {
-        log(I18n.t('msg.noData'), 'warning');
+        UI.log(I18n.t('msg.noData'), 'warning');
         return;
     }
 
-    log(I18n.t('msg.cleaning'), 'info');
+    UI.log(I18n.t('msg.cleaning'), 'info');
 
     var numSeries = appState.originalData[0].length - 1;
 
@@ -2402,14 +2382,14 @@ function handleCleanSeriesResult(data) {
     appState.seriesCleaned++;
     var progress = (appState.seriesCleaned / appState.seriesToClean) * 100;
 
-    log(I18n.t('msg.cleanedSeries', {n: seriesIndex, total: appState.seriesToClean, percent: Math.round(progress)}), 'info');
+    UI.log(I18n.t('msg.cleanedSeries', {n: seriesIndex, total: appState.seriesToClean, percent: Math.round(progress)}), 'info');
 
     // Update progress bar
     updateProgress(progress, I18n.t('msg.cleaningSeries', {n: seriesIndex, total: appState.seriesToClean}));
 
     // If all series are cleaned, update UI
     if (appState.seriesCleaned >= appState.seriesToClean) {
-        log(I18n.t('msg.cleanedAll'), 'success');
+        UI.log(I18n.t('msg.cleanedAll'), 'success');
 
         // Update metrics (average of all series from worker results)
         var avgMetrics = computeAverageMetrics();
@@ -2425,7 +2405,7 @@ function handleCleanSeriesResult(data) {
         // Enable save button
         document.getElementById('saveBtn').disabled = false;
 
-        log(I18n.t('msg.readySave'), 'info');
+        UI.log(I18n.t('msg.readySave'), 'info');
     }
 }
 
@@ -2549,11 +2529,11 @@ function computeAllSeriesMetrics() {
  */
 function saveData() {
     if (!appState.cleanedData) {
-        log(I18n.t('msg.noCleaned'), 'warning');
+        UI.log(I18n.t('msg.noCleaned'), 'warning');
         return;
     }
 
-    log(I18n.t('msg.saving'), 'info');
+    UI.log(I18n.t('msg.saving'), 'info');
 
     try {
         var saveRestored = document.getElementById('saveRestored').checked;
@@ -2625,12 +2605,12 @@ function saveData() {
         var filename = baseName + '_cleansed' + extension;
 
         // Trigger download
-        downloadFile(content, filename);
+        Export.downloadFile(content, filename);
 
-        log(I18n.t('msg.saved', {name: filename, rows: outputData.length}), 'success');
+        UI.log(I18n.t('msg.saved', {name: filename, rows: outputData.length}), 'success');
 
     } catch (error) {
-        log(I18n.t('error.saving', {message: error.message}), 'error');
+        UI.log(I18n.t('error.saving', {message: error.message}), 'error');
         console.error('Save error:', error);
     }
 }
@@ -2731,9 +2711,9 @@ function resetSession() {
         hideResetModal();
 
         // Log success
-        log(I18n.t('msg.resetComplete'), 'success');
+        UI.log(I18n.t('msg.resetComplete'), 'success');
 
-        console.log('Session reset complete');
+        console.UI.log('Session reset complete');
 
     } catch (error) {
         console.error('Reset error:', error);
@@ -2767,12 +2747,12 @@ function resetZoom() {
  */
 function exportJsonReport() {
     if (!appState.cleanedData) {
-        log(I18n.t('msg.noCleanedForReport'), 'warning');
+        UI.log(I18n.t('msg.noCleanedForReport'), 'warning');
         return;
     }
 
     try {
-        log(I18n.t('msg.saving'), 'info');
+        UI.log(I18n.t('msg.saving'), 'info');
 
         // Prepare report data
         var report = {
@@ -2840,12 +2820,12 @@ function exportJsonReport() {
         var filename = baseName + '_report.json';
 
         // Trigger download
-        downloadFile(content, filename);
+        Export.downloadFile(content, filename);
 
-        log(I18n.t('msg.exportedJson', {name: filename}), 'success');
+        UI.log(I18n.t('msg.exportedJson', {name: filename}), 'success');
 
     } catch (error) {
-        log(I18n.t('error.saving', {message: error.message}), 'error');
+        UI.log(I18n.t('error.saving', {message: error.message}), 'error');
         console.error('JSON export error:', error);
     }
 }
@@ -2855,12 +2835,12 @@ function exportJsonReport() {
  */
 function exportHtmlReport() {
     if (!appState.cleanedData) {
-        log(I18n.t('msg.noCleanedForReport'), 'warning');
+        UI.log(I18n.t('msg.noCleanedForReport'), 'warning');
         return;
     }
 
     try {
-        log(I18n.t('msg.saving'), 'info');
+        UI.log(I18n.t('msg.saving'), 'info');
 
         // Generate HTML content
         var html = generateHtmlReport();
@@ -2872,12 +2852,12 @@ function exportHtmlReport() {
         var filename = baseName + '_report.html';
 
         // Trigger download
-        downloadFile(html, filename);
+        Export.downloadFile(html, filename);
 
-        log(I18n.t('msg.exportedHtml', {name: filename}), 'success');
+        UI.log(I18n.t('msg.exportedHtml', {name: filename}), 'success');
 
     } catch (error) {
-        log(I18n.t('error.saving', {message: error.message}), 'error');
+        UI.log(I18n.t('error.saving', {message: error.message}), 'error');
         console.error('HTML export error:', error);
     }
 }
@@ -3078,21 +3058,6 @@ function formatCsvData(data) {
     return lines.join('\n');
 }
 
-/**
- * Trigger file download
- */
-function downloadFile(content, filename) {
-    var blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    var url = URL.createObjectURL(blob);
-    var link = document.createElement('a');
-
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-}
 
 // ============================================================================
 // TABLE VIEW FUNCTIONS
@@ -3468,7 +3433,7 @@ function exportTableToCSV() {
     var data = getFilteredTableData();
 
     if (data.length === 0) {
-        log(I18n.t('msg.noCleanedForReport'), 'error');
+        UI.log(I18n.t('msg.noCleanedForReport'), 'error');
         return;
     }
 
@@ -3500,9 +3465,9 @@ function exportTableToCSV() {
     // Download
     var csvContent = lines.join('\n');
     var filename = (appState.currentFile ? appState.currentFile.name.replace(/\.[^/.]+$/, '') : 'data') + '_table.csv';
-    downloadFile(csvContent, filename);
+    Export.downloadFile(csvContent, filename);
 
-    log(I18n.t('msg.saved', { name: filename, rows: data.length }), 'success');
+    UI.log(I18n.t('msg.saved', { name: filename, rows: data.length }), 'success');
 }
 
 // ============================================================================
@@ -3547,7 +3512,7 @@ var defaultPresets = {
  */
 function getAllPresets() {
     var presets = JSON.parse(JSON.stringify(defaultPresets));
-    var customPresets = localStorage.getItem('presets');
+    var customPresets = Storage.loadPresets();
     if (customPresets) {
         var parsed = JSON.parse(customPresets);
         for (var key in parsed) {
@@ -3589,7 +3554,7 @@ function updatePresetSelect() {
     presetSelect.appendChild(separator);
 
     // Add custom presets
-    var customPresets = localStorage.getItem('presets');
+    var customPresets = Storage.loadPresets();
     if (customPresets) {
         var parsed = JSON.parse(customPresets);
         for (var key in parsed) {
@@ -3631,7 +3596,7 @@ function applyPreset(presetName) {
     var preset = presets[presetName];
 
     if (!preset) {
-        log('Preset not found: ' + presetName, 'error');
+        UI.log('Preset not found: ' + presetName, 'error');
         return;
     }
 
@@ -3657,7 +3622,7 @@ function applyPreset(presetName) {
     // Update app state
     appState.params = getCurrentParams();
 
-    log(I18n.t('presets.applied', { name: presetName }), 'success');
+    UI.log(I18n.t('presets.applied', { name: presetName }), 'success');
 }
 
 /**
@@ -3676,7 +3641,7 @@ function savePreset() {
     var currentParams = getCurrentParams();
 
     // Load existing custom presets
-    var customPresets = localStorage.getItem('presets');
+    var customPresets = Storage.loadPresets();
     var presets = {};
     if (customPresets) {
         presets = JSON.parse(customPresets);
@@ -3691,7 +3656,7 @@ function savePreset() {
 
     // Save preset
     presets[name] = currentParams;
-    localStorage.setItem('presets', JSON.stringify(presets));
+    Storage.savePresets(presets);
 
     // Update dropdown
     updatePresetSelect();
@@ -3699,7 +3664,7 @@ function savePreset() {
     // Select the new preset
     document.getElementById('presetSelect').value = name;
 
-    log(I18n.t('presets.saved', { name: name }), 'success');
+    UI.log(I18n.t('presets.saved', { name: name }), 'success');
 
     updateDeleteButtonState();
 }
@@ -3717,7 +3682,7 @@ function deletePreset() {
 
     // Don't delete default presets
     if (defaultPresets[presetName]) {
-        log('Cannot delete default preset: ' + presetName, 'error');
+        UI.log('Cannot delete default preset: ' + presetName, 'error');
         return;
     }
 
@@ -3726,19 +3691,19 @@ function deletePreset() {
     }
 
     // Load and update custom presets
-    var customPresets = localStorage.getItem('presets');
+    var customPresets = Storage.loadPresets();
     var presets = {};
     if (customPresets) {
         presets = JSON.parse(customPresets);
     }
 
     delete presets[presetName];
-    localStorage.setItem('presets', JSON.stringify(presets));
+    Storage.savePresets(presets);
 
     // Update dropdown
     updatePresetSelect();
 
-    log(I18n.t('presets.deleted') + ': ' + presetName, 'success');
+    UI.log(I18n.t('presets.deleted') + ': ' + presetName, 'success');
 }
 
 /**

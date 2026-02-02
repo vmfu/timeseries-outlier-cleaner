@@ -62,11 +62,6 @@
                     <h2 class="section-title">2. ХОД ПРОЦЕССА</h2>
                     <div class="gauge-container">
                         <svg class="gauge" viewBox="0 0 180 100">
-                            <path d="M 10 90 A 80 80 0 0 1 170 90" fill="none" stroke="#003322" stroke-width="20"/>
-                            <path id="progressArc" d="M 10 90 A 80 80 0 0 1 170 90" fill="none"
-                                  stroke="url(#gaugeGradient)" stroke-width="20"
-                                  stroke-dasharray="251.2" stroke-dashoffset="251.2"
-                                  stroke-linecap="round"/>
                             <defs>
                                 <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                                     <stop offset="0%" style="stop-color:#00ff88"/>
@@ -74,6 +69,11 @@
                                     <stop offset="100%" style="stop-color:#ff4444"/>
                                 </linearGradient>
                             </defs>
+                            <path d="M 10 90 A 80 80 0 0 1 170 90" fill="none" stroke="#003322" stroke-width="20"/>
+                            <path id="progressArc" d="M 10 90 A 80 80 0 0 1 170 90" fill="none"
+                                  stroke="url(#gaugeGradient)" stroke-width="20"
+                                  stroke-dasharray="251.2" stroke-dashoffset="251.2"
+                                  stroke-linecap="round"/>
                             <text x="90" y="75" text-anchor="middle" class="gauge-text-main" id="progressText">0%</text>
                         </svg>
                     </div>
