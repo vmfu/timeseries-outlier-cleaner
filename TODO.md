@@ -204,15 +204,15 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 - [x] Add legend for outlier markers
   - [x] Include in chart legend
   - [x] Explain marker meaning
-- [ ] Test with various outlier patterns
-  - [ ] Single outliers
-  - [ ] Multiple consecutive outliers
-  - [ ] Random outliers
-  - [ ] Edge cases (start/end of series)
-- [ ] Start, test, then stop the local server
-- [ ] Check off the completed items and sub-items
-- [ ] Create a commit and push to Git
-- [ ] Summarize the session to reduce the load on the LLM provider
+- [x] Test with various outlier patterns
+  - [x] Single outliers
+  - [x] Multiple consecutive outliers
+  - [x] Random outliers
+  - [x] Edge cases (start/end of series)
+- [x] Start, test, then stop the local server
+- [x] Check off the completed items and sub-items
+- [x] Create a commit and push to Git
+- [x] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, edit, bash (for testing)
 
 
