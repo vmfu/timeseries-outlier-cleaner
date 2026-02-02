@@ -946,7 +946,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 - [x] Reset Button: 100%
 - [x] Export Report: 100%
 
-**Nice to Have**: 50% complete
+**Nice to Have**: 25% complete
 - [x] Chart Zoom/Pan: 100%
 - [ ] Data Table: 0%
 - [ ] Settings Presets: 0%
