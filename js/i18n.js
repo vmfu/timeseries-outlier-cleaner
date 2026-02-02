@@ -84,6 +84,13 @@
             'button.reset': 'СБРОС СЕССИИ',
             'desc.reset': 'Очистить все данные и начать заново',
 
+            // Export Report
+            'section.report': '4. ЭКСПОРТ ОТЧЕТА',
+            'button.exportJson': 'JSON ОТЧЕТ',
+            'desc.exportJson': 'Экспорт в структурированный формат',
+            'button.exportHtml': 'HTML ОТЧЕТ',
+            'desc.exportHtml': 'Экспорт с графиками и метриками',
+
             // Save Options
             'section.save': '3. ПАРАМЕТРЫ СОХРАНЕНИЯ',
             'checkbox.saveRestored': 'Сохранить восстановленные данные',
@@ -206,6 +213,11 @@
             'modal.cancel': 'Отмена',
             'msg.resetComplete': 'Сессия сброшена. Все данные очищены.',
 
+            // Export Messages
+            'msg.noCleanedForReport': 'Нет очищенных данных для экспорта',
+            'msg.exportedJson': 'JSON отчет сохранен: {name}',
+            'msg.exportedHtml': 'HTML отчет сохранен: {name}',
+
             // Footer
             'footer.text': 'ОТК-001 /// СИСТЕМА ОЧИСТКИ ДАННЫХ ВРЕМЕННЫХ РЯДОВ',
             'footer.author': 'Разработчик: Фунтиков В.М.',
@@ -289,6 +301,13 @@
             'desc.save': 'Export results',
             'button.reset': 'RESET SESSION',
             'desc.reset': 'Clear all data and start fresh',
+
+            // Export Report
+            'section.report': '4. EXPORT REPORT',
+            'button.exportJson': 'JSON REPORT',
+            'desc.exportJson': 'Export structured data format',
+            'button.exportHtml': 'HTML REPORT',
+            'desc.exportHtml': 'Export with charts and metrics',
 
             // Save Options
             'section.save': '3. SAVE PARAMETERS',
@@ -411,6 +430,11 @@
             'modal.confirm': 'Yes, Reset',
             'modal.cancel': 'Cancel',
             'msg.resetComplete': 'Session reset. All data cleared.',
+
+            // Export Messages
+            'msg.noCleanedForReport': 'No cleaned data to export',
+            'msg.exportedJson': 'JSON report saved: {name}',
+            'msg.exportedHtml': 'HTML report saved: {name}',
 
             // Footer
             'footer.text': 'ODC-001 /// TIME SERIES DATA CLEANING SYSTEM',

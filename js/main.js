@@ -170,6 +170,10 @@ function initializeUI() {
     document.getElementById('cancelResetBtn').addEventListener('click', hideResetModal);
     document.querySelector('.modal-close').addEventListener('click', hideResetModal);
 
+    // Export buttons
+    document.getElementById('exportJsonBtn').addEventListener('click', exportJsonReport);
+    document.getElementById('exportHtmlBtn').addEventListener('click', exportHtmlReport);
+
     // Drag & Drop zone
     initializeDragAndDrop();
 
@@ -802,6 +806,8 @@ function loadData() {
         document.getElementById('tuneBtn').disabled = false;
         document.getElementById('cleanBtn').disabled = true;
         document.getElementById('saveBtn').disabled = true;
+        document.getElementById('exportJsonBtn').disabled = true;
+        document.getElementById('exportHtmlBtn').disabled = true;
 
         log(I18n.t('msg.loaded', {points: data.length, series: data[0].length - 1}), 'success');
         log(I18n.t('msg.readyTune'), 'info');
@@ -1094,6 +1100,8 @@ function showLoadingOverlay(show) {
         document.getElementById('tuneBtn').disabled = true;
         document.getElementById('cleanBtn').disabled = true;
         document.getElementById('saveBtn').disabled = true;
+        document.getElementById('exportJsonBtn').disabled = true;
+        document.getElementById('exportHtmlBtn').disabled = true;
         // Disable file input
         document.getElementById('fileInput').disabled = true;
     } else {
@@ -1110,6 +1118,9 @@ function showLoadingOverlay(show) {
         document.getElementById('tuneBtn').disabled = !appState.originalData;
         // Re-enable save button if data is cleaned
         document.getElementById('saveBtn').disabled = !appState.cleanedData;
+        // Re-enable export buttons if data is cleaned
+        document.getElementById('exportJsonBtn').disabled = !appState.cleanedData;
+        document.getElementById('exportHtmlBtn').disabled = !appState.cleanedData;
         // Re-enable clean button (depends on state)
         document.getElementById('cleanBtn').disabled = !appState.originalData;
     }
@@ -2042,6 +2053,8 @@ function resetSession() {
         document.getElementById('tuneBtn').disabled = true;
         document.getElementById('cleanBtn').disabled = true;
         document.getElementById('saveBtn').disabled = true;
+        document.getElementById('exportJsonBtn').disabled = true;
+        document.getElementById('exportHtmlBtn').disabled = true;
 
         // Reset progress
         document.getElementById('progressBar').style.width = '0%';
@@ -2061,6 +2074,282 @@ function resetSession() {
         console.error('Reset error:', error);
         alert('Error during reset: ' + error.message);
     }
+}
+
+/**
+ * Export JSON report
+ */
+function exportJsonReport() {
+    if (!appState.cleanedData) {
+        log(I18n.t('msg.noCleanedForReport'), 'warning');
+        return;
+    }
+
+    try {
+        log(I18n.t('msg.saving'), 'info');
+
+        // Prepare report data
+        var report = {
+            metadata: {
+                filename: appState.currentFile ? appState.currentFile.name : 'unknown',
+                timestamp: new Date().toISOString(),
+                language: I18n.getLanguage()
+            },
+            parameters: {
+                windowWidth: appState.params.windowWidth,
+                threshold: appState.params.threshold,
+                matrixSize: appState.params.matrixSize,
+                relativeSize: appState.params.relativeSize,
+                fillMethod: appState.params.fillMethod
+            },
+            dataSummary: {
+                totalPoints: appState.originalData ? appState.originalData.length : 0,
+                totalSeries: appState.originalData ? (appState.originalData[0] ? appState.originalData[0].length - 1 : 0) : 0
+            },
+            metrics: {}
+        };
+
+        // Add metrics for each series
+        if (appState.cleanedData && appState.cleanedData.length > 0) {
+            report.metrics = {};
+            var numSeries = appState.cleanedData[0] ? appState.cleanedData[0].length - 1 : 0;
+
+            for (var s = 0; s < numSeries; s++) {
+                report.metrics['series_' + (s + 1)] = {
+                    STDF: parseFloat(document.getElementById('STDF_' + s).textContent) || 0,
+                    DF: parseFloat(document.getElementById('DF_' + s).textContent) || 0,
+                    ASNR: parseFloat(document.getElementById('ASNR_' + s).textContent) || 0,
+                    RMSE: parseFloat(document.getElementById('RMSE_' + s).textContent) || 0,
+                    RSquared: parseFloat(document.getElementById('RSquared_' + s).textContent) || 0,
+                    Pearson: parseFloat(document.getElementById('Pearson_' + s).textContent) || 0
+                };
+            }
+        }
+
+        // Add outlier information
+        if (appState.outlierMasks) {
+            report.outliers = {
+                totalOutliers: 0,
+                bySeries: {}
+            };
+
+            for (var i = 0; i < appState.outlierMasks.length; i++) {
+                var mask = appState.outlierMasks[i];
+                var count = 0;
+                for (var j = 0; j < mask.length; j++) {
+                    if (mask[j] === 1) count++;
+                }
+                report.outliers.bySeries['series_' + (i + 1)] = count;
+                report.outliers.totalOutliers += count;
+            }
+        }
+
+        // Format as JSON
+        var content = JSON.stringify(report, null, 2);
+
+        // Generate filename
+        var originalName = appState.currentFile ? appState.currentFile.name : 'data';
+        var dotIndex = originalName.lastIndexOf('.');
+        var baseName = dotIndex > 0 ? originalName.substring(0, dotIndex) : originalName;
+        var filename = baseName + '_report.json';
+
+        // Trigger download
+        downloadFile(content, filename);
+
+        log(I18n.t('msg.exportedJson', {name: filename}), 'success');
+
+    } catch (error) {
+        log(I18n.t('error.saving', {message: error.message}), 'error');
+        console.error('JSON export error:', error);
+    }
+}
+
+/**
+ * Export HTML report
+ */
+function exportHtmlReport() {
+    if (!appState.cleanedData) {
+        log(I18n.t('msg.noCleanedForReport'), 'warning');
+        return;
+    }
+
+    try {
+        log(I18n.t('msg.saving'), 'info');
+
+        // Generate HTML content
+        var html = generateHtmlReport();
+
+        // Generate filename
+        var originalName = appState.currentFile ? appState.currentFile.name : 'data';
+        var dotIndex = originalName.lastIndexOf('.');
+        var baseName = dotIndex > 0 ? originalName.substring(0, dotIndex) : originalName;
+        var filename = baseName + '_report.html';
+
+        // Trigger download
+        downloadFile(html, filename);
+
+        log(I18n.t('msg.exportedHtml', {name: filename}), 'success');
+
+    } catch (error) {
+        log(I18n.t('error.saving', {message: error.message}), 'error');
+        console.error('HTML export error:', error);
+    }
+}
+
+/**
+ * Generate HTML report content
+ */
+function generateHtmlReport() {
+    var lang = I18n.getLanguage();
+    var isRu = lang === 'ru';
+
+    // Get chart images
+    var dataChartImage = appState.dataChart ? appState.dataChart.toBase64Image() : '';
+    var heatmapImage = document.getElementById('heatmapCanvas').toDataURL('image/png');
+
+    // Build HTML
+    var html = '<!DOCTYPE html>\n';
+    html += '<html lang="' + lang + '">\n';
+    html += '<head>\n';
+    html += '    <meta charset="UTF-8">\n';
+    html += '    <title>' + (isRu ? 'Отчет об очистке данных' : 'Data Cleaning Report') + '</title>\n';
+    html += '    <style>\n';
+    html += '        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }\n';
+    html += '        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }\n';
+    html += '        h1 { color: #00aaff; border-bottom: 3px solid #00aaff; padding-bottom: 10px; }\n';
+    html += '        h2 { color: #ffaa00; margin-top: 30px; }\n';
+    html += '        .section { margin: 20px 0; }\n';
+    html += '        .info-table { width: 100%; border-collapse: collapse; margin: 20px 0; }\n';
+    html += '        .info-table th { background: #00aaff; color: white; padding: 12px; text-align: left; }\n';
+    html += '        .info-table td { padding: 12px; border-bottom: 1px solid #ddd; }\n';
+    html += '        .info-table tr:hover { background: #f5f5f5; }\n';
+    html += '        .metric-table { width: 100%; border-collapse: collapse; margin: 20px 0; }\n';
+    html += '        .metric-table th { background: #ffaa00; color: white; padding: 12px; }\n';
+    html += '        .metric-table td { padding: 12px; border-bottom: 1px solid #ddd; text-align: center; }\n';
+    html += '        .chart-container { margin: 30px 0; text-align: center; }\n';
+    html += '        .chart-container img { max-width: 100%; border: 2px solid #00aaff; }\n';
+    html += '        .footer { margin-top: 40px; text-align: center; color: #888; font-size: 12px; }\n';
+    html += '        .quality-excellent { color: #00ff88; font-weight: bold; }\n';
+    html += '        .quality-good { color: #ffaa00; font-weight: bold; }\n';
+    html += '        .quality-poor { color: #ff4444; font-weight: bold; }\n';
+    html += '        @media print { body { margin: 0; } .container { box-shadow: none; } }\n';
+    html += '    </style>\n';
+    html += '</head>\n';
+    html += '<body>\n';
+    html += '    <div class="container">\n';
+    html += '        <h1>' + (isRu ? 'ОТЧЕТ ОБ ОЧИСТКЕ ДАННЫХ' : 'DATA CLEANING REPORT') + '</h1>\n';
+
+    // Metadata section
+    html += '        <div class="section">\n';
+    html += '            <h2>' + (isRu ? 'Метаданные' : 'Metadata') + '</h2>\n';
+    html += '            <table class="info-table">\n';
+    html += '                <tr><th>' + (isRu ? 'Параметр' : 'Parameter') + '</th><th>' + (isRu ? 'Значение' : 'Value') + '</th></tr>\n';
+    html += '                <tr><td>' + (isRu ? 'Имя файла' : 'Filename') + '</td><td>' + (appState.currentFile ? appState.currentFile.name : 'unknown') + '</td></tr>\n';
+    html += '                <tr><td>' + (isRu ? 'Дата создания' : 'Created') + '</td><td>' + new Date().toLocaleString() + '</td></tr>\n';
+    html += '            </table>\n';
+    html += '        </div>\n';
+
+    // Parameters section
+    html += '        <div class="section">\n';
+    html += '            <h2>' + (isRu ? 'Параметры очистки' : 'Cleaning Parameters') + '</h2>\n';
+    html += '            <table class="info-table">\n';
+    html += '                <tr><th>' + (isRu ? 'Параметр' : 'Parameter') + '</th><th>' + (isRu ? 'Значение' : 'Value') + '</th></tr>\n';
+    html += '                <tr><td>' + (isRu ? 'Ширина окна' : 'Window Width') + '</td><td>' + appState.params.windowWidth + '</td></tr>\n';
+    html += '                <tr><td>' + (isRu ? 'Пороговый коэффициент' : 'Threshold') + '</td><td>' + appState.params.threshold + '</td></tr>\n';
+    html += '                <tr><td>' + (isRu ? 'Размер матрицы' : 'Matrix Size') + '</td><td>' + appState.params.matrixSize + '</td></tr>\n';
+    html += '                <tr><td>' + (isRu ? 'Относительный размер' : 'Relative Size') + '</td><td>' + appState.params.relativeSize + '</td></tr>\n';
+    html += '                <tr><td>' + (isRu ? 'Метод заполнения' : 'Fill Method') + '</td><td>' + appState.params.fillMethod + '</td></tr>\n';
+    html += '            </table>\n';
+    html += '        </div>\n';
+
+    // Metrics section
+    html += '        <div class="section">\n';
+    html += '            <h2>' + (isRu ? 'Метрики качества' : 'Quality Metrics') + '</h2>\n';
+
+    if (appState.cleanedData && appState.cleanedData.length > 0) {
+        var numSeries = appState.cleanedData[0] ? appState.cleanedData[0].length - 1 : 0;
+
+        html += '            <table class="metric-table">\n';
+        html += '                <tr><th>' + (isRu ? 'Серия' : 'Series') + '</th><th>STDF</th><th>DF</th><th>ASNR</th><th>RMSE</th><th>R²</th><th>Pearson</th></tr>\n';
+
+        for (var s = 0; s < numSeries; s++) {
+            var stdf = parseFloat(document.getElementById('STDF_' + s).textContent) || 0;
+            var df = parseFloat(document.getElementById('DF_' + s).textContent) || 0;
+            var asnr = parseFloat(document.getElementById('ASNR_' + s).textContent) || 0;
+            var rmse = parseFloat(document.getElementById('RMSE_' + s).textContent) || 0;
+            var r2 = parseFloat(document.getElementById('RSquared_' + s).textContent) || 0;
+            var pearson = parseFloat(document.getElementById('Pearson_' + s).textContent) || 0;
+
+            var stdfClass = stdf < 0.01 ? 'quality-excellent' : (stdf < 0.05 ? 'quality-good' : 'quality-poor');
+            var r2Class = r2 > 0.9 ? 'quality-excellent' : (r2 >= 0.7 ? 'quality-good' : 'quality-poor');
+            var pearsonClass = pearson > 0.9 ? 'quality-excellent' : (pearson >= 0.7 ? 'quality-good' : 'quality-poor');
+
+            html += '                <tr>';
+            html += '<td><strong>' + (s + 1) + '</strong></td>';
+            html += '<td>' + stdf.toFixed(4) + '</td>';
+            html += '<td>' + df.toFixed(2) + '%</td>';
+            html += '<td>' + asnr.toFixed(2) + ' dB</td>';
+            html += '<td>' + rmse.toFixed(4) + '</td>';
+            html += '<td class="' + r2Class + '">' + r2.toFixed(4) + '</td>';
+            html += '<td class="' + pearsonClass + '">' + pearson.toFixed(4) + '</td>';
+            html += '</tr>\n';
+        }
+
+        html += '            </table>\n';
+    }
+
+    html += '        </div>\n';
+
+    // Outliers section
+    if (appState.outlierMasks) {
+        html += '        <div class="section">\n';
+        html += '            <h2>' + (isRu ? 'Статистика выбросов' : 'Outlier Statistics') + '</h2>\n';
+        html += '            <table class="info-table">\n';
+        html += '                <tr><th>' + (isRu ? 'Серия' : 'Series') + '</th><th>' + (isRu ? 'Количество' : 'Count') + '</th></tr>\n';
+
+        var totalOutliers = 0;
+        for (var i = 0; i < appState.outlierMasks.length; i++) {
+            var mask = appState.outlierMasks[i];
+            var count = 0;
+            for (var j = 0; j < mask.length; j++) {
+                if (mask[j] === 1) count++;
+            }
+            totalOutliers += count;
+            html += '                <tr><td>' + (isRu ? 'Серия ' : 'Series ') + (i + 1) + '</td><td>' + count + '</td></tr>\n';
+        }
+
+        html += '                <tr><td><strong>' + (isRu ? 'Всего' : 'Total') + '</strong></td><td><strong>' + totalOutliers + '</strong></td></tr>\n';
+        html += '            </table>\n';
+        html += '        </div>\n';
+    }
+
+    // Charts section
+    html += '        <div class="section">\n';
+    html += '            <h2>' + (isRu ? 'Визуализация' : 'Visualization') + '</h2>\n';
+    if (dataChartImage) {
+        html += '            <div class="chart-container">\n';
+        html += '                <h3>' + (isRu ? 'Данные' : 'Data Chart') + '</h3>\n';
+        html += '                <img src="' + dataChartImage + '" alt="Data Chart">\n';
+        html += '            </div>\n';
+    }
+    if (heatmapImage) {
+        html += '            <div class="chart-container">\n';
+        html += '                <h3>' + (isRu ? 'Карта параметров' : 'Parameter Map') + '</h3>\n';
+        html += '                <img src="' + heatmapImage + '" alt="Parameter Map">\n';
+        html += '            </div>\n';
+    }
+    html += '        </div>\n';
+
+    // Footer
+    html += '        <div class="footer">\n';
+    html += '            <p>ОТК-001 /// СИСТЕМА ОЧИСТКИ ДАННЫХ ВРЕМЕННЫХ РЯДОВ /// ODC-001 Time Series Data Cleaning System</p>\n';
+    html += '            <p>' + (isRu ? 'Разработчик: Фунтиков В.М.' : 'Developer: Vladimir M. Funtikov') + '</p>\n';
+    html += '        </div>\n';
+    html += '    </div>\n';
+    html += '</body>\n';
+    html += '</html>\n';
+
+    return html;
 }
 
 /**
