@@ -579,22 +579,22 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 1-2 hours
 
 **Tasks**:
-- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
-- [ ] Add parameter preview
-  - [ ] Show summary of advanced settings
-  - [ ] Display before opening hood
-  - [ ] Example: "Окно: 40, Порог: 1.4, Метод: movmean"
-- [ ] Make toggle more noticeable
-  - [ ] Increase visual prominence
-  - [ ] Add icon or indicator
-  - [ ] Better positioning
-- [ ] Test preview functionality
-  - [ ] Verify accuracy
-  - [ ] Check with different parameters
-- [ ] Start, test, then stop the local server
-- [ ] Check off the completed items and sub-items
-- [ ] Create a commit and push to Git
-- [ ] Summarize the session to reduce the load on the LLM provider
+- [x] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
+- [x] Add parameter preview
+  - [x] Show summary of advanced settings
+  - [x] Display before opening hood
+  - [x] Example: "Окно: 40, Порог: 1.4, Метод: movmean"
+- [x] Make toggle more noticeable
+  - [x] Increase visual prominence
+  - [x] Add icon or indicator
+  - [x] Better positioning
+- [x] Test preview functionality
+  - [x] Verify accuracy
+  - [x] Check with different parameters
+- [x] Start, test, then stop the local server
+- [x] Check off the completed items and sub-items
+- [x] Create a commit and push to Git
+- [x] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, edit, bash (for testing)
 
 
@@ -953,6 +953,9 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 - [x] ETA Progress: 100%
 - [x] Interactive Heatmap: 100%
 - [x] Export Multiple Formats: 100%
+- [x] Clarify "ONLINE" Status: 100%
+- [x] Prominent File Information: 100%
+- [x] Enhanced "Open Hood" Preview: 100%
 
 **Code Quality**: 100% complete
 - [ ] I18n Architecture: 0%
