@@ -208,6 +208,31 @@
                             <span class="button-desc" data-i18n="desc.save">Экспорт результатов</span>
                         </button>
                     </div>
+
+                    <!-- Reset Button -->
+                    <button id="resetBtn" class="reset-button">
+                        <span class="button-icon">⚠</span>
+                        <span class="button-label" data-i18n="button.reset">СБРОС СЕССИИ</span>
+                        <span class="button-desc" data-i18n="desc.reset">Очистить все данные и начать заново</span>
+                    </button>
+                </div>
+
+                <!-- Reset Confirmation Modal -->
+                <div id="resetModal" class="modal-overlay">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title" data-i18n="modal.reset.title">Подтверждение сброса</h3>
+                            <button class="modal-close" data-i18n="modal.close">✕</button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="modal-text" data-i18n="modal.reset.message">Вы уверены, что хотите сбросить текущую сессию?</p>
+                            <p class="modal-warning" data-i18n="modal.reset.warning">⚠ Все данные, результаты и параметры будут удалены!</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="confirmResetBtn" class="modal-button modal-confirm" data-i18n="modal.confirm">Да, сбросить</button>
+                            <button id="cancelResetBtn" class="modal-button modal-cancel" data-i18n="modal.cancel">Отмена</button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Save Options -->

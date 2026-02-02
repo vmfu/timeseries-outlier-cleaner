@@ -165,6 +165,10 @@ function initializeUI() {
     document.getElementById('tuneBtn').addEventListener('click', autoTune);
     document.getElementById('cleanBtn').addEventListener('click', cleanData);
     document.getElementById('saveBtn').addEventListener('click', saveData);
+    document.getElementById('resetBtn').addEventListener('click', showResetModal);
+    document.getElementById('confirmResetBtn').addEventListener('click', resetSession);
+    document.getElementById('cancelResetBtn').addEventListener('click', hideResetModal);
+    document.querySelector('.modal-close').addEventListener('click', hideResetModal);
 
     // Drag & Drop zone
     initializeDragAndDrop();
@@ -1952,6 +1956,110 @@ function saveData() {
     } catch (error) {
         log(I18n.t('error.saving', {message: error.message}), 'error');
         console.error('Save error:', error);
+    }
+}
+
+/**
+ * Show reset confirmation modal
+ */
+function showResetModal() {
+    document.getElementById('resetModal').classList.add('show');
+}
+
+/**
+ * Hide reset confirmation modal
+ */
+function hideResetModal() {
+    document.getElementById('resetModal').classList.remove('show');
+}
+
+/**
+ * Reset session - clear all data and reset to initial state
+ */
+function resetSession() {
+    try {
+        // Clear data
+        appState.originalData = null;
+        appState.cleanedData = null;
+        appState.currentFile = null;
+        appState.batchQueue = [];
+        appState.optimalParams = null;
+        appState.outlierMasks = null;
+        appState.seriesToClean = 0;
+        appState.seriesCleaned = 0;
+
+        // Reset parameters to defaults
+        appState.params = {
+            windowWidth: 40,
+            threshold: 1.4,
+            matrixSize: 16,
+            relativeSize: 4,
+            fillMethod: 'nearest',
+            numChunks: 3,
+            useChunks: true
+        };
+
+        // Reset sliders
+        document.getElementById('windowWidth').value = 40;
+        document.getElementById('threshold').value = 1.4;
+        document.getElementById('matrixSize').value = 16;
+        document.getElementById('relativeSize').value = 4;
+        document.getElementById('chunkOptimization').checked = true;
+        document.getElementById('numChunks').value = 3;
+
+        // Update parameter displays manually
+        document.getElementById('windowWidthValue').textContent = '40';
+        document.getElementById('thresholdValue').textContent = '1.40';
+        document.getElementById('matrixSizeValue').textContent = '16 × 16';
+        document.getElementById('relativeSizeValue').textContent = '4';
+        document.getElementById('chunkCountValue').textContent = '3';
+
+        // Reset fill method dropdown
+        document.getElementById('fillMethod').value = 'nearest';
+
+        // Clear chart
+        if (appState.dataChart) {
+            appState.dataChart.data.labels = [];
+            appState.dataChart.data.datasets = [];
+            appState.dataChart.update();
+        }
+
+        // Clear NTF heatmap
+        if (appState.NTF) {
+            appState.NTF = null;
+            document.getElementById('heatmapCanvas').getContext('2d').clearRect(0, 0, 1000, 1000);
+        }
+
+        // Clear log
+        document.getElementById('logArea').value = '';
+
+        // Hide data panels
+        document.getElementById('noDataMessage').style.display = 'block';
+        document.getElementById('dataMetrics').style.display = 'none';
+
+        // Disable action buttons
+        document.getElementById('loadBtn').disabled = true;
+        document.getElementById('tuneBtn').disabled = true;
+        document.getElementById('cleanBtn').disabled = true;
+        document.getElementById('saveBtn').disabled = true;
+
+        // Reset progress
+        document.getElementById('progressBar').style.width = '0%';
+
+        // Show file info
+        document.getElementById('fileInfo').textContent = I18n.t('info.points') + ' 0, ' + I18n.t('info.series') + ' 0';
+
+        // Hide modal
+        hideResetModal();
+
+        // Log success
+        log(I18n.t('msg.resetComplete'), 'success');
+
+        console.log('Session reset complete');
+
+    } catch (error) {
+        console.error('Reset error:', error);
+        alert('Error during reset: ' + error.message);
     }
 }
 

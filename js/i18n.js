@@ -81,6 +81,8 @@
             'desc.clean': 'Применить фильтрацию',
             'button.save': 'СОХРАНИТЬ',
             'desc.save': 'Экспорт результатов',
+            'button.reset': 'СБРОС СЕССИИ',
+            'desc.reset': 'Очистить все данные и начать заново',
 
             // Save Options
             'section.save': '3. ПАРАМЕТРЫ СОХРАНЕНИЯ',
@@ -195,6 +197,15 @@
             'error.worker': 'Ошибка Worker: {message}',
             'error.execution': 'Ошибка выполнения: {message}',
 
+            // Modal
+            'modal.reset.title': 'Подтверждение сброса',
+            'modal.reset.message': 'Вы уверены, что хотите сбросить текущую сессию?',
+            'modal.reset.warning': '⚠ Все данные, результаты и параметры будут удалены!',
+            'modal.close': '✕',
+            'modal.confirm': 'Да, сбросить',
+            'modal.cancel': 'Отмена',
+            'msg.resetComplete': 'Сессия сброшена. Все данные очищены.',
+
             // Footer
             'footer.text': 'ОТК-001 /// СИСТЕМА ОЧИСТКИ ДАННЫХ ВРЕМЕННЫХ РЯДОВ',
             'footer.author': 'Разработчик: Фунтиков В.М.',
@@ -276,6 +287,8 @@
             'desc.clean': 'Apply filtering',
             'button.save': 'SAVE',
             'desc.save': 'Export results',
+            'button.reset': 'RESET SESSION',
+            'desc.reset': 'Clear all data and start fresh',
 
             // Save Options
             'section.save': '3. SAVE PARAMETERS',
@@ -389,6 +402,15 @@
             'error.workerInitInternal': 'Built-in Worker initialization error: {message}',
             'error.worker': 'Worker error: {message}',
             'error.execution': 'Execution error: {message}',
+
+            // Modal
+            'modal.reset.title': 'Confirm Reset',
+            'modal.reset.message': 'Are you sure you want to reset the current session?',
+            'modal.reset.warning': '⚠ All data, results, and parameters will be lost!',
+            'modal.close': '✕',
+            'modal.confirm': 'Yes, Reset',
+            'modal.cancel': 'Cancel',
+            'msg.resetComplete': 'Session reset. All data cleared.',
 
             // Footer
             'footer.text': 'ODC-001 /// TIME SERIES DATA CLEANING SYSTEM',
