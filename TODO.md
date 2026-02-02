@@ -167,14 +167,14 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
   - [x] Show recommended ranges
 - [x] Add internationalization for tooltips
   - [x] Include in i18n dictionaries
-- [ ] Test tooltip behavior
-  - [ ] Hover timing
-  - [ ] Positioning (avoid edges)
-  - [ ] Mobile touch support
+- [x] Test tooltip behavior
+  - [x] Hover timing
+  - [x] Positioning (avoid edges)
+  - [x] Mobile touch support
 - [x] Start, test, then stop the local server
-- [ ] Check off the completed items and sub-items
-- [ ] Create a commit and push to Git
-- [ ] Summarize the session to reduce the load on the LLM provider
+- [x] Check off the completed items and sub-items
+- [x] Create a commit and push to Git
+- [x] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit, bash (for testing)
 
 - [ ] Создать коммит и запушить на гит.
