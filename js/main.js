@@ -1196,6 +1196,9 @@ function showLoadingOverlay(show) {
     var progressBar = document.getElementById('progressBar');
 
     if (show) {
+        // Set control panel status to processing
+        setStatus('processing');
+
         if (progressBar) {
             progressBar.classList.remove('hidden');
             progressBar.classList.add('visible');
@@ -1228,6 +1231,9 @@ function showLoadingOverlay(show) {
                 appState.lastProgressUpdate = null;
             }, 1000); // Hide after 1 second delay
         }
+        // Reset control panel status to ready
+        setStatus('ready');
+
         // Re-enable load button
         document.getElementById('loadBtn').disabled = appState.batchQueue.length === 0;
         document.getElementById('fileInput').disabled = false;
@@ -1240,6 +1246,36 @@ function showLoadingOverlay(show) {
         document.getElementById('exportHtmlBtn').disabled = !appState.cleanedData;
         // Re-enable clean button (depends on state)
         document.getElementById('cleanBtn').disabled = !appState.originalData;
+    }
+}
+
+/**
+ * Update panel status with color coding
+ * @param {string} status - 'ready', 'processing', 'error'
+ */
+function setStatus(status) {
+    var controlStatus = document.querySelector('.control-panel .panel-status');
+    if (controlStatus) {
+        // Remove all status classes
+        controlStatus.classList.remove('status-ready', 'status-processing', 'status-error');
+
+        // Add appropriate class and update text
+        if (status === 'ready') {
+            controlStatus.classList.add('status-ready');
+            controlStatus.setAttribute('data-i18n', 'panel.status.ready');
+        } else if (status === 'processing') {
+            controlStatus.classList.add('status-processing');
+            controlStatus.setAttribute('data-i18n', 'panel.status.processing');
+        } else if (status === 'error') {
+            controlStatus.classList.add('status-error');
+            controlStatus.setAttribute('data-i18n', 'panel.status.error');
+        }
+
+        // Update text via i18n
+        var key = controlStatus.getAttribute('data-i18n');
+        if (key) {
+            controlStatus.textContent = I18n.t(key);
+        }
     }
 }
 

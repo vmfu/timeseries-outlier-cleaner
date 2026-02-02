@@ -216,9 +216,27 @@ body {
     animation: blink 2s infinite;
 }
 
+.panel-status.status-ready {
+    color: #00ff88;
+}
+
+.panel-status.status-processing {
+    color: #ffff00;
+}
+
+.panel-status.status-error {
+    color: #ff4444;
+    animation: blink-error 0.5s infinite;
+}
+
 @keyframes blink {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
+}
+
+@keyframes blink-error {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
 }
 
 /* ============================================================================

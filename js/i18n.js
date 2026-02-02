@@ -21,6 +21,7 @@
             'panel.status.ready': 'ГОТОВ',
             'panel.status.online': 'ОНЛАЙН',
             'panel.status.processing': 'ВЫПОЛНЕНИЕ...',
+            'panel.status.error': 'ОШИБКА',
 
             // File Loading
             'section.load': '1. ЗАГРУЗКА ДАННЫХ',
@@ -253,6 +254,12 @@
             'tooltip.zoomOut': 'Уменьшить (прокрутка колеса)',
             'tooltip.resetZoom': 'Сбросить масштаб',
 
+            // Status Tooltips
+            'tooltip.status.ready': 'Система готова к работе',
+            'tooltip.status.online': 'Веб-воркер активен',
+            'tooltip.status.processing': 'Выполняется операция...',
+            'tooltip.status.error': 'Ошибка',
+
             // Footer
             'footer.text': 'ОТК-001 /// СИСТЕМА ОЧИСТКИ ДАННЫХ ВРЕМЕННЫХ РЯДОВ',
             'footer.author': 'Разработчик: Фунтиков В.М.',
@@ -291,6 +298,7 @@
             'panel.status.ready': 'READY',
             'panel.status.online': 'ONLINE',
             'panel.status.processing': 'PROCESSING...',
+            'panel.status.error': 'ERROR',
 
             // File Loading
             'section.load': '1. DATA LOADING',
@@ -420,6 +428,12 @@
             'tooltip.zoomIn': 'Zoom in (scroll wheel)',
             'tooltip.zoomOut': 'Zoom out (scroll wheel)',
             'tooltip.resetZoom': 'Reset zoom',
+
+            // Status Tooltips
+            'tooltip.status.ready': 'System ready',
+            'tooltip.status.online': 'Web Worker active',
+            'tooltip.status.processing': 'Processing...',
+            'tooltip.status.error': 'Error',
 
             // File Info
             'section.fileInfo': 'FILE INFORMATION',
