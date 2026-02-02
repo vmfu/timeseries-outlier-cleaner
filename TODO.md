@@ -177,7 +177,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 - [x] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit, bash (for testing)
 
-- [ ] Создать коммит и запушить на гит.
+- [x] Создать коммит и запушить на гит.
 
 ---
 
@@ -342,15 +342,15 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 - [x] Style zoom controls
   - [x] Match CRT aesthetics
   - [x] Place in chart toolbar
-- [ ] Test zoom/pan behavior
-  - [ ] Mouse wheel zoom
-  - [ ] Click and drag pan
-  - [ ] Zoom reset
-  - [ ] Multiple series
+- [x] Test zoom/pan behavior
+  - [x] Mouse wheel zoom
+  - [x] Click and drag pan
+  - [x] Zoom reset
+  - [x] Multiple series
 - [x] Start, test, then stop the local server
 - [x] Check off the completed items and sub-items
 - [x] Create a commit and push to Git
-- [ ] Summarize the session to reduce the load on the LLM provider
+- [x] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, edit, bash (for testing)
 
 - [x] Создать коммит и запушить на гит.
