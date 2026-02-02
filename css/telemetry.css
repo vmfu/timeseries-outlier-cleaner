@@ -832,6 +832,86 @@ body {
 }
 
 /* ============================================================================
+   DRAG & DROP ZONE
+   ============================================================================
+*/
+
+#dropZone {
+    position: relative;
+    transition: all 0.3s;
+}
+
+#dropZone.drag-over {
+    background: rgba(0, 255, 136, 0.1);
+    border: 2px dashed var(--accent-cyan);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+}
+
+.drop-overlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(10, 10, 15, 0.95);
+    border: 3px dashed var(--accent-cyan);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    z-index: 100;
+    animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+#dropZone.drag-over .drop-overlay {
+    display: flex;
+}
+
+.drop-icon {
+    font-size: 64px;
+    filter: drop-shadow(0 0 10px var(--accent-cyan));
+}
+
+.drop-text {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--accent-cyan);
+    text-shadow: 0 0 10px var(--accent-cyan);
+    font-family: var(--font-mono);
+}
+
+.drop-sub {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+    }
+}
+
+/* Hide drop overlay when data is loaded */
+.chart-wrapper:not(:empty) + .no-data-message,
+.chart-wrapper:not(:empty) ~ .drop-overlay {
+    display: none !important;
+}
+
+/* Show drop zone only when no data */
+.chart-wrapper:empty + .no-data-message {
+    display: flex;
+}
+
+.chart-wrapper:empty ~ .drop-overlay {
+    display: flex;
+}
+
+/* ============================================================================
    METRICS PANEL
    ============================================================================
 */

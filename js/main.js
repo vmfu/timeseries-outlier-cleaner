@@ -165,6 +165,9 @@ function initializeUI() {
     document.getElementById('cleanBtn').addEventListener('click', cleanData);
     document.getElementById('saveBtn').addEventListener('click', saveData);
 
+    // Drag & Drop zone
+    initializeDragAndDrop();
+
     // Tab navigation
     document.querySelectorAll('.tab-button').forEach(function(button) {
         button.addEventListener('click', function() {
@@ -217,6 +220,83 @@ function updateAllUIText() {
 
     // Update log messages are already handled by i18n.updateAllText()
     I18n.updateAllText();
+}
+
+/**
+ * Initialize drag and drop functionality
+ */
+function initializeDragAndDrop() {
+    var dropZone = document.getElementById('dropZone');
+
+    if (!dropZone) {
+        console.warn('Drop zone element not found');
+        return;
+    }
+
+    // Prevent default drag behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(function(eventName) {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    // Highlight drop zone when dragging file over it
+    ['dragenter', 'dragover'].forEach(function(eventName) {
+        dropZone.addEventListener(eventName, function() {
+            dropZone.classList.add('drag-over');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(function(eventName) {
+        dropZone.addEventListener(eventName, function() {
+            dropZone.classList.remove('drag-over');
+        }, false);
+    });
+
+    // Handle dropped files
+    dropZone.addEventListener('drop', handleDrop, false);
+}
+
+/**
+ * Prevent default browser behavior for drag events
+ */
+function preventDefaults(event) {
+    event.preventDefault();
+    event.stopPropagation();
+}
+
+/**
+ * Handle dropped files
+ */
+function handleDrop(event) {
+    var dt = event.dataTransfer;
+    var files = dt.files;
+
+    if (files.length === 0) {
+        return;
+    }
+
+    // Filter valid file types
+    var validFiles = Array.from(files).filter(function(file) {
+        var extension = file.name.split('.').pop().toLowerCase();
+        return ['txt', 'dat', 'csv', 'asc'].includes(extension);
+    });
+
+    if (validFiles.length === 0) {
+        log(I18n.t('dropZone.invalidType'), 'warning');
+        return;
+    }
+
+    if (validFiles.length !== files.length) {
+        log(I18n.t('dropZone.someSkipped'), 'warning');
+    }
+
+    // Load files
+    appState.batchQueue = validFiles;
+    updateFileCount(validFiles.length);
+    displaySelectedFiles(validFiles);
+    document.getElementById('loadBtn').disabled = false;
+
+    log(I18n.t('msg.filesSelected', {count: validFiles.length}), 'info');
 }
 
 /**

@@ -292,7 +292,7 @@
                 <div class="tab-content">
                     <!-- Data Plot Tab -->
                     <div id="dataTab" class="tab-pane active">
-                        <div class="chart-container">
+                        <div class="chart-container" id="dropZone">
                             <div class="chart-wrapper">
                                 <canvas id="dataChart"></canvas>
                             </div>
@@ -300,6 +300,11 @@
                                 <span class="no-data-icon">📭</span>
                                 <span class="no-data-text" data-i18n="noData.title">Нет загруженных данных</span>
                                 <span class="no-data-sub" data-i18n="noData.subtitle">Выберите файл для начала работы</span>
+                            </div>
+                            <div id="dropOverlay" class="drop-overlay">
+                                <span class="drop-icon">📂</span>
+                                <span class="drop-text" data-i18n="dropZone.text">Отпустите файл здесь</span>
+                                <span class="drop-sub" data-i18n="dropZone.sub">TXT, DAT, CSV, ASC</span>
                             </div>
                         </div>
                     </div>

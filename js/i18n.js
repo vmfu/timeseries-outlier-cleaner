@@ -109,6 +109,12 @@
             'noHeatmap.title': 'Карта параметров недоступна',
             'noHeatmap.subtitle': 'Выполните автоподбор для отображения',
 
+            // Drag & Drop Zone
+            'dropZone.text': 'Отпустите файл здесь',
+            'dropZone.sub': 'TXT, DAT, CSV, ASC',
+            'dropZone.invalidType': 'Неверный тип файла. Поддерживаются: TXT, DAT, CSV, ASC',
+            'dropZone.someSkipped': 'Некоторые файлы пропущены (неверный тип)',
+
             // Metrics
             'section.metrics': 'МЕТРИКИ КАЧЕСТВА',
             'metric.STDF': 'Гладкость',
@@ -282,6 +288,12 @@
             'noData.subtitle': 'Select a file to start',
             'noHeatmap.title': 'Parameter map unavailable',
             'noHeatmap.subtitle': 'Run auto-tune to display',
+
+            // Drag & Drop Zone
+            'dropZone.text': 'Drop file here',
+            'dropZone.sub': 'TXT, DAT, CSV, ASC',
+            'dropZone.invalidType': 'Invalid file type. Supported: TXT, DAT, CSV, ASC',
+            'dropZone.someSkipped': 'Some files were skipped (invalid type)',
 
             // Metrics
             'section.metrics': 'QUALITY METRICS',
