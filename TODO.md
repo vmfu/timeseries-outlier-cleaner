@@ -606,28 +606,28 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 4-5 hours
 
 **Tasks**:
-- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
-- [ ] Design queue interface
-  - [ ] Show processing queue
-  - [ ] Progress for each file
-  - [ ] Cancel individual files
-  - [ ] Cancel all
-- [ ] Implement queue logic
-  - [ ] Process files sequentially
-  - [ ] Track individual file progress
-  - [ ] Save all results after completion
-- [ ] Add batch export
-  - [ ] Save all results as ZIP
-  - [ ] Or save to individual files with naming convention
-- [ ] Test batch processing
-  - [ ] Small number of files (2-5)
-  - [ ] Large number of files (10+)
-  - [ ] Mixed file sizes
-  - [ ] Cancel during processing
-- [ ] Start, test, then stop the local server
-- [ ] Check off the completed items and sub-items
-- [ ] Create a commit and push to Git
-- [ ] Summarize the session to reduce the load on the LLM provider
+- [x] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
+- [x] Design queue interface
+  - [x] Show processing queue
+  - [x] Progress for each file
+  - [x] Cancel individual files
+  - [x] Cancel all
+- [x] Implement queue logic
+  - [x] Process files sequentially
+  - [x] Track individual file progress
+  - [x] Save all results after completion
+- [x] Add batch export
+  - [x] Save all results as individual files
+  - [ ] Save all results as ZIP (optional, not implemented)
+- [x] Test batch processing
+  - [x] Small number of files (2-5)
+  - [x] Large number of files (10+)
+  - [x] Mixed file sizes
+  - [x] Cancel during processing
+- [x] Start, test, then stop the local server
+- [x] Check off the completed items and sub-items
+- [x] Create a commit and push to Git
+- [x] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit, bash (for testing)
 
 
@@ -956,6 +956,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 - [x] Clarify "ONLINE" Status: 100%
 - [x] Prominent File Information: 100%
 - [x] Enhanced "Open Hood" Preview: 100%
+- [x] Batch Processing Queue: 100%
 
 **Code Quality**: 100% complete
 - [ ] I18n Architecture: 0%
