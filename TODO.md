@@ -362,7 +362,7 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 3-4 hours
 
 **Tasks**:
-- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
+- [x] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
 - [x] Create table view component
   - [x] Toggle between chart/table view
   - [x] Table with columns: Index, Time, Signal Original, Signal Cleaned, Status
@@ -377,11 +377,11 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 - [x] Test table with various datasets
   - [x] Small datasets (<1000 rows)
   - [x] Large datasets (>10000 rows)
-  - [ ] Multiple series
-- [ ] Start, test, then stop the local server
-- [ ] Check off the completed items and sub-items
-- [ ] Create a commit and push to Git
-- [ ] Summarize the session to reduce the load on the LLM provider
+  - [x] Multiple series
+- [x] Start, test, then stop the local server
+- [x] Check off the completed items and sub-items
+- [x] Create a commit and push to Git
+- [x] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, write, edit, bash (for testing)
 
 
