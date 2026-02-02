@@ -33,6 +33,7 @@
             // Advanced Settings
             'toggle.advanced': 'ОТКРЫТЬ КАПОТ (расширенные настройки)',
             'desc.advanced': 'Показать параметры настройки алгоритма',
+            'paramsPreview': 'Окно: {window}, Порог: {threshold}, Метод: {method}',
             'section.params': 'ПАРАМЕТРЫ АЛГОРИТМА',
 
             // Sliders
@@ -310,6 +311,7 @@
             // Advanced Settings
             'toggle.advanced': 'OPEN HOOD (advanced settings)',
             'desc.advanced': 'Show algorithm tuning parameters',
+            'paramsPreview': 'Window: {window}, Threshold: {threshold}, Method: {method}',
             'section.params': 'ALGORITHM PARAMETERS',
 
             // Sliders

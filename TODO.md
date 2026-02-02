@@ -552,22 +552,22 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 **Estimated Time**: 1-2 hours
 
 **Tasks**:
-- [ ] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
-- [ ] Move file info to more visible location
-  - [ ] Show in header or top of control panel
-  - [ ] Display: file count, total points, series count
-  - [ ] Update dynamically on file load
-- [ ] Style with CRT aesthetics
-  - [ ] Larger font, prominent position
-  - [ ] Glow effect for important info
-- [ ] Test file info display
-  - [ ] Single file
-  - [ ] Multiple files
-  - [ ] Various sizes
-- [ ] Start, test, then stop the local server
-- [ ] Check off the completed items and sub-items
-- [ ] Create a commit and push to Git
-- [ ] Summarize the session to reduce the load on the LLM provider
+- [x] Проанализировать задачу целиком и проверить в какой степени эта задача уже реализована в проекте;
+- [x] Move file info to more visible location
+  - [x] Show in header or top of control panel
+  - [x] Display: file count, total points, series count
+  - [x] Update dynamically on file load
+- [x] Style with CRT aesthetics
+  - [x] Larger font, prominent position
+  - [x] Glow effect for important info
+- [x] Test file info display
+  - [x] Single file
+  - [x] Multiple files
+  - [x] Various sizes
+- [x] Start, test, then stop the local server
+- [x] Check off the completed items and sub-items
+- [x] Create a commit and push to Git
+- [x] Summarize the session to reduce the load on the LLM provider
 **Tools needed**: view, edit, bash (for testing)
 
 

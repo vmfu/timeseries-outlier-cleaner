@@ -153,6 +153,10 @@ function initializeUI() {
                 } else {
                     appState.params[id] = parseFloat(this.value);
                 }
+                // Update parameter preview when windowWidth or threshold changes
+                if (id === 'windowWidth' || id === 'threshold') {
+                    updateParamsPreview();
+                }
             });
         }
     });
@@ -170,6 +174,7 @@ function initializeUI() {
     // Fill method dropdown
     document.getElementById('fillMethod').addEventListener('change', function() {
         appState.params.fillMethod = this.value;
+        updateParamsPreview();
     });
 
     // Save options
@@ -233,6 +238,9 @@ function initializeUI() {
             switchTab(this.dataset.tab);
         });
     });
+
+    // Initialize parameter preview
+    updateParamsPreview();
 }
 
 /**
@@ -777,6 +785,29 @@ function handleFileSelect(event) {
 function updateFileCount(count) {
     document.getElementById('fileCount').textContent = I18n.t('file.count', {count: count});
     document.getElementById('prominentFileCount').textContent = count;
+}
+
+/**
+ * Update parameters preview display
+ */
+function updateParamsPreview() {
+    var windowWidth = parseInt(document.getElementById('windowWidth').value);
+    var threshold = parseFloat(document.getElementById('threshold').value);
+    var fillMethod = document.getElementById('fillMethod').value;
+
+    var paramsElement = document.getElementById('paramsPreview');
+    if (paramsElement) {
+        paramsElement.textContent = I18n.t('paramsPreview', {
+            window: windowWidth,
+            threshold: threshold.toFixed(1),
+            method: fillMethod
+        });
+        paramsElement.setAttribute('data-i18n-params', JSON.stringify({
+            window: windowWidth,
+            threshold: threshold.toFixed(1),
+            method: fillMethod
+        }));
+    }
 }
 
 /**

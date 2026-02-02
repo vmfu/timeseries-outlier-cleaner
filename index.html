@@ -79,14 +79,16 @@
                 </div>
 
                 <!-- Advanced Settings Toggle -->
-                <div class="control-section">
-                    <div class="settings-toggle">
+                <div class="control-section prominent-toggle">
+                    <div class="settings-toggle enhanced">
                         <label for="advancedToggle" class="toggle-label">
+                            <span class="toggle-icon">⚙️</span>
                             <input type="checkbox" id="advancedToggle" class="toggle-checkbox">
                             <span class="toggle-slider"></span>
                             <span class="toggle-text" data-i18n="toggle.advanced">ОТКРЫТЬ КАПОТ (расширенные настройки)</span>
                         </label>
                         <span class="toggle-desc" data-i18n="desc.advanced">Показать параметры настройки алгоритма</span>
+                        <div class="params-preview" id="paramsPreview" data-i18n="paramsPreview" data-i18n-params='{"window":40,"threshold":1.4,"method":"movmean"}'></div>
                     </div>
                 </div>
 
