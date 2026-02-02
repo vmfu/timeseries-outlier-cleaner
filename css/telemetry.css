@@ -1,0 +1,1117 @@
+/**
+ * telemetry.css - Space telemetry + post-Soviet research institute aesthetics
+ */
+
+/* ============================================================================
+   COLOR PALETTE
+   ============================================================================
+   Background: Deep space blue/black (#0a0a0f, #0f0f1a)
+   Text: CRT green (#00ff88), amber (#ffaa00), cyan (#00ccff)
+   Borders: Technical cyan (#00aaff), warning amber (#ffcc00)
+   Overlays: CRT scanlines, vignette effects
+*/
+
+:root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #0f0f1a;
+    --bg-tertiary: #1a1a2e;
+
+    --text-primary: #00ff88;
+    --text-secondary: #00cc66;
+    --text-muted: #008844;
+
+    --accent-cyan: #00aaff;
+    --accent-amber: #ffaa00;
+    --accent-warning: #ffcc00;
+    --accent-danger: #ff4444;
+
+    --border-color: #00aaff;
+    --border-width: 2px;
+
+    --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+    --font-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ============================================================================
+   RESET & BASE STYLES
+   ============================================================================
+*/
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-mono);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* CRT Scanline Overlay */
+.crt-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10000;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 255, 136, 0.03) 0px,
+        rgba(0, 255, 136, 0.03) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+}
+
+/* ============================================================================
+   LAYOUT
+   ============================================================================
+*/
+
+.main-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 10px;
+    height: calc(100vh - 150px);
+    min-height: 600px;
+}
+
+@media (max-width: 1024px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+    }
+}
+
+/* ============================================================================
+   HEADER
+   ============================================================================
+*/
+
+.telemetry-header {
+    background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+    border: var(--border-width) solid var(--border-color);
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0, 170, 255, 0.3);
+}
+
+.header-decoration {
+    width: 50px;
+    height: 30px;
+    border: var(--border-width) solid var(--border-color);
+    position: relative;
+}
+
+.header-decoration::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border: 1px solid var(--text-muted);
+}
+
+.header-decoration.left {
+    margin-right: 20px;
+    clip-path: polygon(0 0, 70% 0, 100% 50%, 70% 100%, 0 100%);
+}
+
+.header-decoration.right {
+    margin-left: 20px;
+    clip-path: polygon(30% 0, 100% 0, 100% 100%, 30% 100%, 0 50%);
+}
+
+.main-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 18px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.title-prefix {
+    color: var(--accent-amber);
+    font-weight: bold;
+}
+
+.title-divider {
+    color: var(--text-muted);
+}
+
+.title-main {
+    color: var(--text-primary);
+    text-shadow: 0 0 10px var(--text-primary);
+}
+
+/* ============================================================================
+   PANELS
+   ============================================================================
+*/
+
+.panel {
+    background: var(--bg-secondary);
+    border: var(--border-width) solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: 10px;
+    border-top: 3px solid var(--accent-cyan);
+    border-left: 3px solid var(--accent-cyan);
+}
+
+.panel::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-top: 3px solid var(--accent-cyan);
+    border-right: 3px solid var(--accent-cyan);
+}
+
+.panel-header {
+    background: var(--bg-tertiary);
+    padding: 10px 15px;
+    border-bottom: var(--border-width) solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.panel-status {
+    color: var(--accent-amber);
+    animation: blink 2s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ============================================================================
+   CONTROL PANEL
+   ============================================================================
+*/
+
+.control-panel {
+    gap: 0;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.control-section {
+    padding: 15px;
+    border-bottom: 1px solid var(--text-muted);
+}
+
+.control-section:last-child {
+    border-bottom: none;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent-cyan);
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed var(--text-muted);
+}
+
+/* ============================================================================
+   INPUT ELEMENTS
+   ============================================================================
+*/
+
+.input-label {
+    display: block;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.label-text {
+    display: block;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.label-desc {
+    display: block;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 3px;
+}
+
+.file-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.file-input {
+    display: none;
+}
+
+.file-button {
+    background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+    border: var(--border-width) solid var(--border-color);
+    color: var(--text-primary);
+    padding: 10px 15px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.file-button:hover {
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+    box-shadow: 0 0 15px rgba(0, 170, 255, 0.5);
+    transform: translateY(-1px);
+}
+
+.file-button:active {
+    transform: translateY(1px);
+}
+
+.button-icon {
+    font-size: 16px;
+}
+
+.file-count {
+    font-size: 11px;
+    color: var(--accent-amber);
+    text-align: center;
+}
+
+.selected-files-list {
+    max-height: 100px;
+    overflow-y: auto;
+    margin-top: 8px;
+    border: 1px solid var(--text-muted);
+    padding: 5px;
+}
+
+.file-item {
+    font-size: 11px;
+    padding: 3px 5px;
+    border-bottom: 1px dashed var(--text-muted);
+}
+
+/* ============================================================================
+   TOGGLE SWITCH
+   ============================================================================
+*/
+
+.settings-toggle {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.toggle-checkbox {
+    display: none;
+}
+
+.toggle-slider {
+    width: 40px;
+    height: 20px;
+    background: var(--bg-tertiary);
+    border: var(--border-width) solid var(--text-muted);
+    position: relative;
+    transition: all 0.3s;
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 12px;
+    height: 12px;
+    background: var(--text-muted);
+    transition: all 0.3s;
+}
+
+.toggle-checkbox:checked + .toggle-slider {
+    border-color: var(--accent-cyan);
+    background: var(--bg-tertiary);
+}
+
+.toggle-checkbox:checked + .toggle-slider::before {
+    left: 22px;
+    background: var(--accent-cyan);
+    box-shadow: 0 0 10px var(--accent-cyan);
+}
+
+.toggle-text {
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.toggle-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: 50px;
+}
+
+/* ============================================================================
+   SLIDERS
+   ============================================================================
+*/
+
+.slider-group {
+    margin-bottom: 15px;
+}
+
+.slider-label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.slider-name {
+    display: block;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.slider-desc {
+    display: block;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 3px;
+}
+
+.slider-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 20px;
+    background: var(--bg-tertiary);
+    border: var(--border-width) solid var(--text-muted);
+    cursor: pointer;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 25px;
+    background: var(--accent-cyan);
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--accent-cyan);
+}
+
+.slider::-moz-range-thumb {
+    width: 15px;
+    height: 25px;
+    background: var(--accent-cyan);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 10px var(--accent-cyan);
+}
+
+.slider-value {
+    min-width: 60px;
+    text-align: center;
+    padding: 5px 10px;
+    background: var(--bg-tertiary);
+    border: var(--border-width) solid var(--text-muted);
+}
+
+.value-display {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--accent-cyan);
+}
+
+.value-unit {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+/* ============================================================================
+   DROPDOWN
+   ============================================================================
+*/
+
+.dropdown-group {
+    margin-bottom: 15px;
+}
+
+.dropdown-label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.dropdown-name {
+    display: block;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.dropdown-desc {
+    display: block;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 3px;
+}
+
+.dropdown {
+    width: 100%;
+    padding: 10px;
+    background: var(--bg-tertiary);
+    border: var(--border-width) solid var(--border-color);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.dropdown:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
+}
+
+/* ============================================================================
+   ACTION BUTTONS
+   ============================================================================
+*/
+
+.button-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.action-button {
+    background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+    border: var(--border-width) solid var(--border-color);
+    color: var(--text-primary);
+    padding: 15px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.action-button:hover:not(:disabled) {
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 15px rgba(0, 170, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.action-button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.action-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.button-number {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--accent-amber);
+}
+
+.button-label {
+    font-weight: bold;
+}
+
+.button-desc {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+/* ============================================================================
+   CHECKBOXES
+   ============================================================================
+*/
+
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.checkbox {
+    display: none;
+}
+
+.checkbox-custom {
+    width: 18px;
+    height: 18px;
+    border: var(--border-width) solid var(--text-muted);
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.checkbox-custom::before {
+    content: '✓';
+    color: var(--accent-cyan);
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.checkbox:checked + .checkbox-custom {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
+}
+
+.checkbox:checked + .checkbox-custom::before {
+    opacity: 1;
+}
+
+.checkbox-text {
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.checkbox-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-left: 28px;
+}
+
+/* ============================================================================
+   GAUGE
+   ============================================================================
+*/
+
+.gauge-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.gauge {
+    width: 180px;
+    height: 100px;
+    filter: drop-shadow(0 0 10px rgba(0, 170, 255, 0.5));
+}
+
+.gauge-text-main {
+    font-size: 24px;
+    font-weight: bold;
+    fill: var(--accent-cyan);
+    text-shadow: 0 0 10px var(--accent-cyan);
+}
+
+/* ============================================================================
+   LOG AREA
+   ============================================================================
+*/
+
+.log-section {
+    flex: 1;
+    min-height: 200px;
+}
+
+.log-area {
+    flex: 1;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--text-muted);
+    padding: 10px;
+    overflow-y: auto;
+    max-height: 300px;
+    font-size: 11px;
+}
+
+.log-entry {
+    display: flex;
+    gap: 10px;
+    padding: 3px 0;
+    border-bottom: 1px dashed var(--text-muted);
+}
+
+.log-time {
+    color: var(--accent-cyan);
+    flex-shrink: 0;
+}
+
+.log-message {
+    color: var(--text-primary);
+}
+
+.log-info .log-message { color: var(--text-primary); }
+.log-success .log-message { color: var(--accent-cyan); }
+.log-warning .log-message { color: var(--accent-amber); }
+.log-error .log-message { color: var(--accent-danger); }
+
+/* ============================================================================
+   PLOT PANEL
+   ============================================================================
+*/
+
+.plot-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.tab-nav {
+    display: flex;
+    gap: 0;
+    border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.tab-button {
+    flex: 1;
+    background: var(--bg-tertiary);
+    border: none;
+    border-bottom: var(--border-width) solid transparent;
+    color: var(--text-muted);
+    padding: 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all 0.3s;
+}
+
+.tab-button:hover {
+    color: var(--text-primary);
+}
+
+.tab-button.active {
+    color: var(--accent-cyan);
+    border-bottom-color: var(--accent-cyan);
+    background: var(--bg-secondary);
+}
+
+.tab-icon {
+    font-size: 16px;
+}
+
+.tab-content {
+    flex: 1;
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.tab-pane {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.tab-pane.active {
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-container,
+.heatmap-container {
+    flex: 1;
+    position: relative;
+    padding: 15px;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.chart-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.no-data-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-muted);
+    gap: 10px;
+}
+
+.no-data-icon {
+    font-size: 48px;
+    opacity: 0.5;
+}
+
+.no-data-text {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.no-data-sub {
+    font-size: 12px;
+}
+
+/* ============================================================================
+   METRICS PANEL
+   ============================================================================
+*/
+
+.metrics-panel {
+    padding: 10px 15px;
+    border-top: var(--border-width) solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.metric-card {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--text-muted);
+    padding: 8px 5px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.metric-name {
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--accent-cyan);
+}
+
+.metric-desc {
+    font-size: 9px;
+    color: var(--text-muted);
+}
+
+.metric-value {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--accent-amber);
+}
+
+/* ============================================================================
+   FILE INFO PANEL
+   ============================================================================
+*/
+
+.file-info-panel {
+    padding: 10px 15px;
+    border-top: var(--border-width) solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 6px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--text-muted);
+    font-size: 11px;
+}
+
+.info-label {
+    color: var(--text-muted);
+}
+
+.info-value {
+    color: var(--text-primary);
+    font-weight: bold;
+}
+
+/* ============================================================================
+   FOOTER
+   ============================================================================
+*/
+
+.telemetry-footer {
+    background: var(--bg-tertiary);
+    border: var(--border-width) solid var(--border-color);
+    padding: 15px 20px;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.footer-decoration {
+    width: 30px;
+    height: 2px;
+    background: var(--border-color);
+}
+
+.footer-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.footer-text {
+    color: var(--text-primary);
+}
+
+.footer-separator {
+    color: var(--text-muted);
+}
+
+.footer-author {
+    color: var(--accent-cyan);
+}
+
+.footer-version {
+    color: var(--accent-amber);
+}
+
+/* ============================================================================
+   LOADING OVERLAY
+   ============================================================================
+*/
+
+/* ============================================================================
+   PROGRESS BAR (FIXED TOP)
+   ============================================================================
+*/
+
+.progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    background: var(--bg-tertiary);
+    border-bottom: 2px solid var(--accent-cyan);
+    z-index: 10000;
+    display: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.progress-bar.hidden {
+    display: none;
+}
+
+.progress-bar.visible {
+    display: flex;
+}
+
+.progress-bar-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    gap: 20px;
+}
+
+.progress-label {
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--accent-cyan);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.progress-track {
+    flex: 1;
+    height: 8px;
+    background: var(--bg-primary);
+    border: 1px solid var(--text-muted);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-cyan), var(--accent-amber));
+    transition: width 0.3s ease;
+}
+
+.progress-percent {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--accent-amber);
+    font-family: 'Consolas', monospace;
+    min-width: 50px;
+    text-align: right;
+}
+
+.progress-message {
+    font-size: 12px;
+    color: var(--text-primary);
+    font-family: 'Consolas', monospace;
+    max-width: 400px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Optimization Section */
+.optimization-section {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    padding: 15px;
+}
+
+.optimization-section .checkbox-group {
+    margin-bottom: 15px;
+}
+
+.optimization-section .checkbox-label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.optimization-section .checkbox-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.optimization-section .slider-group {
+    margin-top: 15px;
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================
+*/
+
+.hidden {
+    display: none !important;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border: 1px solid var(--bg-tertiary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-cyan);
+}
+
+/* Canvas styling */
+.chart-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.chart-wrapper canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+canvas {
+    max-width: 100%;
+}

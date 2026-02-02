@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outlier Cleaner - No Worker Mode</title>
+    <link rel="stylesheet" href="css/telemetry.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="crt-overlay"></div>
+    <div class="main-container">
+        <!-- Header -->
+        <header class="telemetry-header">
+            <div class="header-decoration left"></div>
+            <h1 class="main-title">
+                <span class="title-prefix">ОТК-001</span>
+                <span class="title-divider">///</span>
+                <span class="title-main">СИСТЕМА ОЧИСТКИ (БЕЗ WORKER)</span>
+            </h1>
+            <div class="header-decoration right"></div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+            <!-- Left Panel: Control Panel -->
+            <section class="control-panel panel">
+                <div class="panel-header">
+                    <span class="panel-id">ПАНЕЛЬ УПРАВЛЕНИЯ</span>
+                    <span class="panel-status" style="color: #ff4444;">ТЕСТ РЕЖИМ</span>
+                </div>
+
+                <!-- File Loading Section -->
+                <div class="control-section">
+                    <h2 class="section-title">1. ЗАГРУЗКА ДАННЫХ</h2>
+                    <div class="input-group">
+                        <label for="fileInput" class="input-label">
+                            <span class="label-text">Выбор файла данных:</span>
+                            <span class="label-desc">ASCII формат, столбцы: время, сигналы...</span>
+                        </label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="fileInput" multiple accept=".txt,.dat,.csv,.asc" class="file-input">
+                            <button type="button" class="file-button" onclick="document.getElementById('fileInput').click()">
+                                <span class="button-icon">📁</span>
+                                <span class="button-text">ОТКРЫТЬ ФАЙЛ</span>
+                            </button>
+                            <div id="fileCount" class="file-count">Выбрано файлов: 0</div>
+                        </div>
+                        <div id="selectedFiles" class="selected-files"></div>
+                    </div>
+
+                    <div class="button-grid">
+                        <button id="loadBtn" class="action-button" disabled>
+                            <span class="button-number">1.</span>
+                            <span class="button-label">ЗАГРУЗИТЬ</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress Section -->
+                <div class="control-section">
+                    <h2 class="section-title">2. ХОД ПРОЦЕССА</h2>
+                    <div class="gauge-container">
+                        <svg class="gauge" viewBox="0 0 180 100">
+                            <path d="M 10 90 A 80 80 0 0 1 170 90" fill="none" stroke="#003322" stroke-width="20"/>
+                            <path id="progressArc" d="M 10 90 A 80 80 0 0 1 170 90" fill="none"
+                                  stroke="url(#gaugeGradient)" stroke-width="20"
+                                  stroke-dasharray="251.2" stroke-dashoffset="251.2"
+                                  stroke-linecap="round"/>
+                            <defs>
+                                <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#00ff88"/>
+                                    <stop offset="50%" style="stop-color:#ffff00"/>
+                                    <stop offset="100%" style="stop-color:#ff4444"/>
+                                </linearGradient>
+                            </defs>
+                            <text x="90" y="75" text-anchor="middle" class="gauge-text-main" id="progressText">0%</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Log Section -->
+                <div class="control-section log-section">
+                    <h2 class="section-title">3. ЖУРНАЛ ОПЕРАЦИЙ</h2>
+                    <div id="logArea" class="log-area">
+                        <div class="log-entry log-warning">
+                            <span class="log-time">--:--:--</span>
+                            <span class="log-message">ТЕСТОВЫЙ РЕЖИМ БЕЗ WORKER</span>
+                        </div>
+                        <div class="log-entry log-warning">
+                            <span class="log-time">--:--:--</span>
+                            <span class="log-message">Используйте локальный сервер для полной функциональности!</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Visualization -->
+            <section class="plot-panel panel">
+                <div class="panel-header">
+                    <span class="panel-id">ПАНЕЛЬ ВИЗУАЛИЗАЦИИ</span>
+                    <span class="panel-status">ОНЛАЙН</span>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <div id="dataTab" class="tab-pane active">
+                        <div class="chart-container">
+                            <canvas id="dataChart"></canvas>
+                            <div id="noDataMessage" class="no-data-message">
+                                <span class="no-data-icon">📭</span>
+                                <span class="no-data-text">Нет загруженных данных</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Info -->
+                <div class="file-info-panel">
+                    <h2 class="section-title">ИНФОРМАЦИЯ О ФАЙЛЕ</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Файл:</span>
+                            <span id="infoFilename" class="info-value">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Размер:</span>
+                            <span id="infoSize" class="info-value">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Точек:</span>
+                            <span id="infoPoints" class="info-value">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Сериев:</span>
+                            <span id="infoSeries" class="info-value">--</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Load main_no_worker.js -->
+    <script src="js/main_no_worker.js"></script>
+</body>
+</html>

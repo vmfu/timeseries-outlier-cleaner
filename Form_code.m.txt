@@ -1,0 +1,576 @@
+classdef OutlierCleaner_APP_GPT < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    % Свойства, соответствующие компонентам интерфейса (переименованы для ясности)
+    properties (Access = public)
+        UIFigure                  matlab.ui.Figure                  % Главное окно приложения
+        MainGridLayout            matlab.ui.container.GridLayout    % Основная сетка разметки
+        
+        % --- ЛЕВАЯ ПАНЕЛЬ (УПРАВЛЕНИЕ) ---
+        ControlPanel              matlab.ui.container.Panel         % Левая панель
+        
+        % Настройки сохранения и отображения
+        OpenSettingsCheckBox      matlab.ui.control.CheckBox        % Чекбокс "Открыть капот" (показать настройки)
+        SaveRestoredCheckBox      matlab.ui.control.CheckBox        % Чекбокс "Сохранить восстановленные"
+        AddValidityFlagCheckBox   matlab.ui.control.CheckBox        % Чекбокс "Дополнить признаком истинности"
+        
+        % Выбор метода заполнения (спрятано по умолчанию)
+        FillMethodDropDown        matlab.ui.control.DropDown        % Выпадающий список методов (nearest, spline и т.д.)
+        FillMethodLabel           matlab.ui.control.Label           % Подпись "Метод заполнения сбойных"
+        
+        % Индикация и логи
+        ProgressGauge             matlab.ui.control.NinetyDegreeGauge % Индикатор прогресса (полукруглый)
+        ProgressLabel             matlab.ui.control.Label           % Подпись "Ход процесса"
+        LogTextArea               matlab.ui.control.TextArea        % Текстовое поле для логов
+        
+        % Сохранение файла
+        SaveButton                matlab.ui.control.Button          % Кнопка "4. Сохранить"
+        OutputFilenameField       matlab.ui.control.EditField       % Поле ввода имени выходного файла
+        OutputFilenameLabel       matlab.ui.control.Label           % Подпись "New File"
+        
+        % Основные действия
+        CleanButton               matlab.ui.control.Button          % Кнопка "3. Очистить"
+        TuneButton                matlab.ui.control.Button          % Кнопка "2. Навестись" (автоподбор)
+        LoadButton                matlab.ui.control.Button          % Кнопка "1. Загрузить"
+        
+        % Слайдеры настройки параметров (спрятаны по умолчанию)
+        RelMatrixSizeSlider       matlab.ui.control.Slider          % Слайдер "Относительный размер 2 матрицы"
+        RelMatrixSizeLabel        matlab.ui.control.Label           % Подпись к нему
+        MatrixSizeSlider          matlab.ui.control.Slider          % Слайдер "Размер матрицы наводки"
+        MatrixSizeLabel           matlab.ui.control.Label           % Подпись к нему
+        ThresholdSlider           matlab.ui.control.Slider          % Слайдер "Пороговый коэффициент"
+        ThresholdLabel            matlab.ui.control.Label           % Подпись к нему
+        WindowWidthSlider         matlab.ui.control.Slider          % Слайдер "Ширина окна"
+        WindowWidthLabel          matlab.ui.control.Label           % Подпись к нему
+        
+        % Загрузка файла
+        InputFilenameField        matlab.ui.control.EditField       % Поле ввода имени исходного файла
+        InputFilenameLabel        matlab.ui.control.Label           % Подпись "File"
+        
+        % --- ПРАВАЯ ПАНЕЛЬ (ГРАФИКИ) ---
+        PlotPanel                 matlab.ui.container.Panel         % Правая панель
+        DataAxes                  matlab.ui.control.UIAxes          % График данных
+    end
+
+    % Properties that correspond to apps with auto-reflow
+    properties (Access = private)
+        onePanelWidth = 576; % Порог ширины для адаптивной верстки
+    end
+    
+    properties (Access = private)
+        % Здесь можно хранить приватные переменные, если понадобятся
+    end
+    
+    properties (Access = public)
+        originalData   % Исходные данные (матрица: 1-й столбец X, остальные Y)
+        cleanedData    % Очищенные данные (только Y)
+    end
+    
+    % Callbacks that handle component events
+    methods (Access = private)
+        
+        % Code that executes after component creation
+        function startupFcn(app)
+            % Скрываем "продвинутые" настройки при запуске, чтобы не перегружать интерфейс
+            componentsToHide = [app.WindowWidthSlider, app.ThresholdSlider, app.MatrixSizeSlider, ...
+                                app.RelMatrixSizeSlider, app.FillMethodDropDown, app.MatrixSizeLabel, ...
+                                app.RelMatrixSizeLabel, app.FillMethodLabel, app.WindowWidthLabel, ...
+                                app.ThresholdLabel];
+            set(componentsToHide, 'Visible', 'off');
+        end
+
+        % Button pushed function: LoadButton (Кнопка 1. Загрузить)
+        function LoadButtonPushed(app, event)
+            % Функция загрузки данных из файла
+            cla(app.DataAxes)      % Очищаем график
+            hold(app.DataAxes, 'on')
+            
+            fileName = app.InputFilenameField.Value;
+            
+            % Проверяем существование файла
+            if exist(fileName, 'file')
+                % Загружаем данные (ожидается ASCII формат)
+                app.originalData = load(fileName, '-ascii');
+                
+                % Строим график исходных данных (точки)
+                % 1-й столбец - время/X, остальные - сигналы
+                plot(app.DataAxes, app.originalData(:,1), app.originalData(:,2:end), 'Marker', '.', 'LineStyle', 'none');
+                
+                % Генерируем имя для файла сохранения по умолчанию
+                app.OutputFilenameField.Value = fileName + "_Cleansed";
+                
+                % Логируем действие
+                app.LogTextArea.Value = [app.LogTextArea.Value; "1. Файл " + fileName + " загружен;"];
+            else
+                % Выводим сообщение об ошибке
+                uialert(app.UIFigure, 'Файл не найден. Проверьте имя файла и повторите попытку.', 'Ошибка загрузки');
+            end
+        end
+
+        % Button pushed function: TuneButton (Кнопка 2. Навестись)
+        function TuneButtonPushed(app, event)
+            % Эта функция выполняет автоматический подбор параметров фильтрации (ширина окна и порог)
+            % путем перебора и минимизации целевой функции ошибки (NTF).
+            
+            app.ProgressGauge.Value = 0; % Сброс индикатора прогресса
+            v = 0; % Базовое значение прогресса
+            
+            % Извлекаем данные сигналов (без столбца времени) для обработки
+            app.cleanedData = app.originalData(:, 2:width(app.originalData)); 
+            
+            % Считываем текущие настройки слайдеров (начальные приближения)
+            matrixSize = round(app.MatrixSizeSlider.Value);      % Размер матрицы поиска (n)
+            relSize = round(app.RelMatrixSizeSlider.Value);      % Шаг изменения параметров (d - relative size)
+            winWidth = round(app.WindowWidthSlider.Value);       % Ширина окна скользящего среднего (ma)
+            threshFactor = app.ThresholdSlider.Value * 100;      % Пороговый коэффициент * 100 (tfa)
+            
+            % Инициализация матриц для хранения метрик качества очистки
+            NTF = ones(matrixSize, matrixSize); % Итоговая целевая функция (Target Function)
+            
+            % Основной цикл оптимизации. Проходит дважды:
+            % 1. С широким шагом (relSize/dn) для грубой оценки.
+            % 2. С шагом 1 для точной настройки.
+            for d = [relSize, 1] 
+                
+                % Матрицы метрик качества
+                STDF = ones(matrixSize, matrixSize);       % Отношение шума
+                DF = ones(matrixSize, matrixSize);         % Процент удаленных точек (Deleted Fraction)
+                ASNR = ones(matrixSize, matrixSize);       % Отношение сигнал/шум (SNR)
+                ARMSE = ones(matrixSize, matrixSize);      % Среднеквадратичная ошибка (RMSE)
+                AR_squared = ones(matrixSize, matrixSize); % Коэффициент детерминации (R^2)
+                AR_Pirs = ones(matrixSize, matrixSize);    % Корреляция Пирсона
+                
+                % Цикл по параметру 1 (вариация ширины окна)
+                for k = 1:matrixSize
+                    % Обновление визуального индикатора прогресса
+                    app.ProgressGauge.Value = v + 50 * k / matrixSize; 
+                    pause(1); % Небольшая пауза для отрисовки интерфейса
+                    
+                    % Цикл по параметру 2 (вариация порога)
+                    for j = 1:matrixSize
+                        
+                        ff1 = app.cleanedData; % Рабочая копия данных
+                        
+                        % --- БЛОК ФИЛЬТРАЦИИ ---
+                        % Вычисляем текущие параметры для итерации (динамическое изменение окна и порога)
+                        currentWindow = abs(winWidth + (matrixSize * d / 2) - (k * d) - 1) + 1;
+                        currentThreshold = (threshFactor + (matrixSize * d / 2) - d * j) / 100;
+                        
+                        % Выполняем filloutliers итеративно (до 100 проходов для сходимости)
+                        if app.FillMethodDropDown.Value == "↗∞"
+                            % Специфичный метод (вероятно, интерполяция или заглушка)
+                             for i = 1:100
+                                adaptiveWin = currentWindow + (winWidth / 100) * 4 * (10 - i^0.5);
+                                adaptiveThresh = currentThreshold + (threshFactor / 100) * 4 * (10 - i^0.5) / 100;
+                                [ff1] = filloutliers(ff1, 999999999, "movmean", adaptiveWin, "ThresholdFactor", adaptiveThresh);
+                            end
+                        else
+                            % Стандартные методы MATLAB (nearest, linear и т.д.)
+                            for i = 1:100
+                                adaptiveWin = currentWindow + (winWidth / 100) * 4 * (10 - i^0.5);
+                                adaptiveThresh = currentThreshold + (threshFactor / 100) * 4 * (10 - i^0.5) / 100;
+                                [ff1] = filloutliers(ff1, app.FillMethodDropDown.Value, "movmean", adaptiveWin, "ThresholdFactor", adaptiveThresh);
+                            end
+                        end
+                        
+                        % --- БЛОК РАСЧЕТА МЕТРИК ---
+                        difff = diff(ff1, 1); % Первая производная очищенного сигнала
+                        df_diff = app.originalData(:, 2:width(app.originalData)) - ff1; % Разница (шум/выбросы)
+                        
+                        % Расчет статистических показателей качества очистки
+                        STDF(k, j) = (nnz(difff > std(difff)) / numel(difff)); % Гладкость (меньше пиков производной)
+                        DF(k, j) = (nnz(df_diff) / numel(df_diff));           % Сколько точек изменено (Deleted Fraction)
+                        
+                        % SNR (Signal-to-Noise Ratio)
+                        ASNR(k, j) = 10 * log10(sum(ff1.^2) / sum((app.cleanedData - ff1).^2)); 
+                        
+                        % RMSE (Root Mean Square Error) - берем только вторую строку как пример (быстрая оценка)
+                        ARMSE(k, j) = sqrt(mean((app.cleanedData(2) - ff1(2)).^2)); 
+                        
+                        % R-squared (Коэффициент детерминации)
+                        AR_squared(k, j) = 1 - sum((app.cleanedData - ff1).^2) / sum((app.cleanedData - mean(app.cleanedData)).^2); 
+                        
+                        % Корреляция Пирсона
+                        AR_Pirs(k,j)= (sum((app.cleanedData-mean(app.cleanedData)).*(ff1-mean(ff1))))/( sqrt(sum((app.cleanedData-mean(app.cleanedData)).^2)) .* sqrt(sum((ff1-mean(ff1)).^2))   ); 
+                    end
+                end
+                
+                % --- НОРМАЛИЗАЦИЯ И ПОИСК ЛУЧШИХ ПАРАМЕТРОВ ---
+                % Собираем все метрики в одну матрицу оценки (чем меньше NTF, тем лучше)
+                % Некоторые метрики прибавляются, некоторые вычитаются (в зависимости от того, что мы максимизируем/минимизируем)
+                NTF = normalize(normalize(ASNR, 'range') - normalize(ARMSE, 'range') + normalize(AR_squared, 'range') ...
+                    + normalize(AR_Pirs, 'range') + normalize(STDF, 'range') + normalize(DF, 'range'), 'range');
+                
+                % Сглаживание матрицы NTF (усреднение по окну 3x3)
+                mn = 1; % Радиус усреднения
+                NTF2 = ones(matrixSize - 2 * mn, matrixSize - 2 * mn); 
+                
+                for x = 1:(matrixSize - 2 * mn)
+                    for y = 1:(matrixSize - 2 * mn)
+                        for xi = x:x + 2 * mn
+                            for yi = y:y + 2 * mn
+                                NTF2(x, y) = NTF2(x, y) + NTF(xi, yi);
+                            end
+                        end    
+                    end
+                end
+                
+                % Отладочный график "тепловой карты" поиска параметров
+                figure
+                contourf(NTF2)
+                title('Тепловая карта качества параметров (NTF)')
+                
+                % Находим индексы минимума функции NTF (лучшие параметры)
+                [MinNTF_k, IminNTF_k] = min(NTF2);
+                [MinNTF_j, IminNTF_j] = min(MinNTF_k);
+                
+                IminNTF_k = IminNTF_k(IminNTF_j);
+                % Корректируем индексы с учетом сдвига из-за сглаживания
+                IminNTF_k = IminNTF_k + mn;
+                IminNTF_j = IminNTF_j + mn;
+                
+                % Пересчитываем параметры winWidth и threshFactor на основе найденных индексов
+                winWidth = abs(winWidth + (matrixSize * d / 2) - (IminNTF_k * d) - 1) + 1; 
+                threshFactor = abs(threshFactor + (matrixSize * d / 2) - (d * IminNTF_j) - 1) + 1; 
+                
+                % Обновляем значения на слайдерах интерфейса
+                app.WindowWidthSlider.Value = winWidth; 
+                app.ThresholdSlider.Value = threshFactor / 100;
+                
+                v = 50; % Устанавливаем базу прогресса на 50% для второго прохода
+                
+                % Логируем найденные параметры
+                app.LogTextArea.Value = [app.LogTextArea.Value; "2. Параметры уточнены: Ширина окна = " + winWidth + "; Пороговый коэффициент = " + threshFactor / 100 + ";"];
+            end
+        end
+
+        % Button pushed function: CleanButton (Кнопка 3. Очистить)
+        function CleanButtonPushed(app, event)
+            % Применяет выбранные параметры для финальной очистки данных
+            
+            ma = app.WindowWidthSlider.Value;          % Ширина окна
+            tfa = app.ThresholdSlider.Value * 100;     % Порог
+            app.cleanedData = app.originalData(:, 2:width(app.originalData));
+            app.ProgressGauge.Value = 0;
+            
+            % Выполнение очистки с визуализацией прогресса
+            if app.FillMethodDropDown.Value == "↗∞"
+                for i = 1:1:100
+                    % Адаптивное уменьшение радиуса и порога с каждой итерацией
+                    adaptiveWin = ma + (ma/100) * 4 * (10 - i^0.5);
+                    adaptiveThresh = tfa/100 + (tfa/100) * 4 * (10 - i^0.5)/100;
+                    [app.cleanedData] = filloutliers(app.cleanedData, 999999999, "movmean", adaptiveWin, "ThresholdFactor", adaptiveThresh);
+                    app.ProgressGauge.Value = i;
+                end
+            else
+                for i = 1:1:100
+                    % Стандартный метод
+                    adaptiveWin = ma + (ma/100) * 4 * (10 - i^0.5);
+                    adaptiveThresh = tfa/100 + (tfa/100) * 4 * (10 - i^0.5)/100;
+                    [app.cleanedData] = filloutliers(app.cleanedData, app.FillMethodDropDown.Value, "movmean", adaptiveWin, "ThresholdFactor", adaptiveThresh);
+                    app.ProgressGauge.Value = i;
+                end
+            end    
+            
+            % Оценка результатов финальной очистки
+            df = app.originalData(:, 2:width(app.originalData)) - app.cleanedData; % Разностный сигнал
+            
+            DF_f = (nnz(df)) / numel(df); % Процент удаленных элементов (больше - обычно хуже, если много ложных срабатываний)
+            
+            % Коэффициент детерминации (R-squared)
+            RSQ_j = 1 - (sum((df).^2) / sum((app.originalData(:, 2:width(app.originalData)) - mean(app.cleanedData)).^2));
+            
+            % Логирование результатов
+            app.LogTextArea.Value = [app.LogTextArea.Value; "3.Очистка произведена: соотношение удаленных элементов = " + DF_f + ", "];
+            app.LogTextArea.Value = [app.LogTextArea.Value; "коэф детерминации = " + RSQ_j + ";"];
+            
+            % Обновление графика: отрисовка очищенных данных
+            app.DataAxes.reset;
+            plot(app.DataAxes, app.originalData(:,1), app.cleanedData(:,1:width(app.cleanedData)), 'Marker', '.', 'LineStyle', 'none')
+        end
+
+        % Button pushed function: SaveButton (Кнопка 4. Сохранить)
+        function SaveButtonPushed(app, event)
+            % Сохранение результатов в текстовый файл
+            
+            % Формируем базовую матрицу: [Время, Очищенные_Данные]
+            saveData = [app.originalData(:,1), app.cleanedData];
+            fileName = app.OutputFilenameField.Value + ".txt";
+            
+            if app.SaveRestoredCheckBox.Value
+                % Ветка: Сохраняем восстановленные данные (все строки)
+                if app.AddValidityFlagCheckBox.Value
+                    % Добавляем логический флаг (0/1), указывающий, был ли элемент изменен
+                    % (True/1 - данные совпадают, False/0 - данные были восстановлены)
+                    validityFlag = app.originalData(:,2:end) == app.cleanedData;
+                    saveData = [saveData, validityFlag];
+                end
+            else
+                % Ветка: Сохраняем ТОЛЬКО те строки, где не было выбросов
+                isValid = all(app.originalData(:,2:end) == app.cleanedData, 2);
+                saveData = saveData(isValid, :);
+            end
+            
+            % Сохраняем матрицу на диск
+            save(fileName, 'saveData', '-ascii');
+            app.LogTextArea.Value = [app.LogTextArea.Value; "4. Результат сохранен в файл " + fileName + ";"];
+        end
+
+        % Value changed function: SaveRestoredCheckBox
+        function SaveRestoredCheckBoxValueChanged(app, event)
+            % Управление доступностью чекбокса "Флаг валидности"
+            value = app.SaveRestoredCheckBox.Value;
+            app.AddValidityFlagCheckBox.Enable = value;
+            app.AddValidityFlagCheckBox.Value = value;
+        end
+
+        % Value changed function: OpenSettingsCheckBox
+        function OpenSettingsCheckBoxValueChanged(app, event)
+            % Показ или скрытие панели расширенных настроек (слайдеров)
+            value = app.OpenSettingsCheckBox.Value;
+            components = [app.WindowWidthSlider, app.ThresholdSlider, app.MatrixSizeSlider, app.RelMatrixSizeSlider, ...
+                          app.FillMethodDropDown, app.MatrixSizeLabel, app.RelMatrixSizeLabel, ...
+                          app.FillMethodLabel, app.WindowWidthLabel, app.ThresholdLabel];
+            set(components, 'Visible', value);
+        end
+
+        % Changes arrangement of the app based on UIFigure width
+        % Адаптивная верстка (изменение расположения панелей при ресайзе окна)
+        function updateAppLayout(app, event)
+            currentFigureWidth = app.UIFigure.Position(3);
+            if(currentFigureWidth <= app.onePanelWidth)
+                % Узкое окно: Вертикальная компоновка (2 строки, 1 столбец)
+                app.MainGridLayout.RowHeight = {596, 596};
+                app.MainGridLayout.ColumnWidth = {'1x'};
+                app.PlotPanel.Layout.Row = 2;
+                app.PlotPanel.Layout.Column = 1;
+            else
+                % Широкое окно: Горизонтальная компоновка (1 строка, 2 столбца)
+                app.MainGridLayout.RowHeight = {'1x'};
+                app.MainGridLayout.ColumnWidth = {327, '1x'};
+                app.PlotPanel.Layout.Row = 1;
+                app.PlotPanel.Layout.Column = 2;
+            end
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.AutoResizeChildren = 'off';
+            app.UIFigure.Position = [100 100 925 596];
+            app.UIFigure.Name = 'MATLAB App: Outlier Cleaner';
+            app.UIFigure.SizeChangedFcn = createCallbackFcn(app, @updateAppLayout, true);
+
+            % Create MainGridLayout
+            app.MainGridLayout = uigridlayout(app.UIFigure);
+            app.MainGridLayout.ColumnWidth = {327, '1x'};
+            app.MainGridLayout.RowHeight = {'1x'};
+            app.MainGridLayout.ColumnSpacing = 0;
+            app.MainGridLayout.RowSpacing = 0;
+            app.MainGridLayout.Padding = [0 0 0 0];
+            app.MainGridLayout.Scrollable = 'on';
+
+            % Create ControlPanel (Left)
+            app.ControlPanel = uipanel(app.MainGridLayout);
+            app.ControlPanel.Layout.Row = 1;
+            app.ControlPanel.Layout.Column = 1;
+
+            % Create InputFilenameLabel
+            app.InputFilenameLabel = uilabel(app.ControlPanel);
+            app.InputFilenameLabel.HorizontalAlignment = 'right';
+            app.InputFilenameLabel.Position = [8 567 32 22];
+            app.InputFilenameLabel.Text = 'File: ';
+
+            % Create InputFilenameField
+            app.InputFilenameField = uieditfield(app.ControlPanel, 'text');
+            app.InputFilenameField.Position = [39 567 282 22];
+            app.InputFilenameField.Value = 'TanRysKr';
+
+            % Create WindowWidthLabel
+            app.WindowWidthLabel = uilabel(app.ControlPanel);
+            app.WindowWidthLabel.HorizontalAlignment = 'center';
+            app.WindowWidthLabel.Position = [9 321 99 28];
+            app.WindowWidthLabel.Text = {'Ширина'; ' окна'};
+
+            % Create WindowWidthSlider
+            app.WindowWidthSlider = uislider(app.ControlPanel);
+            app.WindowWidthSlider.Limits = [1 100];
+            app.WindowWidthSlider.Position = [107 344 204 3];
+            app.WindowWidthSlider.Value = 40;
+
+            % Create ThresholdLabel
+            app.ThresholdLabel = uilabel(app.ControlPanel);
+            app.ThresholdLabel.HorizontalAlignment = 'center';
+            app.ThresholdLabel.Position = [19 271 83 28];
+            app.ThresholdLabel.Text = {'Пороговый'; 'коэффициент'};
+
+            % Create ThresholdSlider
+            app.ThresholdSlider = uislider(app.ControlPanel);
+            app.ThresholdSlider.Limits = [0.1 2];
+            app.ThresholdSlider.Position = [109 294 204 3];
+            app.ThresholdSlider.Value = 1.4;
+
+            % Create MatrixSizeLabel
+            app.MatrixSizeLabel = uilabel(app.ControlPanel);
+            app.MatrixSizeLabel.HorizontalAlignment = 'center';
+            app.MatrixSizeLabel.Position = [11 478 99 28];
+            app.MatrixSizeLabel.Text = {'Размер матрицы'; 'наводки'};
+
+            % Create MatrixSizeSlider
+            app.MatrixSizeSlider = uislider(app.ControlPanel);
+            app.MatrixSizeSlider.Limits = [10 50];
+            app.MatrixSizeSlider.Position = [109 501 204 3];
+            app.MatrixSizeSlider.Value = 16;
+
+            % Create RelMatrixSizeLabel
+            app.RelMatrixSizeLabel = uilabel(app.ControlPanel);
+            app.RelMatrixSizeLabel.HorizontalAlignment = 'center';
+            app.RelMatrixSizeLabel.FontSize = 11;
+            app.RelMatrixSizeLabel.Position = [-38 440 199 28];
+            app.RelMatrixSizeLabel.Text = {'Относительный'; 'размер 2 матрицы'};
+
+            % Create RelMatrixSizeSlider
+            app.RelMatrixSizeSlider = uislider(app.ControlPanel);
+            app.RelMatrixSizeSlider.Limits = [1 9];
+            app.RelMatrixSizeSlider.MajorTicks = [1 2 3 4 5 6 7 8 9];
+            app.RelMatrixSizeSlider.MinorTicks = [1 2 3 4 5 6 7 8 9];
+            app.RelMatrixSizeSlider.FontSize = 11;
+            app.RelMatrixSizeSlider.Position = [110 463 204 3];
+            app.RelMatrixSizeSlider.Value = 4;
+
+            % Create LoadButton
+            app.LoadButton = uibutton(app.ControlPanel, 'push');
+            app.LoadButton.ButtonPushedFcn = createCallbackFcn(app, @LoadButtonPushed, true);
+            app.LoadButton.Position = [222 537 100 22];
+            app.LoadButton.Text = '1. Загрузить';
+
+            % Create TuneButton
+            app.TuneButton = uibutton(app.ControlPanel, 'push');
+            app.TuneButton.ButtonPushedFcn = createCallbackFcn(app, @TuneButtonPushed, true);
+            app.TuneButton.Position = [224 357 100 22];
+            app.TuneButton.Text = '2. Навестись';
+
+            % Create CleanButton
+            app.CleanButton = uibutton(app.ControlPanel, 'push');
+            app.CleanButton.ButtonPushedFcn = createCallbackFcn(app, @CleanButtonPushed, true);
+            app.CleanButton.Position = [222 235 100 22];
+            app.CleanButton.Text = '3. Очистить';
+
+            % Create OutputFilenameLabel
+            app.OutputFilenameLabel = uilabel(app.ControlPanel);
+            app.OutputFilenameLabel.HorizontalAlignment = 'right';
+            app.OutputFilenameLabel.Position = [6 182 59 22];
+            app.OutputFilenameLabel.Text = 'New File: ';
+
+            % Create OutputFilenameField
+            app.OutputFilenameField = uieditfield(app.ControlPanel, 'text');
+            app.OutputFilenameField.Position = [64 182 259 22];
+            app.OutputFilenameField.Value = 'Cleansed';
+
+            % Create SaveButton
+            app.SaveButton = uibutton(app.ControlPanel, 'push');
+            app.SaveButton.ButtonPushedFcn = createCallbackFcn(app, @SaveButtonPushed, true);
+            app.SaveButton.Position = [224 145 100 22];
+            app.SaveButton.Text = '4. Сохранить';
+
+            % Create LogTextArea
+            app.LogTextArea = uitextarea(app.ControlPanel);
+            app.LogTextArea.FontSize = 10;
+            app.LogTextArea.Position = [113 11 211 123];
+            app.LogTextArea.Value = {'Приятного использования! По вопросам свяжитесь с Фунтиковым Владимиром Михайловичем.'};
+
+            % Create ProgressLabel
+            app.ProgressLabel = uilabel(app.ControlPanel);
+            app.ProgressLabel.HorizontalAlignment = 'center';
+            app.ProgressLabel.Position = [13 7 82 22];
+            app.ProgressLabel.Text = 'Ход процесса';
+
+            % Create ProgressGauge
+            app.ProgressGauge = uigauge(app.ControlPanel, 'ninetydegree');
+            app.ProgressGauge.Orientation = 'southwest';
+            app.ProgressGauge.ScaleDirection = 'counterclockwise';
+            app.ProgressGauge.Position = [7 44 90 90];
+
+            % Create AddValidityFlagCheckBox
+            app.AddValidityFlagCheckBox = uicheckbox(app.ControlPanel);
+            app.AddValidityFlagCheckBox.Text = 'Дополнить признаком истинности';
+            app.AddValidityFlagCheckBox.Position = [6 136 212 22];
+            app.AddValidityFlagCheckBox.Value = true;
+
+            % Create FillMethodLabel
+            app.FillMethodLabel = uilabel(app.ControlPanel);
+            app.FillMethodLabel.HorizontalAlignment = 'right';
+            app.FillMethodLabel.Position = [9 410 163 22];
+            app.FillMethodLabel.Text = 'Метод заполнения сбойных:';
+
+            % Create FillMethodDropDown
+            app.FillMethodDropDown = uidropdown(app.ControlPanel);
+            app.FillMethodDropDown.Items = {'↗∞', 'серединное', 'пороговая обрезка', 'предыдущее верное', 'следующее верное', 'ближайшее верное', 'линейная интерполяция', 'сплайн', 'сплайн^2', 'модификатор Акимы'};
+            app.FillMethodDropDown.ItemsData = {'↗∞', 'center', 'clip', 'previous', 'next', 'nearest', 'linear', 'spline', 'pchip', 'makima'};
+            app.FillMethodDropDown.Position = [183 410 138 22];
+            app.FillMethodDropDown.Value = 'nearest';
+
+            % Create SaveRestoredCheckBox
+            app.SaveRestoredCheckBox = uicheckbox(app.ControlPanel);
+            app.SaveRestoredCheckBox.ValueChangedFcn = createCallbackFcn(app, @SaveRestoredCheckBoxValueChanged, true);
+            app.SaveRestoredCheckBox.Text = 'Сохранить востановленные';
+            app.SaveRestoredCheckBox.Position = [6 155 178 22];
+            app.SaveRestoredCheckBox.Value = true;
+
+            % Create OpenSettingsCheckBox
+            app.OpenSettingsCheckBox = uicheckbox(app.ControlPanel);
+            app.OpenSettingsCheckBox.ValueChangedFcn = createCallbackFcn(app, @OpenSettingsCheckBoxValueChanged, true);
+            app.OpenSettingsCheckBox.Text = 'Открыть капот';
+            app.OpenSettingsCheckBox.Position = [7 537 103 22];
+
+            % Create PlotPanel (Right)
+            app.PlotPanel = uipanel(app.MainGridLayout);
+            app.PlotPanel.Layout.Row = 1;
+            app.PlotPanel.Layout.Column = 2;
+
+            % Create DataAxes
+            app.DataAxes = uiaxes(app.PlotPanel);
+            title(app.DataAxes, 'Фигура 1')
+            xlabel(app.DataAxes, 'X')
+            ylabel(app.DataAxes, 'Y')
+            zlabel(app.DataAxes, 'Z')
+            app.DataAxes.ClippingStyle = 'rectangle';
+            app.DataAxes.Position = [6 7 586 583];
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = OutlierCleaner_APP_GPT
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            % Execute the startup function
+            runStartupFcn(app, @startupFcn)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end

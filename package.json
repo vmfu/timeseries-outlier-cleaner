@@ -1,0 +1,12 @@
+{
+  "name": "cleaner_outlier_crush_2",
+  "version": "1.0.0",
+  "description": "A web-based tool for cleaning time series data from noise and outliers, ported from MATLAB to HTML/CSS/JavaScript.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

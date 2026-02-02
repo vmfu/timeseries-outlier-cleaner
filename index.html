@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outlier Cleaner - Telemetry Data Processing</title>
+    <link rel="stylesheet" href="css/telemetry.css">
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+</head>
+<body>
+    <div class="crt-overlay"></div>
+    <div class="main-container">
+        <!-- Header -->
+        <header class="telemetry-header">
+            <div class="header-decoration left"></div>
+            <h1 class="main-title">
+                <span class="title-prefix">ОТК-001</span>
+                <span class="title-divider">///</span>
+                <span class="title-main">СИСТЕМА ОЧИСТКИ ДАННЫХ</span>
+            </h1>
+            <div class="header-decoration right"></div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+            <!-- Left Panel: Control Panel -->
+            <section class="control-panel panel">
+                <div class="panel-header">
+                    <span class="panel-id">ПАНЕЛЬ УПРАВЛЕНИЯ</span>
+                    <span class="panel-status">ГОТОВ</span>
+                </div>
+
+                <!-- File Loading Section -->
+                <div class="control-section">
+                    <h2 class="section-title">1. ЗАГРУЗКА ДАННЫХ</h2>
+                    <div class="input-group">
+                        <label for="fileInput" class="input-label">
+                            <span class="label-text">Выбор файла данных:</span>
+                            <span class="label-desc">ASCII формат, столбцы: время, сигналы...</span>
+                        </label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="fileInput" multiple accept=".txt,.dat,.csv,.asc" class="file-input">
+                            <button type="button" class="file-button" onclick="document.getElementById('fileInput').click()">
+                                <span class="button-icon">📁</span>
+                                <span class="button-text">ОТКРЫТЬ ФАЙЛ</span>
+                            </button>
+                            <div id="fileCount" class="file-count">Выбрано файлов: 0</div>
+                        </div>
+                    </div>
+                    <div id="selectedFiles" class="selected-files-list"></div>
+                </div>
+
+                <!-- Advanced Settings Toggle -->
+                <div class="control-section">
+                    <div class="settings-toggle">
+                        <label for="advancedToggle" class="toggle-label">
+                            <input type="checkbox" id="advancedToggle" class="toggle-checkbox">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-text">ОТКРЫТЬ КАПОТ (расширенные настройки)</span>
+                        </label>
+                        <span class="toggle-desc">Показать параметры настройки алгоритма</span>
+                    </div>
+                </div>
+
+                <!-- Advanced Parameters (Hidden by default) -->
+                <div id="advancedSettings" class="advanced-settings hidden">
+                    <h2 class="section-title">ПАРАМЕТРЫ АЛГОРИТМА</h2>
+
+                    <!-- Window Width Slider -->
+                    <div class="slider-group">
+                        <label class="slider-label">
+                            <span class="slider-name">Ширина окна</span>
+                            <span class="slider-desc">Размер скользящего окна (1-100)</span>
+                        </label>
+                        <div class="slider-control">
+                            <input type="range" id="windowWidth" min="1" max="100" value="40" class="slider">
+                            <div class="slider-value">
+                                <span id="windowWidthValue" class="value-display">40</span>
+                                <span class="value-unit">ед.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Threshold Slider -->
+                    <div class="slider-group">
+                        <label class="slider-label">
+                            <span class="slider-name">Пороговый коэффициент</span>
+                            <span class="slider-desc">Чувствительность обнаружения (0.1-2.0)</span>
+                        </label>
+                        <div class="slider-control">
+                            <input type="range" id="threshold" min="0.1" max="2.0" step="0.1" value="1.4" class="slider">
+                            <div class="slider-value">
+                                <span id="thresholdValue" class="value-display">1.4</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Matrix Size Slider -->
+                    <div class="slider-group">
+                        <label class="slider-label">
+                            <span class="slider-name">Размер матрицы наводки</span>
+                            <span class="slider-desc">Размер сетки поиска параметров (10-50)</span>
+                        </label>
+                        <div class="slider-control">
+                            <input type="range" id="matrixSize" min="10" max="50" value="16" class="slider">
+                            <div class="slider-value">
+                                <span id="matrixSizeValue" class="value-display">16</span>
+                                <span class="value-unit">×16</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Relative Size Slider -->
+                    <div class="slider-group">
+                        <label class="slider-label">
+                            <span class="slider-name">Относительный размер 2 матрицы</span>
+                            <span class="slider-desc">Шаг грубого поиска (1-9)</span>
+                        </label>
+                        <div class="slider-control">
+                            <input type="range" id="relativeSize" min="1" max="9" value="4" class="slider">
+                            <div class="slider-value">
+                                <span id="relativeSizeValue" class="value-display">4</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Optimization Section -->
+                    <div class="optimization-section">
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="useChunks" checked class="checkbox">
+                                <span class="checkbox-text">Оптимизация через чанки</span>
+                                <span class="checkbox-desc">Ускоряет автоподбор в 5-10 раз</span>
+                            </label>
+                        </div>
+
+                        <div class="slider-group">
+                            <label class="slider-label">
+                                <span class="slider-name">Количество тестовых чанков</span>
+                                <span class="slider-desc">Чанк=25 точек (1-5)</span>
+                            </label>
+                            <div class="slider-control">
+                                <input type="range" id="numChunks" min="1" max="5" value="3" class="slider">
+                                <div class="slider-value">
+                                    <span id="numChunksValue" class="value-display">3</span>
+                                    <span class="value-unit">шт.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fill Method Dropdown -->
+                    <div class="dropdown-group">
+                        <label class="dropdown-label">
+                            <span class="dropdown-name">Метод заполнения выбросов</span>
+                            <span class="dropdown-desc">Способ замещения обнаруженных аномалий</span>
+                        </label>
+                        <select id="fillMethod" class="dropdown">
+                            <option value="extreme">↗∞ Экстремальное значение (маркировка)</option>
+                            <option value="center">Центральное значение (медиана/среднее)</option>
+                            <option value="clip">Пороговая обрезка</option>
+                            <option value="previous">Предыдущее верное</option>
+                            <option value="next">Следующее верное</option>
+                            <option value="nearest" selected>Ближайшее верное</option>
+                            <option value="linear">Линейная интерполяция</option>
+                            <option value="spline">Сплайн-интерполяция</option>
+                            <option value="pchip">Сплайн² (PCHIP)</option>
+                            <option value="makima">Модификатор Акимы</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="control-section">
+                    <h2 class="section-title">2. ОПЕРАЦИИ</h2>
+                    <div class="button-grid">
+                        <button id="loadBtn" class="action-button" disabled>
+                            <span class="button-number">1.</span>
+                            <span class="button-label">ЗАГРУЗИТЬ</span>
+                            <span class="button-desc">Чтение файла данных</span>
+                        </button>
+
+                        <button id="tuneBtn" class="action-button" disabled>
+                            <span class="button-number">2.</span>
+                            <span class="button-label">НАВЕСТЬСЯ</span>
+                            <span class="button-desc">Автоподбор параметров</span>
+                        </button>
+
+                        <button id="cleanBtn" class="action-button" disabled>
+                            <span class="button-number">3.</span>
+                            <span class="button-label">ОЧИСТИТЬ</span>
+                            <span class="button-desc">Применить фильтрацию</span>
+                        </button>
+
+                        <button id="saveBtn" class="action-button" disabled>
+                            <span class="button-number">4.</span>
+                            <span class="button-label">СОХРАНИТЬ</span>
+                            <span class="button-desc">Экспорт результатов</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Save Options -->
+                <div class="control-section">
+                    <h2 class="section-title">3. ПАРАМЕТРЫ СОХРАНЕНИЯ</h2>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="saveRestored" checked class="checkbox">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">Сохранить восстановленные данные</span>
+                        </label>
+                        <span class="checkbox-desc">Включить в результат восстановленные значения</span>
+                    </div>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label" id="validityFlagWrapper">
+                            <input type="checkbox" id="addValidityFlag" checked class="checkbox">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">Дополнить признаком истинности</span>
+                        </label>
+                        <span class="checkbox-desc">Добавить столбец с флагом корректности (0/1)</span>
+                    </div>
+                </div>
+
+                <!-- Progress Section -->
+                <div class="control-section">
+                    <h2 class="section-title">4. ХОД ПРОЦЕССА</h2>
+                    <div class="gauge-container">
+                        <svg class="gauge" viewBox="0 0 180 100">
+                            <defs>
+                                <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#00ff88"/>
+                                    <stop offset="50%" style="stop-color:#ffff00"/>
+                                    <stop offset="100%" style="stop-color:#ff4444"/>
+                                </linearGradient>
+                            </defs>
+                            <!-- Background arc -->
+                            <path d="M 10 90 A 80 80 0 0 1 170 90" fill="none" stroke="#003322" stroke-width="20"/>
+                            <!-- Progress arc -->
+                            <path id="progressArc" d="M 10 90 A 80 80 0 0 1 170 90" fill="none"
+                                  stroke="url(#gaugeGradient)" stroke-width="20"
+                                  stroke-dasharray="251.2" stroke-dashoffset="251.2"
+                                  stroke-linecap="round"/>
+                            <!-- Center text -->
+                            <text x="90" y="75" text-anchor="middle" class="gauge-text-main"
+                                  id="progressText">0%</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Log Section -->
+                <div class="control-section log-section">
+                    <h2 class="section-title">5. ЖУРНАЛ ОПЕРАЦИЙ</h2>
+                    <div id="logArea" class="log-area">
+                        <div class="log-entry log-info">
+                            <span class="log-time">--:--:--</span>
+                            <span class="log-message">Система готова к работе. Приятного использования!</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Visualization -->
+            <section class="plot-panel panel">
+                <div class="panel-header">
+                    <span class="panel-id">ПАНЕЛЬ ВИЗУАЛИЗАЦИИ</span>
+                    <span class="panel-status">ОНЛАЙН</span>
+                </div>
+
+                <!-- Tab Navigation -->
+                <div class="tab-nav">
+                    <button class="tab-button active" data-tab="data">
+                        <span class="tab-icon">📊</span>
+                        <span class="tab-text">ДАННЫЕ</span>
+                    </button>
+                    <button class="tab-button" data-tab="heatmap">
+                        <span class="tab-icon">🌡️</span>
+                        <span class="tab-text">КАРТА ПАРАМЕТРОВ</span>
+                    </button>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Data Plot Tab -->
+                    <div id="dataTab" class="tab-pane active">
+                        <div class="chart-container">
+                            <div class="chart-wrapper">
+                                <canvas id="dataChart"></canvas>
+                            </div>
+                            <div id="noDataMessage" class="no-data-message">
+                                <span class="no-data-icon">📭</span>
+                                <span class="no-data-text">Нет загруженных данных</span>
+                                <span class="no-data-sub">Выберите файл для начала работы</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Heatmap Tab -->
+                    <div id="heatmapTab" class="tab-pane">
+                        <div class="heatmap-container">
+                            <div class="chart-wrapper">
+                                <canvas id="heatmapCanvas"></canvas>
+                            </div>
+                            <div id="noHeatmapMessage" class="no-data-message">
+                                <span class="no-data-icon">🌡️</span>
+                                <span class="no-data-text">Карта параметров недоступна</span>
+                                <span class="no-data-sub">Выполните автоподбор для отображения</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metrics Display -->
+                <div class="metrics-panel">
+                    <h2 class="section-title">МЕТРИКИ КАЧЕСТВА</h2>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <span class="metric-name">STDF</span>
+                            <span class="metric-desc">Гладкость</span>
+                            <span id="metricSTDF" class="metric-value">--</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-name">DF</span>
+                            <span class="metric-desc">Доля удалённых</span>
+                            <span id="metricDF" class="metric-value">--</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-name">ASNR</span>
+                            <span class="metric-desc">С/Ш (дБ)</span>
+                            <span id="metricASNR" class="metric-value">--</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-name">RMSE</span>
+                            <span class="metric-desc">СКО</span>
+                            <span id="metricRMSE" class="metric-value">--</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-name">R²</span>
+                            <span class="metric-desc">Детерминация</span>
+                            <span id="metricRSquared" class="metric-value">--</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-name">R Пирсона</span>
+                            <span class="metric-desc">Корреляция</span>
+                            <span id="metricPearson" class="metric-value">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Info -->
+                <div class="file-info-panel">
+                    <h2 class="section-title">ИНФОРМАЦИЯ О ФАЙЛЕ</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Файл:</span>
+                            <span id="infoFilename" class="info-value">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Размер:</span>
+                            <span id="infoSize" class="info-value">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Точек:</span>
+                            <span id="infoPoints" class="info-value">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Сериев:</span>
+                            <span id="infoSeries" class="info-value">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Опт. окно:</span>
+                            <span id="infoOptWindow" class="info-value">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Опт. порог:</span>
+                            <span id="infoOptThreshold" class="info-value">--</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="telemetry-footer">
+            <div class="footer-decoration"></div>
+            <div class="footer-content">
+                <span class="footer-text">ОТК-001 /// СИСТЕМА ОЧИСТКИ ДАННЫХ ВРЕМЕННЫХ РЯДОВ</span>
+                <span class="footer-separator">|</span>
+                <span class="footer-author">Разработчик: Фунтиков В.М.</span>
+                <span class="footer-separator">|</span>
+                <span class="footer-version">Версия: 2.0 (Web)</span>
+            </div>
+            <div class="footer-decoration"></div>
+        </footer>
+    </div>
+
+    <!-- Fixed Progress Bar (Top) -->
+    <div id="progressBar" class="progress-bar hidden">
+        <div class="progress-bar-content">
+            <span class="progress-label">ХОД ПРОЦЕССА</span>
+            <div class="progress-track">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+            <span id="progressPercent" class="progress-percent">0%</span>
+            <span id="progressMessage" class="progress-message"></span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+</body>
+</html>
