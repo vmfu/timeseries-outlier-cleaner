@@ -72,3 +72,15 @@ jspm_packages/
 *.log
 *.tmp
 *.bak
+
+# AI Agent Files
+AGENTS.md
+primary prompt is a human task.txt
+
+# Project Startup Scripts (personal/local)
+start_crush.bat
+start_new_project.bat
+start_and_open.bat
+start_auto.bat
+start_server.bat
+open_app.bat
