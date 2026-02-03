@@ -401,7 +401,7 @@ function initializeVisibilityControls() {
         });
     });
 
-    // Keyboard shortcuts (1/2/3)
+    // Keyboard shortcuts (1/2/3/Q/W/E/R/Escape)
     document.addEventListener('keydown', function(event) {
         // Only if not typing in input
         if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
@@ -409,6 +409,7 @@ function initializeVisibilityControls() {
         }
 
         switch (event.key) {
+            // Chart visibility shortcuts
             case '1':
                 setChartVisibility('original');
                 break;
@@ -417,6 +418,48 @@ function initializeVisibilityControls() {
                 break;
             case '3':
                 setChartVisibility('both');
+                break;
+            // Operation shortcuts
+            case 'q':
+            case 'Q':
+                var loadBtn = document.getElementById('loadBtn');
+                if (loadBtn && !loadBtn.disabled) {
+                    loadBtn.click();
+                }
+                break;
+            case 'w':
+            case 'W':
+                var tuneBtn = document.getElementById('tuneBtn');
+                if (tuneBtn && !tuneBtn.disabled) {
+                    tuneBtn.click();
+                }
+                break;
+            case 'e':
+            case 'E':
+                var cleanBtn = document.getElementById('cleanBtn');
+                if (cleanBtn && !cleanBtn.disabled) {
+                    cleanBtn.click();
+                }
+                break;
+            case 'r':
+            case 'R':
+                var saveBtn = document.getElementById('saveBtn');
+                if (saveBtn && !saveBtn.disabled) {
+                    saveBtn.click();
+                }
+                break;
+            // Modal close shortcut
+            case 'Escape':
+                // Close reset modal if open
+                var resetModal = document.getElementById('resetModal');
+                if (resetModal && resetModal.classList.contains('show')) {
+                    hideResetModal();
+                }
+                // Close error modal if open
+                var errorModal = document.getElementById('errorModal');
+                if (errorModal && errorModal.classList.contains('show')) {
+                    ErrorHandler.hideModal();
+                }
                 break;
         }
     });
