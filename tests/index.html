@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Outlier Cleaner - Unit Tests</title>
+    <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.25.0.css">
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a2e;
+            color: #00ff88;
+            margin: 20px;
+        }
+        #qunit {
+            background: #16213e;
+            border: 2px solid #00aaff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
+        }
+        #qunit-tests, #qunit-banner {
+            font-family: 'Courier New', monospace !important;
+        }
+        .qunit-passed {
+            color: #00ff88 !important;
+        }
+        .qunit-failed {
+            color: #ff4444 !important;
+        }
+        #qunit-userAgent {
+            color: #ffaa00 !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="qunit"></div>
+    <div id="qunit-fixture"></div>
+
+    <!-- Load application modules -->
+    <script src="../js/utils.js"></script>
+    <script src="../js/filloutliers.js"></script>
+    <script src="../js/metrics.js"></script>
+    <script src="../js/export.js"></script>
+    <script src="../js/i18n.js"></script>
+
+    <!-- Load QUnit -->
+    <script src="https://code.jquery.com/qunit/qunit-2.25.0.js"></script>
+
+    <!-- Load test files -->
+    <script src="test-utils.js"></script>
+    <script src="test-filloutliers.js"></script>
+    <script src="test-metrics.js"></script>
+    <script src="test-export.js"></script>
+    <script src="test-i18n.js"></script>
+
+    <div style="margin-top: 40px; text-align: center; color: #00aaff;">
+        <p>OTC-TEST-001 /// UNIT TEST SUITE /// OTC-TEST-001</p>
+    </div>
+</body>
+</html>

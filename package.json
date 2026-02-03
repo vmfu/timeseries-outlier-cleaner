@@ -4,7 +4,9 @@
   "description": "A web-based tool for cleaning time series data from noise and outliers, ported from MATLAB to HTML/CSS/JavaScript.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Open tests/index.html in your browser to run unit tests\"",
+    "test:server": "npx http-server -p 8000 -o tests/",
+    "start": "start_server.bat"
   },
   "keywords": [],
   "author": "",
