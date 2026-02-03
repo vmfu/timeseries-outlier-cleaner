@@ -108,7 +108,7 @@
         if (!chart) return;
 
         chart.data.datasets = data.datasets || [];
-        chart.update();
+        chart.update('none'); // Skip animation for better performance
     }
 
     /**

@@ -76,14 +76,12 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeCharts();
     UI.log(I18n.t('log.systemInit'), 'info');
 
-    // Handle window resize
-    window.addEventListener('resize', function() {
+    // Handle window resize with debounce for performance
+    window.addEventListener('resize', Utils.debounce(function() {
         if (appState.dataChart) {
-            setTimeout(function() {
-                appState.dataChart.resize();
-            }, 100);
+            appState.dataChart.resize();
         }
-    });
+    }, 100));
 });
 
 /**
@@ -141,6 +139,11 @@ function initializeUI() {
     // Advanced settings toggle
     document.getElementById('advancedToggle').addEventListener('change', toggleAdvancedSettings);
 
+    // Create debounced version of updateParamsPreview for performance
+    var debouncedUpdateParamsPreview = Utils.debounce(function() {
+        updateParamsPreview();
+    }, 150);
+
     // Sliders
     const sliders = ['windowWidth', 'threshold', 'matrixSize', 'relativeSize', 'numChunks'];
     sliders.forEach(function(id) {
@@ -148,6 +151,7 @@ function initializeUI() {
         var valueDisplay = document.getElementById(id + 'Value');
         if (slider && valueDisplay) {
             slider.addEventListener('input', function() {
+                // Immediate update for value display
                 valueDisplay.textContent = this.value;
                 if (id === 'relativeSize') {
                     appState.params.relativeSize = parseFloat(this.value);
@@ -156,9 +160,9 @@ function initializeUI() {
                 } else {
                     appState.params[id] = parseFloat(this.value);
                 }
-                // Update parameter preview when windowWidth or threshold changes
+                // Debounced update for parameter preview (only for expensive updates)
                 if (id === 'windowWidth' || id === 'threshold') {
-                    updateParamsPreview();
+                    debouncedUpdateParamsPreview();
                 }
             });
         }
@@ -3105,11 +3109,11 @@ function initializeViewToggle() {
     // Table controls
     var tableFilter = document.getElementById('tableFilter');
     if (tableFilter) {
-        tableFilter.addEventListener('input', function() {
+        tableFilter.addEventListener('input', Utils.debounce(function() {
             appState.tableState.filterText = this.value.toLowerCase();
             appState.tableState.currentPage = 1;
             renderTable();
-        });
+        }, 200));
     }
 
     var tableSeriesSelect = document.getElementById('tableSeriesSelect');
