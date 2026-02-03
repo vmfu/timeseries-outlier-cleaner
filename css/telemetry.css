@@ -998,8 +998,6 @@ a:focus-visible {
     border-color: #00ffff;
     box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
 }
-    transform: translateY(0);
-}
 
 .reset-button .button-icon {
     font-size: 18px;
