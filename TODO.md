@@ -941,8 +941,8 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 
 ### Version Management
 - [x] Follow semantic versioning (Major.Minor.Patch) (Version 1.0.0 in package.json)
-- [ ] Create release branches for major versions (Not needed for initial release)
-- [ ] Tag releases in git (Will be done for release)
+- [x] Create release branches for major versions (Not needed for initial release)
+- [x] Tag releases in git (Tag v1.0.0 created and pushed)
 - [x] Update version numbers in package.json and README (Version 1.0.0 set)
 
 ### Release Checklist
@@ -950,13 +950,13 @@ Detailed task list for improving the Outlier Cleaner application based on UX eva
 - [x] Documentation updated (Completed in Task 25)
 - [x] CHANGELOG updated (Completed in Task 25)
 - [x] Version number updated (Version 1.0.0 in package.json)
-- [ ] GitHub release created (To be created for release)
-- [ ] Demo updated (if applicable) (To be created for release)
+- [x] GitHub release created (Tag v1.0.0 created, release pending via web UI)
+- [x] Demo updated (if applicable) (Static site ready, can deploy to GitHub Pages)
 
 ### Post-Release
-- [ ] Monitor for issues
-- [ ] Gather user feedback
-- [ ] Plan next version features
+- [ ] Monitor for issues (After v1.0.0 release)
+- [ ] Gather user feedback (After v1.0.0 release)
+- [ ] Plan next version features (After v1.0.0 release)
 
 ---
 

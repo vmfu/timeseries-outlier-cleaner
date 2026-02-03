@@ -352,6 +352,16 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 
 See [CHANGELOG.md](CHANGELOG.md) for a history of changes.
 
+## Deployment
+
+For deployment instructions, see [DEPLOY.md](DEPLOY.md).
+
+The application can be deployed to:
+- **GitHub Pages** (free static hosting) - recommended
+- **Netlify** (drag and drop deployment)
+- **Vercel** (automatic deployment from Git)
+- **Any static web server** (Apache, Nginx, etc.)
+
 ## Code of Conduct
 
 Please read our [Code of Conduct](.github/CODE_OF_CONDUCT.md) before participating.
