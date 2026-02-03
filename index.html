@@ -10,6 +10,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
     <!-- i18n system -->
     <script src="js/i18n.js"></script>
+    <!-- Error handling system -->
+    <script src="js/error.js"></script>
     <!-- Core modules -->
     <script src="js/storage.js"></script>
     <script src="js/export.js"></script>
@@ -338,6 +340,12 @@
                             <span class="button-icon">📊</span>
                             <span class="button-label" data-i18n="button.exportHtml">HTML ОТЧЕТ</span>
                             <span class="button-desc" data-i18n="desc.exportHtml">Экспорт с графиками и метриками</span>
+                        </button>
+
+                        <button id="exportErrorLogBtn" class="action-button" onclick="ErrorHandler.exportLog()">
+                            <span class="button-icon">📋</span>
+                            <span class="button-label" data-i18n="button.exportErrorLog">ЖУРНАЛ ОШИБОК</span>
+                            <span class="button-desc" data-i18n="desc.exportErrorLog">Экспорт журнала ошибок</span>
                         </button>
                     </div>
                 </div>

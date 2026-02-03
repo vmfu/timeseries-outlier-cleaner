@@ -1097,6 +1097,185 @@ body {
 }
 
 /* ============================================================================
+   ERROR MODAL STYLES
+   ============================================================================
+*/
+
+.error-modal {
+    z-index: 2000;
+}
+
+.error-content {
+    border-color: var(--accent-danger);
+    box-shadow: 0 0 40px rgba(255, 68, 68, 0.4);
+    max-width: 600px;
+}
+
+.error-header {
+    border-bottom-color: var(--accent-danger);
+    background: linear-gradient(180deg, rgba(255, 68, 68, 0.15) 0%, transparent 100%);
+}
+
+.error-title {
+    color: var(--accent-danger);
+    text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+}
+
+.error-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.error-message {
+    font-size: 14px;
+    color: var(--text-primary);
+    margin: 0 0 20px 0;
+    line-height: 1.6;
+    font-weight: bold;
+}
+
+.error-context {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0 0 20px 0;
+    padding: 10px;
+    background: rgba(0, 170, 255, 0.1);
+    border-left: 3px solid var(--accent-cyan);
+    font-family: var(--font-mono);
+}
+
+.error-suggestions-container {
+    margin: 20px 0;
+    padding: 15px;
+    background: rgba(0, 255, 136, 0.05);
+    border: 1px solid var(--accent-cyan);
+    border-radius: 3px;
+}
+
+.error-suggestions-title {
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--accent-cyan);
+    margin: 0 0 10px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.error-suggestions {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.error-suggestions li {
+    font-size: 13px;
+    color: var(--text-primary);
+    margin: 8px 0;
+    line-height: 1.5;
+}
+
+.error-suggestions li::marker {
+    color: var(--accent-cyan);
+}
+
+.error-details-container {
+    margin-top: 20px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 15px;
+}
+
+.error-details-toggle {
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--text-muted);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 5px 0;
+    user-select: none;
+    transition: all 0.3s;
+}
+
+.error-details-toggle:hover {
+    color: var(--accent-cyan);
+}
+
+.error-details-toggle::after {
+    content: ' ▼';
+    transition: transform 0.3s;
+}
+
+details[open] .error-details-toggle::after {
+    transform: rotate(180deg);
+}
+
+.error-details {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--bg-tertiary);
+    padding: 15px;
+    border-radius: 3px;
+    border: 1px solid var(--border-color);
+    font-family: var(--font-mono);
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 300px;
+    overflow-y: auto;
+    margin: 10px 0 0 0;
+}
+
+.error-details::-webkit-scrollbar {
+    width: 8px;
+}
+
+.error-details::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+.error-details::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.error-details::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-cyan);
+}
+
+.error-footer {
+    border-top-color: var(--border-color);
+}
+
+.error-button-primary {
+    border-color: var(--accent-danger);
+    color: var(--accent-danger);
+    background: rgba(255, 68, 68, 0.1);
+}
+
+.error-button-primary:hover {
+    background: rgba(255, 68, 68, 0.2);
+    box-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
+    border-color: #ff6666;
+}
+
+.error-button-secondary {
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.error-button-secondary:hover {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
+}
+
+@keyframes pulse-warning {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* ============================================================================
    CHECKBOXES
    ============================================================================
 */

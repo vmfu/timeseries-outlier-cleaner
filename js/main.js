@@ -772,19 +772,23 @@ function initializeCharts() {
  * Handle file selection
  */
 function handleFileSelect(event) {
-    var files = Array.from(event.target.files);
+    try {
+        var files = Array.from(event.target.files);
 
-    if (files.length === 0) {
-        return;
+        if (files.length === 0) {
+            return;
+        }
+
+        Queue.addToQueue(files);
+        updateFileCount(files.length);
+        displaySelectedFiles(files);
+
+        document.getElementById('loadBtn').disabled = false;
+
+        UI.log(I18n.t('msg.filesSelected', {count: files.length}), 'info');
+    } catch (error) {
+        ErrorHandler.show(error, ErrorHandler.types.FILE_LOAD, 'handleFileSelect');
     }
-
-    Queue.addToQueue(files);
-    updateFileCount(files.length);
-    displaySelectedFiles(files);
-
-    document.getElementById('loadBtn').disabled = false;
-
-    UI.log(I18n.t('msg.filesSelected', {count: files.length}), 'info');
 }
 
 /**
@@ -1198,36 +1202,45 @@ function readFileContent(file) {
  * Parse ASCII data file content
  */
 function parseAsciiData(content) {
-    var lines = content.trim().split('\n');
-    var data = [];
-
-    for (var i = 0; i < lines.length; i++) {
-        var line = lines[i];
-        var trimmed = line.trim();
-
-        // Skip comments and empty lines
-        if (trimmed === '' || trimmed.startsWith('#') || trimmed.startsWith('%')) {
-            continue;
+    try {
+        if (!content || typeof content !== 'string') {
+            throw new Error('Invalid content: empty or not a string');
         }
 
-        // Parse values (handle tab, space, comma separators)
-        var values = trimmed.split(/[\s,]+/)
-            .map(function(v) { return parseFloat(v); })
-            .filter(function(v) { return !isNaN(v); });
+        var lines = content.trim().split('\n');
+        var data = [];
 
-        if (values.length > 0) {
-            data.push(values);
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i];
+            var trimmed = line.trim();
+
+            // Skip comments and empty lines
+            if (trimmed === '' || trimmed.startsWith('#') || trimmed.startsWith('%')) {
+                continue;
+            }
+
+            // Parse values (handle tab, space, comma separators)
+            var values = trimmed.split(/[\s,]+/)
+                .map(function(v) { return parseFloat(v); })
+                .filter(function(v) { return !isNaN(v); });
+
+            if (values.length > 0) {
+                data.push(values);
+            }
         }
+
+        // If no time column, add one
+        if (data.length > 0 && data.every(function(row) { return row.length === 1; })) {
+            for (var i = 0; i < data.length; i++) {
+                data[i] = [i, data[i][0]];
+            }
+        }
+
+        return data;
+    } catch (error) {
+        ErrorHandler.show(error, ErrorHandler.types.FILE_PARSE, 'parseAsciiData');
+        throw error; // Re-throw for caller to handle
     }
-
-    // If no time column, add one
-    if (data.length > 0 && data.every(function(row) { return row.length === 1; })) {
-        for (var i = 0; i < data.length; i++) {
-            data[i] = [i, data[i][0]];
-        }
-    }
-
-    return data;
 }
 
 // ============================================================================
@@ -2218,30 +2231,35 @@ function handleError(data) {
  * Auto-tune parameters
  */
 function autoTune() {
-    if (!appState.originalData) {
-        UI.log(I18n.t('msg.noData'), 'warning');
-        return;
-    }
-
-    UI.log(I18n.t('msg.tuning'), 'info');
-
-    // Prepare data (remove time column for cleaning)
-    var signalData = appState.originalData.map(function(row) {
-        return row.slice(1);
-    });
-
-    sendToWorker('TUNE', {
-        originalData: signalData,
-        params: {
-            windowWidth: appState.params.windowWidth,
-            threshold: appState.params.threshold,
-            matrixSize: appState.params.matrixSize,
-            relativeSize: appState.params.relativeSize,
-            fillMethod: appState.params.fillMethod,
-            numChunks: appState.params.numChunks,
-            useChunks: appState.params.useChunks
+    try {
+        if (!appState.originalData) {
+            UI.log(I18n.t('msg.noData'), 'warning');
+            return;
         }
-    });
+
+        UI.log(I18n.t('msg.tuning'), 'info');
+
+        // Prepare data (remove time column for cleaning)
+        var signalData = appState.originalData.map(function(row) {
+            return row.slice(1);
+        });
+
+        sendToWorker('TUNE', {
+            originalData: signalData,
+            params: {
+                windowWidth: appState.params.windowWidth,
+                threshold: appState.params.threshold,
+                matrixSize: appState.params.matrixSize,
+                relativeSize: appState.params.relativeSize,
+                fillMethod: appState.params.fillMethod,
+                numChunks: appState.params.numChunks,
+                useChunks: appState.params.useChunks
+            }
+        });
+    } catch (error) {
+        showLoadingOverlay(false);
+        ErrorHandler.show(error, ErrorHandler.types.PROCESSING, 'autoTune');
+    }
 }
 
 /**
@@ -2297,10 +2315,11 @@ function handleTuneResult(data) {
  * Clean data using current parameters
  */
 function cleanData() {
-    if (!appState.originalData) {
-        UI.log(I18n.t('msg.noData'), 'warning');
-        return;
-    }
+    try {
+        if (!appState.originalData) {
+            UI.log(I18n.t('msg.noData'), 'warning');
+            return;
+        }
 
     UI.log(I18n.t('msg.cleaning'), 'info');
 
@@ -2348,6 +2367,10 @@ function cleanData() {
                 }
             }
         });
+    }
+    } catch (error) {
+        showLoadingOverlay(false);
+        ErrorHandler.show(error, ErrorHandler.types.PROCESSING, 'cleanData');
     }
 }
 
@@ -2610,8 +2633,7 @@ function saveData() {
         UI.log(I18n.t('msg.saved', {name: filename, rows: outputData.length}), 'success');
 
     } catch (error) {
-        UI.log(I18n.t('error.saving', {message: error.message}), 'error');
-        console.error('Save error:', error);
+        ErrorHandler.show(error, ErrorHandler.types.EXPORT, 'saveData');
     }
 }
 
@@ -2825,8 +2847,7 @@ function exportJsonReport() {
         UI.log(I18n.t('msg.exportedJson', {name: filename}), 'success');
 
     } catch (error) {
-        UI.log(I18n.t('error.saving', {message: error.message}), 'error');
-        console.error('JSON export error:', error);
+        ErrorHandler.show(error, ErrorHandler.types.EXPORT, 'exportJsonReport');
     }
 }
 
@@ -2857,8 +2878,7 @@ function exportHtmlReport() {
         UI.log(I18n.t('msg.exportedHtml', {name: filename}), 'success');
 
     } catch (error) {
-        UI.log(I18n.t('error.saving', {message: error.message}), 'error');
-        console.error('HTML export error:', error);
+        ErrorHandler.show(error, ErrorHandler.types.EXPORT, 'exportHtmlReport');
     }
 }
 

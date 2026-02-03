@@ -97,6 +97,8 @@
             'desc.exportJson': 'Экспорт в структурированный формат',
             'button.exportHtml': 'HTML ОТЧЕТ',
             'desc.exportHtml': 'Экспорт с графиками и метриками',
+            'button.exportErrorLog': 'ЖУРНАЛ ОШИБОК',
+            'desc.exportErrorLog': 'Экспорт журнала ошибок',
 
             // Save Options
             'section.save': '3. ПАРАМЕТРЫ СОХРАНЕНИЯ',
@@ -249,6 +251,14 @@
             'modal.confirm': 'Да, сбросить',
             'modal.cancel': 'Отмена',
             'msg.resetComplete': 'Сессия сброшена. Все данные очищены.',
+
+            // Error Modal
+            'modal.error.title': 'Ошибка',
+            'modal.error.suggestions': 'Возможные решения:',
+            'modal.error.showDetails': 'Показать технические детали',
+            'modal.error.close': 'Закрыть',
+            'modal.error.copy': 'Копировать',
+            'modal.error.copied': 'Скопировано!',
 
             // Export Messages
             'msg.noCleanedForReport': 'Нет очищенных данных для экспорта',
@@ -422,6 +432,8 @@
             'desc.exportJson': 'Export structured data format',
             'button.exportHtml': 'HTML REPORT',
             'desc.exportHtml': 'Export with charts and metrics',
+            'button.exportErrorLog': 'ERROR LOG',
+            'desc.exportErrorLog': 'Export error log',
 
             // Save Options
             'section.save': '3. SAVE PARAMETERS',
@@ -585,6 +597,14 @@
             'modal.confirm': 'Yes, Reset',
             'modal.cancel': 'Cancel',
             'msg.resetComplete': 'Session reset. All data cleared.',
+
+            // Error Modal
+            'modal.error.title': 'Error',
+            'modal.error.suggestions': 'Possible solutions:',
+            'modal.error.showDetails': 'Show technical details',
+            'modal.error.close': 'Close',
+            'modal.error.copy': 'Copy',
+            'modal.error.copied': 'Copied!',
 
             // Export Messages
             'msg.noCleanedForReport': 'No cleaned data to export',
