@@ -13,6 +13,7 @@ This application provides a modern, web-based implementation of the MATLAB outli
 
 ## Features
 
+### Core Functionality
 - **Multi-series support**: Handle multiple time series in a single file
 - **Automatic parameter tuning**: Two-pass optimization algorithm
 - **Quality metrics**: STDF, DF, ASNR, ARMSE, R², and Pearson correlation
@@ -21,6 +22,59 @@ This application provides a modern, web-based implementation of the MATLAB outli
 - **Real-time visualization**: Interactive charts using modern graphing libraries
 - **Progress logging**: Detailed execution logs with progress indicators
 - **Telemetry-inspired UI**: Space telemetry interface with post-Soviet research institute aesthetics
+
+### Version 2.0 Enhancements
+
+**Internationalization**
+- Full bilingual support (Russian/English)
+- Dynamic language switching
+- All UI elements translated
+- Persistent language preference
+
+**Improved User Experience**
+- Drag & drop file upload with visual feedback
+- Interactive chart visibility toggles (Original/Cleaned/Both)
+- Comprehensive tooltips for all metrics and parameters
+- Outlier markers displayed on charts
+- Color-coded quality indicators for metrics
+
+**Data Management**
+- Interactive data table view with sorting and filtering
+- Pagination for large datasets
+- Table export to CSV
+- Settings presets for quick parameter switching
+- Reset session with confirmation dialog
+
+**Export Options**
+- Export in multiple formats: CSV, TXT, JSON, HTML
+- Structured JSON reports with metadata
+- HTML reports with embedded charts
+- Error log export functionality
+- Batch export for processed files
+
+**Visualization Enhancements**
+- Chart zoom and pan controls
+- Interactive parameter heatmap
+- Click-to-select parameters from heatmap
+- ETA display for long operations
+
+**Accessibility**
+- WCAG AA compliant color contrast
+- Full keyboard navigation support
+- Screen reader compatible with ARIA labels
+- Focus indicators for all interactive elements
+- Skip to main content link
+
+**Performance**
+- Debounced UI updates for smoother experience
+- Chart rendering optimizations
+- Batch processing queue with progress tracking
+- Chunk-based optimization for fast parameter tuning
+
+**Error Handling**
+- Comprehensive error modal system
+- Detailed error messages with recovery suggestions
+- Error log export for debugging
 
 ## Installation
 
@@ -111,6 +165,72 @@ ASCII text files with numeric values:
 - Column 1: Time/X values (optional, will be auto-generated if missing)
 - Columns 2+: Signal data to be cleaned
 
+## Keyboard Shortcuts
+
+The application supports keyboard shortcuts for quick access to common operations:
+
+| Shortcut | Action |
+|----------|---------|
+| **Q** | Load data |
+| **W** | Auto-tune parameters |
+| **E** | Clean data |
+| **R** | Save results |
+| **1** | Show original data only |
+| **2** | Show cleaned data only |
+| **3** | Show both datasets |
+| **Tab** | Navigate between interactive elements |
+| **Shift + Tab** | Navigate backwards |
+| **Escape** | Close modals (reset confirmation, error messages) |
+| **Enter** | Activate focused button/link |
+
+**Note**: Shortcuts only work when not typing in text input fields.
+
+## Troubleshooting
+
+### Common Issues
+
+**"File not loading"**
+- Ensure file is ASCII text format (not Excel binary)
+- Check file has numeric data separated by spaces or tabs
+- Verify file is not corrupted (try opening in text editor)
+
+**"No chart visible"**
+- Wait for data to finish loading
+- Check browser console for errors (F12)
+- Try refreshing the page
+
+**"Processing is slow"**
+- Enable "Optimize via chunks" in advanced settings
+- Reduce "Matrix Size" for faster tuning
+- Use smaller test chunks for quick preview
+
+**"Keyboard shortcuts not working"**
+- Click anywhere in the page to ensure focus
+- Ensure not typing in input field
+- Check browser hasn't disabled JavaScript
+
+**"Modal won't close"**
+- Press Escape key
+- Click the X button in top-right corner
+- Try clicking outside modal
+
+**Export issues**
+- Check browser popup blocker allows file downloads
+- Verify enough disk space available
+- Try different export format (CSV/TXT)
+
+### Browser-Specific Issues
+
+**Firefox**: Web Workers may show security warnings for local files. Serve via HTTP server.
+**Safari**: Web Workers require HTTPS or localhost. Use local server for best results.
+**Edge/Chrome**: Generally compatible. If issues, clear cache and cookies.
+
+### Getting Help
+
+- Check [ARCHITECTURE.md](ARCHITECTURE.md) for technical details
+- Review [CHANGELOG.md](CHANGELOG.md) for recent changes
+- Open browser console (F12) and check for errors
+
 ## Output File Format
 
 ASCII text files with the same structure as input.
@@ -187,9 +307,17 @@ See `ARCHITECTURE.md` for detailed system architecture.
 .
 ├── index.html              # Main HTML structure
 ├── css/
-│   └── telemetry.css       # Telemetry-inspired styling
+│   └── telemetry.css       # Telemetry-inspired styling with accessibility
 ├── js/
-│   ├── main.js             # Main application logic
+│   ├── main.js             # Main application logic and event handlers
+│   ├── i18n.js            # Internationalization system (RU/EN)
+│   ├── storage.js          # LocalStorage management
+│   ├── export.js           # Export functionality (CSV, TXT, JSON, HTML)
+│   ├── queue.js            # Batch processing queue
+│   ├── chart.js            # Chart.js configuration and management
+│   ├── ui.js               # UI component interactions
+│   ├── error.js            # Error handling system
+│   ├── utils.js            # Performance utilities (debounce, throttle)
 │   ├── filloutliers.js     # Outlier detection/fill functions
 │   ├── metrics.js          # Quality metrics calculations
 │   └── worker.js           # Web Worker for non-blocking operations
@@ -198,15 +326,23 @@ See `ARCHITECTURE.md` for detailed system architecture.
 └── docs/
     ├── README.md           # This file
     ├── ARCHITECTURE.md     # System architecture
-    └── AGENTS.md           # Agent development guide
+    ├── TODO.md            # Task list and progress tracking
+    ├── AGENTS.md          # Agent development guide
+    ├── CHANGELOG.md       # Version history
+    └── CONTRIBUTING.md    # Contribution guidelines
 ```
 
 ### Adding New Features
 
-1. For new fill methods: Edit `filloutliers.js`
-2. For new metrics: Edit `metrics.js`
+1. For new fill methods: Edit `js/filloutliers.js`
+2. For new metrics: Edit `js/metrics.js`
 3. For UI changes: Edit `index.html` and `css/telemetry.css`
 4. For algorithm changes: Edit `js/worker.js`
+5. For new translations: Add entries to `js/i18n.js`
+6. For new export formats: Extend `js/export.js`
+7. For error handling: Use `ErrorHandler` from `js/error.js`
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed module documentation.
 
 ## Contributing
 
