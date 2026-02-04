@@ -2799,7 +2799,12 @@ function resetSession() {
         document.getElementById('progressBar').style.width = '0%';
 
         // Show file info
-        document.getElementById('fileInfo').textContent = I18n.t('info.points') + ' 0, ' + I18n.t('info.series') + ' 0';
+        document.getElementById('infoPoints').textContent = '0';
+        document.getElementById('infoSeries').textContent = '0';
+        document.getElementById('infoFilename').textContent = '--';
+        document.getElementById('infoSize').textContent = '--';
+        document.getElementById('infoOptWindow').textContent = '--';
+        document.getElementById('infoOptThreshold').textContent = '--';
 
         // Hide modal
         hideResetModal();
