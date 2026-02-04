@@ -928,7 +928,7 @@ a:focus-visible {
 
 .preset-select {
     flex: 1;
-    min-width: 150px;
+    min-width: 80px;
 }
 
 .preset-apply,
@@ -1495,26 +1495,6 @@ details[open] .error-details-toggle::after {
    GAUGE
    ============================================================================
 */
-
-.gauge-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
-
-.gauge {
-    width: 180px;
-    height: 100px;
-    filter: drop-shadow(0 0 10px rgba(0, 170, 255, 0.5));
-}
-
-.gauge-text-main {
-    font-size: 24px;
-    font-weight: bold;
-    fill: var(--accent-cyan);
-    text-shadow: 0 0 10px var(--accent-cyan);
-}
 
 /* ============================================================================
    LOG AREA

@@ -110,8 +110,6 @@
             'checkbox.validityFlag': 'Дополнить признаком истинности',
             'desc.validityFlag': 'Добавить столбец с флагом корректности (0/1)',
 
-            // Progress
-            'section.progress': '4. ХОД ПРОЦЕССА',
 
             // Log
             'section.log': '5. ЖУРНАЛ ОПЕРАЦИЙ',
@@ -446,8 +444,6 @@
             'checkbox.validityFlag': 'Add validity flag',
             'desc.validityFlag': 'Add correctness flag column (0/1)',
 
-            // Progress
-            'section.progress': '4. PROGRESS',
 
             // Log
             'section.log': '5. OPERATION LOG',
