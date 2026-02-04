@@ -89,8 +89,6 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 function initializeWorker() {
     try {
-        console.UI.log('[Main] Попытка загрузить внешний worker...');
-
         // Add timestamp to prevent caching
         var workerUrl = 'js/worker.js?v=' + Date.now();
 
@@ -101,7 +99,7 @@ function initializeWorker() {
         UI.log('Web Worker успешно инициализирован (внешний).', 'success');
     } catch (error) {
         // Fall back to inline worker (works without server)
-        console.UI.log('[Main] Ошибка загрузки внешнего worker, использую встроенный...', error);
+        UI.log('[Main] Ошибка загрузки внешнего worker, использую встроенный...', error);
         UI.log(I18n.t('error.workerLoad'), 'warning');
         console.error('Worker initialization error:', error);
         initializeInlineWorker();
@@ -114,7 +112,13 @@ function initializeWorker() {
 function initializeInlineWorker() {
     try {
         // Load worker code from embedded script
-        var workerCode = document.getElementById('worker-code').textContent;
+        var workerCodeElement = document.getElementById('worker-code');
+        if (!workerCodeElement) {
+            console.warn('Inline worker code not found, skipping worker initialization');
+            return;
+        }
+        
+        var workerCode = workerCodeElement.textContent;
         var blob = new Blob([workerCode], { type: 'application/javascript' });
         var workerUrl = URL.createObjectURL(blob);
 
@@ -2181,18 +2185,18 @@ function handleWorkerMessage(event) {
     var jobId = event.data.jobId;
     var data = event.data.data;
 
-    console.UI.log('[Main] Получено сообщение:', {type, jobId, data});
+    console.log('[Main] Получено сообщение:', {type, jobId, data});
 
     // Ignore old messages (but allow CLEAN_SERIES results to pass through)
     if (jobId !== currentJobId && type !== 'RESULT') {
-        console.UI.log('[Main] Игнорирую старое сообщение:', {receivedJobId: jobId, currentJobId: currentJobId});
+        console.log('[Main] Игнорирую старое сообщение:', {receivedJobId: jobId, currentJobId: currentJobId});
         return;
     }
 
     // For CLEAN_SERIES results, we need to handle them even if jobId differs
     // because we send multiple series with the same initial jobId
     if (type === 'RESULT' && data.seriesIndex !== undefined) {
-        console.UI.log('[Main] Обработка CLEAN_SERIES результата');
+        console.log('[Main] Обработка CLEAN_SERIES результата');
         handleResult(data);
         return;
     }
@@ -2202,11 +2206,11 @@ function handleWorkerMessage(event) {
             handleProgress(data);
             break;
         case 'RESULT':
-            console.UI.log('[Main] Обработка RESULT, данные:', data);
+            console.log('[Main] Обработка RESULT, данные:', data);
             handleResult(data);
             break;
         case 'ERROR':
-            console.UI.log('[Main] Обработка ERROR');
+            console.log('[Main] Обработка ERROR');
             handleError(data);
             break;
     }
@@ -2238,14 +2242,14 @@ function handleProgress(data) {
  * Handle result from worker
  */
 function handleResult(data) {
-    console.UI.log('[Main] В handleResult, данные:', data);
+    console.log('[Main] В handleResult, данные:', data);
 
     showLoadingOverlay(false);
 
     // Determine operation type based on current state
     // Check for optimalParams (auto-tune result) FIRST
     if (data.optimalParams !== undefined) {
-        console.UI.log('[Main] Распознан результат автоподбора, вызываю handleTuneResult');
+        console.log('[Main] Распознан результат автоподбора, вызываю handleTuneResult');
         // Auto-tune result
         handleTuneResult(data);
     } else if (data.seriesIndex !== undefined) {
@@ -2313,7 +2317,7 @@ function autoTune() {
  * Handle auto-tune result
  */
 function handleTuneResult(data) {
-    console.UI.log('[Main] Получен результат автоподбора:', data);
+    console.log('[Main] Получен результат автоподбора:', data);
     var optimalParams = data.optimalParams;
 
     if (!optimalParams) {
@@ -2322,7 +2326,7 @@ function handleTuneResult(data) {
         return;
     }
 
-    console.UI.log('[Main] Оптимальные параметры:', optimalParams);
+    console.log('[Main] Оптимальные параметры:', optimalParams);
 
     appState.optimalParams = optimalParams;
 
@@ -2782,7 +2786,7 @@ function resetSession() {
         // Log success
         UI.log(I18n.t('msg.resetComplete'), 'success');
 
-        console.UI.log('Session reset complete');
+        console.log('Session reset complete');
 
     } catch (error) {
         console.error('Reset error:', error);

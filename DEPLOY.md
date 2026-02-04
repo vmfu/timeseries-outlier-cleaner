@@ -80,3 +80,22 @@ GitHub will automatically build and deploy the site in a few minutes.
 
 The application will be available at:
 https://vmfu.github.io/timeseries-outlier-cleaner/
+
+### Следующие шаги (для пользователя):
+
+1. Создать GitHub Release:
+  • Перейти на: https://github.com/vmfu/timeseries-outlier-cleaner/releases/new
+  • Выбрать тег:  v1.0.0
+  • Название:  Version 1.0.0 - Initial Release
+  • Описание: Скопировать из сообщения тега
+  • Нажать "Publish release"
+2. Включить GitHub Pages:
+  • Settings → Pages
+  • Source: Deploy from a branch
+  • Branch: master
+  • Folder: /(root)
+  • Нажать Save
+3. Мониторить после релиза:
+  • Следить за Issues
+  • Собирать feedback от пользователей
+  • Планировать фичи для v2.0.0
