@@ -129,7 +129,7 @@
                     dataset.hidden = !isOriginal;
                     break;
                 case 'cleaned':
-                    dataset.hidden = !isCleaned;
+                    dataset.hidden = !(isCleaned || isOutlier);
                     break;
                 case 'both':
                 default:

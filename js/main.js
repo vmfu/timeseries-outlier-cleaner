@@ -602,13 +602,14 @@ function updateChartDatasetsVisibility() {
         var label = dataset.label || '';
         var isOriginal = label.includes('Исходные') || label.includes('Original');
         var isCleaned = label.includes('Очищенные') || label.includes('Cleaned');
+        var isOutlier = label.includes('Выбросы') || label.includes('Outliers');
 
         switch (mode) {
             case 'original':
                 dataset.hidden = !isOriginal;
                 break;
             case 'cleaned':
-                dataset.hidden = !isCleaned;
+                dataset.hidden = !(isCleaned || isOutlier);
                 break;
             case 'both':
                 dataset.hidden = false;
