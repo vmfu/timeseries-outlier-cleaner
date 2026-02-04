@@ -32,6 +32,11 @@
      * @param {number} count - Number of files selected
      */
     function updateFileCount(count) {
+        // Cache elements if not already done
+        if (!elements.fileCount) {
+            cacheElements();
+        }
+
         if (elements.fileCount) {
             elements.fileCount.textContent = I18n.t('file.count', { count: count });
         }
@@ -43,6 +48,11 @@
      * @param {string} message - Optional message
      */
     function updateProgress(value, message) {
+        // Cache elements if not already done
+        if (!elements.progressBar) {
+            cacheElements();
+        }
+
         if (!elements.progressBar) return;
 
         if (value >= 0 && value <= 100) {
@@ -109,6 +119,11 @@
      * @param {string} type - Log type ('info', 'success', 'warning', 'error')
      */
     function log(message, type) {
+        // Cache elements if not already done
+        if (!elements.logArea) {
+            cacheElements();
+        }
+
         if (!elements.logArea) return;
 
         type = type || 'info';
