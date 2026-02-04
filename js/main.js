@@ -3028,12 +3028,13 @@ function generateHtmlReport() {
         html += '                <tr><th>' + (isRu ? 'Серия' : 'Series') + '</th><th>STDF</th><th>DF</th><th>ASNR</th><th>RMSE</th><th>R²</th><th>Pearson</th></tr>\n';
 
         for (var s = 0; s < numSeries; s++) {
-            var stdf = parseFloat(document.getElementById('STDF_' + s).textContent) || 0;
-            var df = parseFloat(document.getElementById('DF_' + s).textContent) || 0;
-            var asnr = parseFloat(document.getElementById('ASNR_' + s).textContent) || 0;
-            var rmse = parseFloat(document.getElementById('RMSE_' + s).textContent) || 0;
-            var r2 = parseFloat(document.getElementById('RSquared_' + s).textContent) || 0;
-            var pearson = parseFloat(document.getElementById('Pearson_' + s).textContent) || 0;
+            var metrics = appState.seriesMetrics && appState.seriesMetrics[s + 1] ? appState.seriesMetrics[s + 1] : {};
+            var stdf = metrics.STDF || 0;
+            var df = metrics.DF || 0;
+            var asnr = metrics.ASNR || 0;
+            var rmse = metrics.ARMSE || 0;
+            var r2 = metrics.R_squared || 0;
+            var pearson = metrics.R_Pirs || 0;
 
             var stdfClass = stdf < 0.01 ? 'quality-excellent' : (stdf < 0.05 ? 'quality-good' : 'quality-poor');
             var r2Class = r2 > 0.9 ? 'quality-excellent' : (r2 >= 0.7 ? 'quality-good' : 'quality-poor');
