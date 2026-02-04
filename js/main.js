@@ -3066,6 +3066,8 @@ function generateHtmlReport() {
         var totalOutliers = 0;
         for (var i = 0; i < appState.outlierMasks.length; i++) {
             var mask = appState.outlierMasks[i];
+            if (!mask || !Array.isArray(mask)) continue;
+
             var count = 0;
             for (var j = 0; j < mask.length; j++) {
                 if (mask[j] === 1) count++;
