@@ -1705,12 +1705,12 @@ details[open] .error-details-toggle::after {
 }
 
 .zoom-button {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
     border: 1px solid var(--accent-cyan);
     color: var(--accent-cyan);
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
     display: flex;
@@ -1718,6 +1718,7 @@ details[open] .error-details-toggle::after {
     justify-content: center;
     transition: all 0.3s;
     font-family: var(--font-mono);
+    white-space: nowrap;
 }
 
 .zoom-button:hover {
