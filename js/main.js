@@ -2751,7 +2751,10 @@ function resetSession() {
         document.getElementById('threshold').value = 1.4;
         document.getElementById('matrixSize').value = 16;
         document.getElementById('relativeSize').value = 4;
-        document.getElementById('chunkOptimization').checked = true;
+        var useChunks = document.getElementById('useChunks');
+        if (useChunks) {
+            useChunks.checked = true;
+        }
         document.getElementById('numChunks').value = 3;
 
         // Update parameter displays manually
@@ -2759,7 +2762,7 @@ function resetSession() {
         document.getElementById('thresholdValue').textContent = '1.40';
         document.getElementById('matrixSizeValue').textContent = '16 × 16';
         document.getElementById('relativeSizeValue').textContent = '4';
-        document.getElementById('chunkCountValue').textContent = '3';
+        document.getElementById('numChunksValue').textContent = '3';
 
         // Reset fill method dropdown
         document.getElementById('fillMethod').value = 'nearest';
