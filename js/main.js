@@ -3207,21 +3207,26 @@ function initializeViewToggle() {
 function switchView(view) {
     appState.currentView = view;
 
-    var chartContainer = document.getElementById('chartContainer');
+    var chartContainer = document.getElementById('dropZone');
     var tableContainer = document.getElementById('tableContainer');
     var chartViewBtn = document.getElementById('chartViewBtn');
     var tableViewBtn = document.getElementById('tableViewBtn');
 
+    if (!chartContainer || !tableContainer) {
+        console.warn('View containers not found');
+        return;
+    }
+
     if (view === 'chart') {
         chartContainer.style.display = 'block';
         tableContainer.style.display = 'none';
-        chartViewBtn.classList.add('active');
-        tableViewBtn.classList.remove('active');
+        if (chartViewBtn) chartViewBtn.classList.add('active');
+        if (tableViewBtn) tableViewBtn.classList.remove('active');
     } else {
         chartContainer.style.display = 'none';
         tableContainer.style.display = 'flex';
-        chartViewBtn.classList.remove('active');
-        tableViewBtn.classList.add('active');
+        if (chartViewBtn) chartViewBtn.classList.remove('active');
+        if (tableViewBtn) tableViewBtn.classList.add('active');
         updateTableSeriesSelect();
         renderTable();
     }
