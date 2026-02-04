@@ -1219,6 +1219,9 @@ function loadData() {
         // Update chart
         updateDataChart(data, null);
 
+        // Set visibility to original after load
+        setChartVisibility('original');
+
         // Force chart resize after update
         setTimeout(function() {
             if (appState.dataChart) {
