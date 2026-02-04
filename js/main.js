@@ -1787,9 +1787,9 @@ function updateDataChart(original, cleaned) {
                         type: 'scatter',
                         backgroundColor: '#ffaa00',
                         borderColor: '#ffcc00',
-                        borderWidth: 2,
-                        pointRadius: 6,
-                        pointHoverRadius: 10,
+                        borderWidth: 1,
+                        pointRadius: 1,
+                        pointHoverRadius: 2,
                         pointStyle: 'circle',
                         showLine: false,
                         order: 999 // Draw on top
