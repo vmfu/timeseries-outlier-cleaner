@@ -3623,9 +3623,8 @@ function getAllPresets() {
     var presets = JSON.parse(JSON.stringify(defaultPresets));
     var customPresets = Storage.loadPresets();
     if (customPresets) {
-        var parsed = JSON.parse(customPresets);
-        for (var key in parsed) {
-            presets[key] = parsed[key];
+        for (var key in customPresets) {
+            presets[key] = customPresets[key];
         }
     }
     return presets;
@@ -3665,10 +3664,8 @@ function updatePresetSelect() {
 
     // Add custom presets
     var customPresets = Storage.loadPresets();
-    var parsed = null;
     if (customPresets) {
-        parsed = JSON.parse(customPresets);
-        for (var key in parsed) {
+        for (var key in customPresets) {
             var customOption = document.createElement('option');
             customOption.value = key;
             customOption.textContent = key;
@@ -3677,7 +3674,7 @@ function updatePresetSelect() {
     }
 
     // Restore selection if still valid
-    if (currentValue && (defaultPresets[currentValue] || (parsed && parsed[currentValue]))) {
+    if (currentValue && (defaultPresets[currentValue] || (customPresets && customPresets[currentValue]))) {
         presetSelect.value = currentValue;
     }
 
@@ -3758,7 +3755,7 @@ function savePreset() {
     var customPresets = Storage.loadPresets();
     var presets = {};
     if (customPresets) {
-        presets = JSON.parse(customPresets);
+        presets = customPresets;
     }
 
     // Check if preset already exists
@@ -3808,7 +3805,7 @@ function deletePreset() {
     var customPresets = Storage.loadPresets();
     var presets = {};
     if (customPresets) {
-        presets = JSON.parse(customPresets);
+        presets = customPresets;
     }
 
     delete presets[presetName];
