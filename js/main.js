@@ -224,6 +224,7 @@ function initializeUI() {
         if (presetName && presetName !== '' && presetName !== '---') {
             applyPreset(presetName);
         }
+        updateDeleteButtonState();
     });
     document.getElementById('applyPresetBtn').addEventListener('click', function() {
         var presetName = document.getElementById('presetSelect').value;
@@ -255,6 +256,9 @@ function initializeUI() {
 
     // Initialize parameter preview
     updateParamsPreview();
+
+    // Initialize presets dropdown
+    updatePresetSelect();
 }
 
 /**
@@ -3654,14 +3658,16 @@ function updatePresetSelect() {
     // Add separator
     var separator = document.createElement('option');
     separator.value = '---';
-    separator.textContent = '--- ' + (currentLanguage === 'ru' ? 'Пользовательские пресеты' : 'Custom Presets') + ' ---';
+    var lang = I18n.getLanguage();
+    separator.textContent = '--- ' + (lang === 'ru' ? 'Пользовательские пресеты' : 'Custom Presets') + ' ---';
     separator.disabled = true;
     presetSelect.appendChild(separator);
 
     // Add custom presets
     var customPresets = Storage.loadPresets();
+    var parsed = null;
     if (customPresets) {
-        var parsed = JSON.parse(customPresets);
+        parsed = JSON.parse(customPresets);
         for (var key in parsed) {
             var customOption = document.createElement('option');
             customOption.value = key;
@@ -3710,10 +3716,10 @@ function applyPreset(presetName) {
     document.getElementById('windowWidthValue').textContent = preset.windowWidth;
 
     document.getElementById('threshold').value = preset.threshold;
-    document.getElementById('thresholdValue').textContent = preset.threshold;
+    document.getElementById('thresholdValue').textContent = preset.threshold.toFixed(2);
 
     document.getElementById('matrixSize').value = preset.matrixSize;
-    document.getElementById('matrixSizeValue').textContent = preset.matrixSize;
+    document.getElementById('matrixSizeValue').textContent = preset.matrixSize + ' × ' + preset.matrixSize;
 
     document.getElementById('relativeSize').value = preset.relativeSize;
     document.getElementById('relativeSizeValue').textContent = preset.relativeSize;
@@ -3791,7 +3797,7 @@ function deletePreset() {
         return;
     }
 
-    if (!confirm(I18n.t('presets.deleted') + '?')) {
+    if (!confirm(I18n.t('presets.confirmDelete'))) {
         return;
     }
 
