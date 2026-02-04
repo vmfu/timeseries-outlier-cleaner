@@ -1698,19 +1698,15 @@ details[open] .error-details-toggle::after {
     display: flex;
     gap: 5px;
     z-index: 100;
-    background: var(--bg-secondary);
-    border: var(--border-width) solid var(--border-color);
-    padding: 8px;
-    border-radius: 3px;
 }
 
 .zoom-button {
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
     background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
     border: 1px solid var(--accent-cyan);
     color: var(--accent-cyan);
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     cursor: pointer;
     display: flex;
