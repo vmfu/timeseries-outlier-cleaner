@@ -120,8 +120,9 @@
         if (!chart) return;
 
         chart.data.datasets.forEach(function(dataset, index) {
-            var isOriginal = dataset.label.includes('Original');
-            var isCleaned = dataset.label.includes('Cleaned');
+            var isOriginal = dataset.label.includes('Исходные') || dataset.label.includes('Original');
+            var isCleaned = dataset.label.includes('Очищенные') || dataset.label.includes('Cleaned');
+            var isOutlier = dataset.label.includes('Выбросы') || dataset.label.includes('Outliers');
 
             switch (mode) {
                 case 'original':
