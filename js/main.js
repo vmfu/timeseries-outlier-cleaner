@@ -585,18 +585,30 @@ function updateChartDatasetsVisibility() {
 
     var chart = appState.dataChart;
     var mode = appState.chartVisibility;
+    var numOriginalSeries = 0;
+    var numCleanedSeries = 0;
+
+    // First, count how many original and cleaned series we have
+    chart.data.datasets.forEach(function(dataset, index) {
+        var label = dataset.label || '';
+        if (label.includes('Исходные') || label.includes('Original')) {
+            numOriginalSeries++;
+        } else if (label.includes('Очищенные') || label.includes('Cleaned')) {
+            numCleanedSeries++;
+        }
+    });
 
     chart.data.datasets.forEach(function(dataset, index) {
-        // Original datasets are even indices (0, 2, 4, ...)
-        // Cleaned datasets are odd indices (1, 3, 5, ...)
-        var isOriginal = (index % 2 === 0);
+        var label = dataset.label || '';
+        var isOriginal = label.includes('Исходные') || label.includes('Original');
+        var isCleaned = label.includes('Очищенные') || label.includes('Cleaned');
 
         switch (mode) {
             case 'original':
                 dataset.hidden = !isOriginal;
                 break;
             case 'cleaned':
-                dataset.hidden = isOriginal;
+                dataset.hidden = !isCleaned;
                 break;
             case 'both':
                 dataset.hidden = false;
