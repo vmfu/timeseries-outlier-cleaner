@@ -12,8 +12,6 @@ const appState = {
     originalData: null,        // Raw loaded data (2D array)
     cleanedData: null,         // Processed data (2D array)
     currentFile: null,         // Current file being processed
-    batchQueue: [],            // Files to process
-    batchResults: [],          // Results from batch processing
     batchProcessing: false,    // Is batch processing active
     batchCancelled: false,     // Was batch processing cancelled
 
@@ -993,7 +991,8 @@ function processNextBatchItem(index) {
         return;
     }
 
-    var file = appState.batchQueue[index];
+    var queueItem = Queue.getStatus().queue[index];
+    var file = queueItem.file;
     appState.currentFile = file;
 
     // Update status
@@ -1183,7 +1182,8 @@ function loadData() {
         return;
     }
 
-    var file = appState.batchQueue[0];
+    var queueItem = Queue.getStatus().queue[0];
+    var file = queueItem.file;
     appState.currentFile = file;
 
     UI.log(I18n.t('msg.loading', {name: file.name}), 'info');
@@ -2711,7 +2711,6 @@ function resetSession() {
         appState.originalData = null;
         appState.cleanedData = null;
         appState.currentFile = null;
-        appState.batchQueue = [];
         appState.optimalParams = null;
         appState.outlierMasks = null;
         appState.seriesToClean = 0;
