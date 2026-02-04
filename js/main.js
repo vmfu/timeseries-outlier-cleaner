@@ -2485,6 +2485,9 @@ function handleCleanSeriesResult(data) {
         switchTab('data');
         updateDataChart(appState.originalData, appState.cleanedData);
 
+        // Switch to cleaned view
+        setChartVisibility('cleaned');
+
         // Update table series select
         updateTableSeriesSelect();
 
