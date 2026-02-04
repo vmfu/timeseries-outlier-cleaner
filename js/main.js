@@ -3733,6 +3733,9 @@ function applyPreset(presetName) {
     // Update app state
     appState.params = getCurrentParams();
 
+    // Update parameter preview
+    updateParamsPreview();
+
     UI.log(I18n.t('presets.applied', { name: presetName }), 'success');
 }
 
