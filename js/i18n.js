@@ -116,6 +116,13 @@
             'log.init': 'Система готова к работе. Приятного использования!',
             'log.systemInit': 'Система инициализирована. Готова к работе.',
             'log.workerInit': 'Встроенный Web Worker инициализирован.',
+            'log.workerExternalInit': 'Внешний Web Worker успешно инициализирован.',
+            'log.workerLoadError': 'Ошибка загрузки внешнего worker, использую встроенный...',
+            'log.workerNotInit': 'Worker не инициализирован',
+            'log.presetNotFound': 'Пресет не найден: {name}',
+            'log.cannotDeleteDefault': 'Нельзя удалить пресет по умолчанию: {name}',
+            'log.errorLogEmpty': 'Журнал ошибок пуст',
+            'log.errorLogExported': 'Журнал ошибок экспортирован: {filename}',
             'log.heatmapDraw': 'Отрисовка тепловой карты: {rows}x{cols}, NTF[0][0] = {ntf}',
             'log.heatmapShown': 'Карта параметров отображена',
 
@@ -450,6 +457,13 @@
             'log.init': 'System ready. Enjoy!',
             'log.systemInit': 'System initialized. Ready to work.',
             'log.workerInit': 'Built-in Web Worker initialized.',
+            'log.workerExternalInit': 'External Web Worker successfully initialized.',
+            'log.workerLoadError': 'Error loading external worker, using built-in...',
+            'log.workerNotInit': 'Worker not initialized',
+            'log.presetNotFound': 'Preset not found: {name}',
+            'log.cannotDeleteDefault': 'Cannot delete default preset: {name}',
+            'log.errorLogEmpty': 'Error log is empty',
+            'log.errorLogExported': 'Error log exported: {filename}',
             'log.heatmapDraw': 'Drawing heatmap: {rows}x{cols}, NTF[0][0] = {ntf}',
             'log.heatmapShown': 'Parameter map displayed',
 
@@ -801,6 +815,11 @@
             const text = t(key);
             element.textContent = text;
         });
+
+        // Update log messages
+        if (global.UI && global.UI.updateLogs) {
+            UI.updateLogs();
+        }
 
         console.log('[i18n] Updated all text elements');
     }

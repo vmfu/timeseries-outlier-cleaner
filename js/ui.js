@@ -12,6 +12,9 @@
 
     var elements = {};
 
+    // Log history for language switching
+    var logHistory = [];
+
     /**
      * Cache DOM elements for performance
      */
@@ -115,7 +118,7 @@
 
     /**
      * Add message to log
-     * @param {string} message - Log message
+     * @param {string|Object} message - Log message or i18n key object {key, params}
      * @param {string} type - Log type ('info', 'success', 'warning', 'error')
      */
     function log(message, type) {
@@ -130,12 +133,31 @@
         var now = new Date();
         var time = now.toTimeString().split(' ')[0];
 
+        // Store log entry for language switching
+        var logEntry = {
+            time: time,
+            type: type,
+            message: message,
+            i18nKey: null,
+            i18nParams: null
+        };
+
+        // Check if message is an i18n key object
+        if (typeof message === 'object' && message.key) {
+            logEntry.i18nKey = message.key;
+            logEntry.i18nParams = message.params;
+            message = global.I18n ? global.I18n.t(message.key, message.params) : message.key;
+        }
+
         var entry = document.createElement('div');
         entry.className = 'log-entry log-' + type;
         entry.innerHTML = '<span class="log-time">' + time + '</span><span class="log-message">' + message + '</span>';
 
         elements.logArea.appendChild(entry);
         elements.logArea.scrollTop = elements.logArea.scrollHeight;
+
+        // Store in history
+        logHistory.push(logEntry);
     }
 
     /**
@@ -145,6 +167,48 @@
         if (elements.logArea) {
             elements.logArea.innerHTML = '';
         }
+        logHistory = [];
+    }
+
+    /**
+     * Update all log messages for language switching
+     */
+    function updateLogs() {
+        if (!elements.logArea) {
+            cacheElements();
+        }
+
+        if (!elements.logArea) return;
+
+        elements.logArea.innerHTML = '';
+
+        for (var i = 0; i < logHistory.length; i++) {
+            var entry = logHistory[i];
+            var message = entry.message;
+
+            // Re-translate if i18n key is stored
+            if (entry.i18nKey && global.I18n) {
+                message = global.I18n.t(entry.i18nKey, entry.i18nParams);
+            }
+
+            var entryElement = document.createElement('div');
+            entryElement.className = 'log-entry log-' + entry.type;
+            entryElement.innerHTML = '<span class="log-time">' + entry.time + '</span><span class="log-message">' + message + '</span>';
+
+            elements.logArea.appendChild(entryElement);
+        }
+
+        elements.logArea.scrollTop = elements.logArea.scrollHeight;
+    }
+
+    /**
+     * Log a translatable message with i18n key
+     * @param {string} key - i18n translation key
+     * @param {Object} params - i18n parameters
+     * @param {string} type - Log type ('info', 'success', 'warning', 'error')
+     */
+    function logMsg(key, params, type) {
+        log({key: key, params: params}, type);
     }
 
     /**
@@ -192,7 +256,9 @@
         showProgressBar: showProgressBar,
         updateETA: updateETA,
         log: log,
+        logMsg: logMsg,
         clearLog: clearLog,
+        updateLogs: updateLogs,
         show: show,
         hide: hide,
         toggle: toggle

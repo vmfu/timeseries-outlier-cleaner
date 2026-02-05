@@ -319,7 +319,7 @@
     function exportErrorLog() {
         if (errorLog.length === 0) {
             if (global.UI && global.UI.log) {
-                UI.log('Журнал ошибок пуст', 'warning');
+                UI.logMsg('log.errorLogEmpty', null, 'warning');
             }
             return;
         }
@@ -341,7 +341,7 @@
         }
 
         if (global.UI && global.UI.log) {
-            UI.log('Журнал ошибок экспортирован: ' + filename, 'success');
+            UI.logMsg('log.errorLogExported', {filename: filename}, 'success');
         }
     }
 

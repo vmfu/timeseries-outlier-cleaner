@@ -3,8 +3,8 @@
  * Handles heavy computations to keep UI responsive
  */
 
-// Import scripts (relative path from worker file)
-importScripts('filloutliers.js', 'metrics.js');
+// Import scripts (relative path from worker file) with cache busting
+importScripts('filloutliers.js?v=' + Date.now(), 'metrics.js?v=' + Date.now());
 
 let currentJobId = null;
 
@@ -212,6 +212,7 @@ function handleTune(jobId, data) {
 
     console.log('[Worker] ========== END handleTune ==========');
     console.log('[Worker] Результат автоподбора:', result);
+    console.log('[Worker] result.NTF:', result.NTF ? `${result.NTF.length}x${result.NTF[0].length}` : 'null');
 
     self.postMessage({
         type: 'RESULT',
@@ -294,7 +295,7 @@ function parseAsciiData(content) {
             continue;
         }
 
-        const values = line.trim().split(/\s+/).map(v => parseFloat(v));
+        const values = line.trim().split(/[\s,;]+/).map(v => parseFloat(v));
 
         // Skip lines with no valid numbers
         if (values.some(isNaN)) {

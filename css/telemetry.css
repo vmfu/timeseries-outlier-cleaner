@@ -1038,22 +1038,21 @@ a:focus-visible {
 */
 
 .reset-button {
+    width: 100%;
     background: linear-gradient(180deg, #2a1515 0%, #1a0f0f 100%);
     border: 2px solid var(--accent-danger);
     color: var(--accent-danger);
-    padding: 12px 10px;
+    padding: 15px 10px;
     font-family: var(--font-mono);
     font-size: 11px;
     text-transform: uppercase;
     cursor: pointer;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
+    gap: 5px;
     transition: all 0.3s;
     text-align: center;
-    margin-top: 5px;
 }
 
 .reset-button:hover {
@@ -2257,6 +2256,11 @@ details[open] .error-details-toggle::after {
 
 canvas {
     max-width: 100%;
+}
+
+#heatmapCanvas {
+    min-width: 300px;
+    min-height: 200px;
 }
 
 /* Language Switcher */

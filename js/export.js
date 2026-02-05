@@ -24,34 +24,42 @@
         var includeCleaned = options && options.includeCleaned;
         var addValidityFlag = options && options.addValidityFlag;
 
-        var csv = '';
+        var csv = [];
         var rows = data.length;
         var cols = data[0].length;
         var numSeries = cols - 1;
 
+        // Use semicolon as delimiter (works with Excel in Russian locale)
+        var delimiter = ';';
+
         // Build header
-        csv += 'Time';
+        var header = ['Time'];
         for (var i = 1; i <= numSeries; i++) {
-            csv += ',Signal' + i;
+            header.push('Signal' + i);
             if (includeCleaned) {
-                csv += ',Signal' + i + '_Cleaned';
+                header.push('Signal' + i + '_Cleaned');
             }
         }
         if (addValidityFlag) {
-            csv += ',Valid';
+            header.push('Valid');
         }
-        csv += '\n';
+        csv.push(header.join(delimiter));
 
         // Build data rows
         for (var r = 0; r < rows; r++) {
+            var row = [];
             for (var c = 0; c < cols; c++) {
-                if (c > 0) csv += ',';
-                csv += data[r][c];
+                // Wrap in quotes if contains special characters
+                var val = String(data[r][c]);
+                if (val.indexOf(delimiter) !== -1 || val.indexOf('"') !== -1 || val.indexOf('\n') !== -1) {
+                    val = '"' + val.replace(/"/g, '""') + '"';
+                }
+                row.push(val);
             }
-            csv += '\n';
+            csv.push(row.join(delimiter));
         }
 
-        return csv;
+        return csv.join('\r\n');
     }
 
     /**
@@ -71,7 +79,14 @@
      * @param {string} mimeType - MIME type
      */
     function downloadFile(content, filename, mimeType) {
-        var blob = new Blob([content], { type: mimeType });
+        // Add BOM for Excel to recognize UTF-8 encoding
+        var bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+        var encoder = new TextEncoder();
+        var contentBytes = encoder.encode(content);
+        var bytes = new Uint8Array(bom.length + contentBytes.length);
+        bytes.set(bom, 0);
+        bytes.set(contentBytes, bom.length);
+        var blob = new Blob([bytes], { type: mimeType });
         var url = URL.createObjectURL(blob);
         var link = document.createElement('a');
         link.href = url;

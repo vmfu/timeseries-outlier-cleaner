@@ -817,8 +817,16 @@ function findOptimalParamsFromMatrix(NTF, baseWindow, threshFactor, matrixSize, 
     // winWidth = abs(winWidth + (matrixSize * d / 2) - (IminNTF_k * d) - 1) + 1;
     // threshFactor = abs(threshFactor + (matrixSize * d / 2) - (d * IminNTF_j) - 1) + 1;
 
-    const windowWidth = Math.abs(baseWindow + (matrixSize * step / 2) - (minI * step) - 1) + 1;
-    const newThreshFactor = Math.abs(threshFactor + (matrixSize * step / 2) - (step * minJ) - 1) + 1;
+    // For second pass (d=1), grid is already centered around baseWindow/threshFactor
+    // So parameters are: base + (minIndex - matrixSize/2)
+    let windowWidth, newThreshFactor;
+    if (step === 1) {
+        windowWidth = baseWindow + (minI - matrixSize / 2);
+        newThreshFactor = threshFactor + (minJ - matrixSize / 2);
+    } else {
+        windowWidth = Math.abs(baseWindow + (matrixSize * step / 2) - (minI * step) - 1) + 1;
+        newThreshFactor = Math.abs(threshFactor + (matrixSize * step / 2) - (step * minJ) - 1) + 1;
+    }
 
     return {
         windowWidth: windowWidth,

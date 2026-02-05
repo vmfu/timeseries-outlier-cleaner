@@ -244,9 +244,9 @@ classdef OutlierCleaner_APP_GPT < matlab.apps.AppBase
                 
                 % Пересчитываем параметры winWidth и threshFactor на основе найденных индексов
                 if d == 1
-                    % Второй проход: восстанавливаем оптимальные значения из первого прохода
-                    winWidth = optimalWinWidth;
-                    threshFactor = optimalThreshFactor;
+                    % Второй проход: сетка уже центрирована вокруг оптимальных значений
+                    winWidth = optimalWinWidth + (IminNTF_k - matrixSize/2);
+                    threshFactor = optimalThreshFactor + (IminNTF_j - matrixSize/2);
                 else
                     % Первый проход: вычисляем и сохраняем оптимальные значения
                     winWidth = abs(winWidth + (matrixSize * d / 2) - (IminNTF_k * d) - 1) + 1;

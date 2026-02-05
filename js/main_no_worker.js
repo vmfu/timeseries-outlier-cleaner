@@ -208,6 +208,13 @@ function loadData() {
         log('Файл загружен: ' + data.length + ' точек, ' + (data[0].length - 1) + ' серий', 'success');
         log('ВНИМАНИЕ: Без Web Worker операция очистки может занять время!', 'warning');
 
+        // Reset zoom
+        setTimeout(function() {
+            if (appState.dataChart && typeof appState.dataChart.resetZoom === 'function') {
+                appState.dataChart.resetZoom();
+            }
+        }, 150);
+
     }).catch(function(error) {
         log('Ошибка загрузки файла: ' + error.message, 'error');
         console.error('File loading error:', error);
@@ -239,7 +246,7 @@ function parseAsciiData(content) {
             continue;
         }
 
-        var values = trimmed.split(/[\s,]+/)
+        var values = trimmed.split(/[\s,;]+/)
             .map(function(v) { return parseFloat(v); })
             .filter(function(v) { return !isNaN(v); });
 

@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeUI();
     initializeLanguageSwitcher();
     initializeCharts();
-    UI.log(I18n.t('log.systemInit'), 'info');
+    UI.logMsg('log.systemInit', null, 'info');
 
     // Handle window resize with debounce for performance
     window.addEventListener('resize', Utils.debounce(function() {
@@ -90,15 +90,18 @@ function initializeWorker() {
         // Add timestamp to prevent caching
         var workerUrl = 'js/worker.js?v=' + Date.now();
 
+        console.log('[Main] Пытаюсь загрузить внешний worker из:', workerUrl);
+
         // Try to load worker from file (requires server)
         worker = new Worker(workerUrl);
         worker.onmessage = handleWorkerMessage;
         worker.onerror = handleWorkerError;
-        UI.log('Web Worker успешно инициализирован (внешний).', 'success');
+        console.log('[Main] Внешний worker успешно загружен');
+        UI.logMsg('log.workerExternalInit', null, 'success');
     } catch (error) {
         // Fall back to inline worker (works without server)
-        UI.log('[Main] Ошибка загрузки внешнего worker, использую встроенный...', error);
-        UI.log(I18n.t('error.workerLoad'), 'warning');
+        UI.logMsg('log.workerLoadError', null, 'warning');
+        UI.logMsg('error.workerLoad', null, 'warning');
         console.error('Worker initialization error:', error);
         initializeInlineWorker();
     }
@@ -115,8 +118,17 @@ function initializeInlineWorker() {
             console.warn('Inline worker code not found, skipping worker initialization');
             return;
         }
-        
+
         var workerCode = workerCodeElement.textContent;
+
+        // Add metrics.js code to worker (it needs to be inline)
+        var metricsCodeElement = document.getElementById('metrics-code');
+        if (metricsCodeElement) {
+            workerCode = metricsCodeElement.textContent + '\n' + workerCode;
+        } else {
+            console.warn('Metrics code not found, trying to import it');
+        }
+
         var blob = new Blob([workerCode], { type: 'application/javascript' });
         var workerUrl = URL.createObjectURL(blob);
 
@@ -124,9 +136,10 @@ function initializeInlineWorker() {
         worker.onmessage = handleWorkerMessage;
         worker.onerror = handleWorkerError;
 
-        UI.log(I18n.t('log.workerInit'), 'success');
+        console.log('[Main] Inline worker initialized, code length:', workerCode.length);
+        UI.logMsg('log.workerInit', null, 'success');
     } catch (error) {
-        UI.log(I18n.t('error.workerInitInternal', {message: error.message}), 'error');
+        UI.logMsg('error.workerInitInternal', {message: error.message}, 'error');
         console.error('Inline worker initialization error:', error);
     }
 }
@@ -174,9 +187,9 @@ function initializeUI() {
     document.getElementById('useChunks').addEventListener('change', function() {
         appState.params.useChunks = this.checked;
         if (this.checked) {
-            UI.log(I18n.t('msg.optimizationEnabled'), 'info');
+            UI.logMsg('msg.optimizationEnabled', null, 'info');
         } else {
-            UI.log(I18n.t('msg.optimizationDisabled'), 'info');
+            UI.logMsg('msg.optimizationDisabled', null, 'info');
         }
     });
 
@@ -367,12 +380,12 @@ function handleDrop(event) {
     });
 
     if (validFiles.length === 0) {
-        UI.log(I18n.t('dropZone.invalidType'), 'warning');
+        UI.logMsg('dropZone.invalidType', null, 'warning');
         return;
     }
 
     if (validFiles.length !== files.length) {
-        UI.log(I18n.t('dropZone.someSkipped'), 'warning');
+        UI.logMsg('dropZone.someSkipped', null, 'warning');
     }
 
     // Load files
@@ -381,7 +394,7 @@ function handleDrop(event) {
     displaySelectedFiles(validFiles);
     document.getElementById('loadBtn').disabled = false;
 
-    UI.log(I18n.t('msg.filesSelected', {count: validFiles.length}), 'info');
+    UI.logMsg('msg.filesSelected', {count: validFiles.length}, 'info');
 }
 
 /**
@@ -851,7 +864,7 @@ function handleFileSelect(event) {
 
         document.getElementById('loadBtn').disabled = false;
 
-        UI.log(I18n.t('msg.filesSelected', {count: files.length}), 'info');
+        UI.logMsg('msg.filesSelected', {count: files.length}, 'info');
     } catch (error) {
         ErrorHandler.show(error, ErrorHandler.types.FILE_LOAD, 'handleFileSelect');
     }
@@ -966,14 +979,14 @@ function formatFileSize(bytes) {
  */
 function cancelBatchItem(index) {
     if (Queue.getStatus().isProcessing) {
-        UI.log(I18n.t('batch.cannotCancelDuring'), 'warning');
+        UI.logMsg('batch.cannotCancelDuring', null, 'warning');
         return;
     }
     Queue.removeFromQueue(index);
     displaySelectedFiles(Queue.getStatus().queue);
     UI.updateFileCount(Queue.getStatus().queue.length);
     document.getElementById('prominentFileCount').textContent = Queue.getStatus().queue.length;
-    UI.log(I18n.t('batch.itemRemoved'), 'info');
+    UI.logMsg('batch.itemRemoved', null, 'info');
 }
 
 /**
@@ -981,16 +994,16 @@ function cancelBatchItem(index) {
  */
 function processBatchQueue() {
     if (Queue.getStatus().queue.length === 0) {
-        UI.log(I18n.t('msg.noFiles'), 'warning');
+        UI.logMsg('msg.noFiles', null, 'warning');
         return;
     }
 
     if (Queue.getStatus().isProcessing) {
-        UI.log(I18n.t('batch.alreadyProcessing'), 'warning');
+        UI.logMsg('batch.alreadyProcessing', null, 'warning');
         return;
     }
 
-    Queue.startProcessing();UI.log(I18n.t('batch.started', {count: Queue.getStatus().queue.length}), 'info');
+    Queue.startProcessing();UI.logMsg('batch.started', {count: Queue.getStatus().queue.length}, 'info');
 
     // Disable controls
     document.getElementById('batchProcessBtn').disabled = true;
@@ -1014,7 +1027,7 @@ function processNextBatchItem(index) {
 
     // Update status
     updateBatchItemStatus(index, 'processing', 0);
-    UI.log(I18n.t('batch.processing', {index: index + 1, total: Queue.getStatus().queue.length, name: file.name}), 'info');
+    UI.logMsg('batch.processing', {index: index + 1, total: Queue.getStatus().queue.length, name: file.name}, 'info');
 
     // Load file
     readFileContent(file).then(function(content) {
@@ -1052,7 +1065,7 @@ function processNextBatchItem(index) {
     }).catch(function(error) {
         console.error('Batch processing error:', error);
         updateBatchItemStatus(index, 'error', 0);
-        UI.log(I18n.t('batch.itemError', {name: file.name, message: error.message}), 'error');
+        UI.logMsg('batch.itemError', {name: file.name, message: error.message}, 'error');
 
         // Continue to next item
         setTimeout(function() {
@@ -1134,10 +1147,10 @@ function completeBatchProcessing() {
     document.getElementById('loadBtn').disabled = false;
 
     if (Queue.getStatus().isCancelled) {
-        UI.log(I18n.t('batch.cancelled'), 'warning');
+        UI.logMsg('batch.cancelled', null, 'warning');
     } else {
-        UI.log(I18n.t('batch.completed', {count: Queue.getStatus().results.length}), 'success');
-        UI.log(I18n.t('batch.exportHint'), 'info');
+        UI.logMsg('batch.completed', {count: Queue.getStatus().results.length}, 'success');
+        UI.logMsg('batch.exportHint', null, 'info');
 
         // Show batch export button
         var exportBtn = document.getElementById('exportBatchBtn');
@@ -1157,7 +1170,7 @@ function cancelBatchProcessing() {
 
     if (confirm(I18n.t('batch.confirmCancel'))) {
         Queue.cancelProcessing();
-        UI.log(I18n.t('batch.cancelling'), 'warning');
+        UI.logMsg('batch.cancelling', null, 'warning');
     }
 }
 
@@ -1166,11 +1179,11 @@ function cancelBatchProcessing() {
  */
 function exportBatchResults() {
     if (Queue.getStatus().results.length === 0) {
-        UI.log(I18n.t('batch.noResults'), 'warning');
+        UI.logMsg('batch.noResults', null, 'warning');
         return;
     }
 
-    UI.log(I18n.t('batch.exporting'), 'info');
+    UI.logMsg('batch.exporting', null, 'info');
 
     // Export each result as a separate file
     Queue.getStatus().results.forEach(function(result, index) {
@@ -1184,10 +1197,10 @@ function exportBatchResults() {
 
         Export.downloadFile(saveData, filename);
 
-        UI.log(I18n.t('batch.saved', {name: filename}), 'success');
+        UI.logMsg('batch.saved', {name: filename}, 'success');
     });
 
-    UI.log(I18n.t('batch.exportComplete', {count: Queue.getStatus().results.length}), 'success');
+    UI.logMsg('batch.exportComplete', {count: Queue.getStatus().results.length}, 'success');
 }
 
 /**
@@ -1195,7 +1208,7 @@ function exportBatchResults() {
  */
 function loadData() {
     if (Queue.getStatus().queue.length === 0) {
-        UI.log(I18n.t('msg.noFiles'), 'warning');
+        UI.logMsg('msg.noFiles', null, 'warning');
         return;
     }
 
@@ -1203,7 +1216,7 @@ function loadData() {
     var file = queueItem.file;
     appState.currentFile = file;
 
-    UI.log(I18n.t('msg.loading', {name: file.name}), 'info');
+    UI.logMsg('msg.loading', {name: file.name}, 'info');
 
     readFileContent(file).then(function(content) {
         var data = parseAsciiData(content);
@@ -1244,11 +1257,18 @@ function loadData() {
         document.getElementById('exportJsonBtn').disabled = true;
         document.getElementById('exportHtmlBtn').disabled = true;
 
-        UI.log(I18n.t('msg.loaded', {points: data.length, series: data[0].length - 1}), 'success');
-        UI.log(I18n.t('msg.readyTune'), 'info');
+        UI.logMsg('msg.loaded', {points: data.length, series: data[0].length - 1}, 'success');
+        UI.logMsg('msg.readyTune', null, 'info');
+
+        // Reset zoom
+        setTimeout(function() {
+            if (appState.dataChart && typeof appState.dataChart.resetZoom === 'function') {
+                appState.dataChart.resetZoom();
+            }
+        }, 150);
 
     }).catch(function(error) {
-        UI.log(I18n.t('error.fileLoad', {message: error.message}), 'error');
+        UI.logMsg('error.fileLoad', {message: error.message}, 'error');
         console.error('File loading error:', error);
     });
 }
@@ -1290,8 +1310,8 @@ function parseAsciiData(content) {
                 continue;
             }
 
-            // Parse values (handle tab, space, comma separators)
-            var values = trimmed.split(/[\s,]+/)
+            // Parse values (handle tab, space, comma, semicolon separators)
+            var values = trimmed.split(/[\s,;]+/)
                 .map(function(v) { return parseFloat(v); })
                 .filter(function(v) { return !isNaN(v); });
 
@@ -1454,10 +1474,10 @@ function toggleAdvancedSettings() {
 
     if (isVisible) {
         settings.classList.remove('hidden');
-        UI.log(I18n.t('msg.settingsShown'), 'info');
+        UI.logMsg('msg.settingsShown', null, 'info');
     } else {
         settings.classList.add('hidden');
-        UI.log(I18n.t('msg.settingsHidden'), 'info');
+        UI.logMsg('msg.settingsHidden', null, 'info');
     }
 }
 
@@ -1484,6 +1504,16 @@ function switchTab(tabName) {
     setTimeout(function() {
         if (appState.dataChart && tabName === 'data') {
             appState.dataChart.resize();
+        }
+        // Redraw heatmap when switching to heatmap tab
+        if (tabName === 'heatmap' && appState.heatmapMatrix && appState.heatmapOptimal) {
+            // Use requestAnimationFrame to ensure layout is complete
+            requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                    drawHeatmap(appState.heatmapMatrix, appState.heatmapOptimal);
+                    initializeHeatmapInteraction();
+                });
+            });
         }
     }, 50);
 }
@@ -1840,8 +1870,13 @@ function updateDataChart(original, cleaned) {
  * Draw heatmap from NTF matrix
  */
 function drawHeatmap(NTF, optimalParams) {
+    console.log('[drawHeatmap] Начинаю рисование heatmap');
+
     var canvas = document.getElementById('heatmapCanvas');
-    if (!canvas) return;
+    if (!canvas) {
+        console.error('[drawHeatmap] canvas не найден!');
+        return;
+    }
 
     // Hide no data message
     document.getElementById('noHeatmapMessage').classList.add('hidden');
@@ -1850,10 +1885,23 @@ function drawHeatmap(NTF, optimalParams) {
     var rows = NTF.length;
     var cols = NTF[0].length;
 
+    console.log('[drawHeatmap] NTF размеры:', rows, 'x', cols, 'First value:', NTF[0] ? NTF[0][0] : 'undefined');
+
     // Set canvas size (use parent container dimensions)
     var container = canvas.parentElement;
-    canvas.width = container.offsetWidth;
-    canvas.height = container.offsetHeight;
+    var containerWidth = container.offsetWidth;
+    var containerHeight = container.offsetHeight;
+
+    console.log('[drawHeatmap] Контейнер размеры:', containerWidth, 'x', containerHeight);
+
+    // Use minimum size if container has no dimensions
+    if (containerWidth < 100) containerWidth = 600;
+    if (containerHeight < 100) containerHeight = 400;
+
+    canvas.width = containerWidth;
+    canvas.height = containerHeight;
+
+    console.log('[drawHeatmap] Установлены размеры canvas:', canvas.width, 'x', canvas.height);
 
     // Clear canvas
     ctx.fillStyle = '#0a0a0f';
@@ -1873,7 +1921,7 @@ function drawHeatmap(NTF, optimalParams) {
     var cellWidth = canvas.width / cols;
     var cellHeight = canvas.height / rows;
 
-    UI.log(I18n.t('log.heatmapDraw', {rows: rows, cols: cols, ntf: NTF[0][0]}), 'info');
+    UI.logMsg('log.heatmapDraw', {rows: rows, cols: cols, ntf: NTF[0][0]}, 'info');
 
     // Draw heatmap
     for (var i = 0; i < rows; i++) {
@@ -1920,7 +1968,7 @@ function drawHeatmap(NTF, optimalParams) {
     // Draw color scale
     drawColorScale(ctx, canvas, minVal, maxVal);
 
-    UI.log(I18n.t('log.heatmapShown'), 'success');
+    UI.logMsg('log.heatmapShown', null, 'success');
 }
 
 /**
@@ -2163,7 +2211,7 @@ function applyHeatmapParameters(windowWidth, threshold) {
     document.getElementById('thresholdValue').textContent = threshold.toFixed(3);
 
     // Log the parameter change
-    UI.log(I18n.t('heatmap.selected', {window: windowWidth.toFixed(0), threshold: threshold.toFixed(3)}), 'info');
+    UI.logMsg('heatmap.selected', {window: windowWidth.toFixed(0), threshold: threshold.toFixed(3)}, 'info');
 }
 
 // ============================================================================
@@ -2175,7 +2223,7 @@ function applyHeatmapParameters(windowWidth, threshold) {
  */
 function sendToWorker(type, data) {
     if (!worker) {
-        UI.log('Worker не инициализирован', 'error');
+        UI.logMsg('log.workerNotInit', null, 'error');
         return;
     }
 
@@ -2240,7 +2288,7 @@ function handleWorkerMessage(event) {
  * Handle worker error
  */
 function handleWorkerError(error) {
-    UI.log(I18n.t('error.worker', {message: error.message}), 'error');
+    UI.logMsg('error.worker', {message: error.message}, 'error');
     showLoadingOverlay(false);
 }
 
@@ -2290,7 +2338,7 @@ function handleResult(data) {
  * Handle error from worker
  */
 function handleError(data) {
-    UI.log(I18n.t('error.execution', {message: data.message}), 'error');
+    UI.logMsg('error.execution', {message: data.message}, 'error');
     showLoadingOverlay(false);
 }
 
@@ -2304,11 +2352,11 @@ function handleError(data) {
 function autoTune() {
     try {
         if (!appState.originalData) {
-            UI.log(I18n.t('msg.noData'), 'warning');
+            UI.logMsg('msg.noData', null, 'warning');
             return;
         }
 
-        UI.log(I18n.t('msg.tuning'), 'info');
+        UI.logMsg('msg.tuning', null, 'info');
 
         // Prepare data (remove time column for cleaning)
         var signalData = appState.originalData.map(function(row) {
@@ -2337,12 +2385,16 @@ function autoTune() {
  * Handle auto-tune result
  */
 function handleTuneResult(data) {
+    console.log('[Main] ===== handleTuneResult START =====');
     console.log('[Main] Получен результат автоподбора:', data);
+    console.log('[Main] data.NTF:', data.NTF);
+    console.log('[Main] data.optimalParams:', data.optimalParams);
+
     var optimalParams = data.optimalParams;
 
     if (!optimalParams) {
         console.error('[Main] Ошибка: optimalParams не определен!');
-        UI.log(I18n.t('error.tuneFailed'), 'error');
+        UI.logMsg('error.tuneFailed', null, 'error');
         return;
     }
 
@@ -2367,15 +2419,23 @@ function handleTuneResult(data) {
     if (data.NTF) {
         appState.heatmapMatrix = data.NTF;
         appState.heatmapOptimal = optimalParams;
-        drawHeatmap(data.NTF, optimalParams);
-        initializeHeatmapInteraction();
+        console.log('[Main] NTF получена, рисую heatmap. Размеры:', data.NTF.length, 'x', data.NTF[0].length);
+        // Draw heatmap with requestAnimationFrame for proper sizing
+        requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+                drawHeatmap(data.NTF, optimalParams);
+                initializeHeatmapInteraction();
+            });
+        });
+    } else {
+        console.warn('[Main] NTF отсутствует в данных от worker!');
     }
 
     // Enable clean button
     document.getElementById('cleanBtn').disabled = false;
 
-    UI.log(I18n.t('msg.tuned', {window: optimalParams.windowWidth.toFixed(0), threshold: optimalParams.threshold.toFixed(2)}), 'success');
-    UI.log(I18n.t('msg.readyClean'), 'info');
+    UI.logMsg('msg.tuned', {window: optimalParams.windowWidth.toFixed(0), threshold: optimalParams.threshold.toFixed(2)}, 'success');
+    UI.logMsg('msg.readyClean', null, 'info');
 }
 
 // ============================================================================
@@ -2388,11 +2448,11 @@ function handleTuneResult(data) {
 function cleanData() {
     try {
         if (!appState.originalData) {
-            UI.log(I18n.t('msg.noData'), 'warning');
+            UI.logMsg('msg.noData', null, 'warning');
             return;
         }
 
-    UI.log(I18n.t('msg.cleaning'), 'info');
+    UI.logMsg('msg.cleaning', null, 'info');
 
     var numSeries = appState.originalData[0].length - 1;
 
@@ -2476,14 +2536,14 @@ function handleCleanSeriesResult(data) {
     appState.seriesCleaned++;
     var progress = (appState.seriesCleaned / appState.seriesToClean) * 100;
 
-    UI.log(I18n.t('msg.cleanedSeries', {n: seriesIndex, total: appState.seriesToClean, percent: Math.round(progress)}), 'info');
+    UI.logMsg('msg.cleanedSeries', {n: seriesIndex, total: appState.seriesToClean, percent: Math.round(progress)}, 'info');
 
     // Update progress bar
     updateProgress(progress, I18n.t('msg.cleaningSeries', {n: seriesIndex, total: appState.seriesToClean}));
 
     // If all series are cleaned, update UI
     if (appState.seriesCleaned >= appState.seriesToClean) {
-        UI.log(I18n.t('msg.cleanedAll'), 'success');
+        UI.logMsg('msg.cleanedAll', null, 'success');
 
         // Update metrics (average of all series from worker results)
         var avgMetrics = computeAverageMetrics();
@@ -2502,7 +2562,7 @@ function handleCleanSeriesResult(data) {
         // Enable save button
         document.getElementById('saveBtn').disabled = false;
 
-        UI.log(I18n.t('msg.readySave'), 'info');
+        UI.logMsg('msg.readySave', null, 'info');
     }
 }
 
@@ -2626,11 +2686,11 @@ function computeAllSeriesMetrics() {
  */
 function saveData() {
     if (!appState.cleanedData) {
-        UI.log(I18n.t('msg.noCleaned'), 'warning');
+        UI.logMsg('msg.noCleaned', null, 'warning');
         return;
     }
 
-    UI.log(I18n.t('msg.saving'), 'info');
+    UI.logMsg('msg.saving', null, 'info');
 
     try {
         var saveRestored = document.getElementById('saveRestored').checked;
@@ -2704,7 +2764,7 @@ function saveData() {
         // Trigger download
         Export.downloadFile(content, filename);
 
-        UI.log(I18n.t('msg.saved', {name: filename, rows: outputData.length}), 'success');
+        UI.logMsg('msg.saved', {name: filename, rows: outputData.length}, 'success');
 
     } catch (error) {
         ErrorHandler.show(error, ErrorHandler.types.EXPORT, 'saveData');
@@ -2814,9 +2874,12 @@ function resetSession() {
         hideResetModal();
 
         // Log success
-        UI.log(I18n.t('msg.resetComplete'), 'success');
+        UI.logMsg('msg.resetComplete', null, 'success');
 
         console.log('Session reset complete');
+
+        // Reload page
+        location.reload();
 
     } catch (error) {
         console.error('Reset error:', error);
@@ -2850,12 +2913,12 @@ function resetZoom() {
  */
 function exportJsonReport() {
     if (!appState.cleanedData) {
-        UI.log(I18n.t('msg.noCleanedForReport'), 'warning');
+        UI.logMsg('msg.noCleanedForReport', null, 'warning');
         return;
     }
 
     try {
-        UI.log(I18n.t('msg.saving'), 'info');
+        UI.logMsg('msg.saving', null, 'info');
 
         // Prepare report data
         var report = {
@@ -2925,7 +2988,7 @@ function exportJsonReport() {
         // Trigger download
         Export.downloadFile(content, filename);
 
-        UI.log(I18n.t('msg.exportedJson', {name: filename}), 'success');
+        UI.logMsg('msg.exportedJson', {name: filename}, 'success');
 
     } catch (error) {
         ErrorHandler.show(error, ErrorHandler.types.EXPORT, 'exportJsonReport');
@@ -2937,12 +3000,12 @@ function exportJsonReport() {
  */
 function exportHtmlReport() {
     if (!appState.cleanedData) {
-        UI.log(I18n.t('msg.noCleanedForReport'), 'warning');
+        UI.logMsg('msg.noCleanedForReport', null, 'warning');
         return;
     }
 
     try {
-        UI.log(I18n.t('msg.saving'), 'info');
+        UI.logMsg('msg.saving', null, 'info');
 
         // Generate HTML content
         var html = generateHtmlReport();
@@ -2956,7 +3019,7 @@ function exportHtmlReport() {
         // Trigger download
         Export.downloadFile(html, filename);
 
-        UI.log(I18n.t('msg.exportedHtml', {name: filename}), 'success');
+        UI.logMsg('msg.exportedHtml', {name: filename}, 'success');
 
     } catch (error) {
         ErrorHandler.show(error, ErrorHandler.types.EXPORT, 'exportHtmlReport');
@@ -3128,10 +3191,6 @@ function generateHtmlReport() {
 function formatAsciiData(data) {
     var lines = [];
 
-    // Header comment
-    lines.push('# ' + I18n.t('msg.fileHeader'));
-    lines.push('# ' + I18n.t('msg.generated') + ' ' + new Date().toISOString());
-
     // Data rows
     for (var i = 0; i < data.length; i++) {
         var row = data[i];
@@ -3148,18 +3207,14 @@ function formatAsciiData(data) {
 function formatCsvData(data) {
     var lines = [];
 
-    // Header comment
-    lines.push('# ' + I18n.t('msg.fileHeader'));
-    lines.push('# ' + I18n.t('msg.generated') + ' ' + new Date().toISOString());
-
-    // Data rows with comma separator
+    // Data rows with semicolon separator (for Excel Russian locale)
     for (var i = 0; i < data.length; i++) {
         var row = data[i];
-        var formatted = row.map(function(v) { return v.toFixed(6); }).join(',');
+        var formatted = row.map(function(v) { return v.toFixed(6); }).join(';');
         lines.push(formatted);
     }
 
-    return lines.join('\n');
+    return lines.join('\r\n');
 }
 
 
@@ -3542,7 +3597,7 @@ function exportTableToCSV() {
     var data = getFilteredTableData();
 
     if (data.length === 0) {
-        UI.log(I18n.t('msg.noCleanedForReport'), 'error');
+        UI.logMsg('msg.noCleanedForReport', null, 'error');
         return;
     }
 
@@ -3576,7 +3631,7 @@ function exportTableToCSV() {
     var filename = (appState.currentFile ? appState.currentFile.name.replace(/\.[^/.]+$/, '') : 'data') + '_table.csv';
     Export.downloadFile(csvContent, filename);
 
-    UI.log(I18n.t('msg.saved', { name: filename, rows: data.length }), 'success');
+    UI.logMsg('msg.saved', {name: filename, rows: data.length}, 'success');
 }
 
 // ============================================================================
@@ -3704,7 +3759,7 @@ function applyPreset(presetName) {
     var preset = presets[presetName];
 
     if (!preset) {
-        UI.log('Preset not found: ' + presetName, 'error');
+        UI.logMsg('log.presetNotFound', {name: presetName}, 'error');
         return;
     }
 
@@ -3733,7 +3788,7 @@ function applyPreset(presetName) {
     // Update parameter preview
     updateParamsPreview();
 
-    UI.log(I18n.t('presets.applied', { name: presetName }), 'success');
+    UI.logMsg('presets.applied', {name: presetName}, 'success');
 }
 
 /**
@@ -3775,7 +3830,7 @@ function savePreset() {
     // Select the new preset
     document.getElementById('presetSelect').value = name;
 
-    UI.log(I18n.t('presets.saved', { name: name }), 'success');
+    UI.logMsg('presets.saved', {name: name}, 'success');
 
     updateDeleteButtonState();
 }
@@ -3793,7 +3848,7 @@ function deletePreset() {
 
     // Don't delete default presets
     if (defaultPresets[presetName]) {
-        UI.log('Cannot delete default preset: ' + presetName, 'error');
+        UI.logMsg('log.cannotDeleteDefault', {name: presetName}, 'error');
         return;
     }
 
@@ -3814,7 +3869,7 @@ function deletePreset() {
     // Update dropdown
     updatePresetSelect();
 
-    UI.log(I18n.t('presets.deleted') + ': ' + presetName, 'success');
+    UI.logMsg('presets.deleted', null, 'success');
 }
 
 /**
