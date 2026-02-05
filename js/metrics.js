@@ -392,6 +392,7 @@ function computeAllMetricsMultiSeries(originalMatrix, cleanedMatrix) {
  * @returns {Float64Array[]} Smoothed matrix
  */
 function smoothMatrix(matrix, radius = 1) {
+    console.log(`[smoothMatrix] Вход: ${matrix.length}x${matrix[0].length}, radius=${radius}`);
     const rows = matrix.length;
     const cols = matrix[0].length;
 
@@ -400,7 +401,10 @@ function smoothMatrix(matrix, radius = 1) {
     const smoothedRows = rows - 2 * radius;
     const smoothedCols = cols - 2 * radius;
 
+    console.log(`[smoothMatrix] Выходные размеры: ${smoothedRows}x${smoothedCols}`);
+
     if (smoothedRows <= 0 || smoothedCols <= 0) {
+        console.log('[smoothMatrix] Размеры <= 0, возвращаю копию исходной матрицы');
         return matrix.map(row => [...row]);
     }
 
@@ -427,6 +431,7 @@ function smoothMatrix(matrix, radius = 1) {
         smoothed.push(row);
     }
 
+    console.log(`[smoothMatrix] Возврат: ${smoothed.length}x${smoothed[0].length}`);
     return smoothed;
 }
 
@@ -445,27 +450,31 @@ function performGridSearch(originalData, params, progressCallback) {
     console.log('[Worker] ========== START performGridSearch ==========');
     console.log('[Worker] Параметры:', params);
 
-    let {
-        windowWidth: baseWindow = 40,
-        threshold: baseThreshold = 1.4,
-        matrixSize = 16,
-        relativeSize: step = 4,
-        fillMethod = 'nearest',
-        numChunks = 3, // New parameter: number of chunks to select
-        useChunks = true // New parameter: enable chunk optimization
-    } = params;
+    var baseWindow = params.windowWidth || 40;
+    var baseThreshold = params.threshold || 1.4;
+    var matrixSize = params.matrixSize || 16;
+    var step = params.relativeSize || 4;
+    var fillMethod = params.fillMethod || 'nearest';
+    var numChunks = params.numChunks || 3;
+    var useChunks = params.useChunks !== false;
 
     console.log('[Worker] Распакованные параметры:', {
-        baseWindow, baseThreshold, matrixSize, step, fillMethod, numChunks, useChunks
+        baseWindow: baseWindow,
+        baseThreshold: baseThreshold,
+        matrixSize: matrixSize,
+        step: step,
+        fillMethod: fillMethod,
+        numChunks: numChunks,
+        useChunks: useChunks
     });
 
     // Convert threshold to thresholdFactor (multiply by 100 as in MATLAB)
-    let threshFactor = baseThreshold * 100;
+    var threshFactor = baseThreshold * 100;
 
-    const numSeries = originalData[0].length;
-    const signalLength = originalData.length;
+    var numSeries = originalData[0].length;
+    var signalLength = originalData.length;
 
-    console.log(`[Worker] performGridSearch: серия=${numSeries}, точек=${signalLength}, чанков=${numChunks}, оптимизация=${useChunks}`);
+    console.log('[Worker] performGridSearch: серия=' + numSeries + ', точек=' + signalLength + ', чанков=' + numChunks + ', оптимизация=' + useChunks);
 
     // Check if optimization functions are available
     if (typeof analyzeSignalNoise !== 'function') {
@@ -479,33 +488,39 @@ function performGridSearch(originalData, params, progressCallback) {
     }
 
     // Select representative chunks (optimization)
-    let selectedChunks = [];
+    var selectedChunks = [];
 
     if (useChunks) {
         // Analyze signal to select chunks (use first series for selection)
-        const firstSeries = originalData.map(row => row[0]);
-        const analysis = analyzeSignalNoise(firstSeries, 25);
+        var firstSeries = [];
+        for (var idx = 0; idx < originalData.length; idx++) {
+            firstSeries.push(originalData[idx][0]);
+        }
+        var analysis = analyzeSignalNoise(firstSeries, 25);
         selectedChunks = selectRepresentativeChunks(analysis, numChunks);
 
-        console.log(`[Worker] Выбрано ${selectedChunks.length} чанков из ${analysis.chunks.length} для оптимизации`);
+        console.log('[Worker] Выбрано ' + selectedChunks.length + ' чанков из ' + analysis.chunks.length + ' для оптимизации');
     }
 
     // Main loop: Execute TWICE (as in MATLAB)
-    for (let d = step; d >= 1; d = (d === step ? 1 : 0)) {
+    var finalNTF = null; // Store final NTF from second pass
+    for (var d = step; d >= 1; d = (d === step ? 1 : 0)) {
         if (d === 0) break; // Exit after second pass
 
-        const isFirstPass = d === step;
-        const phaseBaseProgress = isFirstPass ? 0 : 50; // First pass 0-50%, Second 50-100%
+        var isFirstPass = d === step;
+        var optimalWinWidth = 0;
+        var optimalThreshFactor = 0;
+        var phaseBaseProgress = isFirstPass ? 0 : 50; // First pass 0-50%, Second 50-100%
 
         // Initialize metric matrices for this pass
-        const STDF = [];
-        const DF = [];
-        const ASNR = [];
-        const ARMSE = [];
-        const RSquared = [];
-        const RPirs = [];
+        var STDF = [];
+        var DF = [];
+        var ASNR = [];
+        var ARMSE = [];
+        var RSquared = [];
+        var RPirs = [];
 
-        for (let k = 0; k < matrixSize; k++) {
+        for (var k = 0; k < matrixSize; k++) {
             STDF[k] = new Float64Array(matrixSize).fill(1);
             DF[k] = new Float64Array(matrixSize).fill(1);
             ASNR[k] = new Float64Array(matrixSize).fill(1);
@@ -515,41 +530,57 @@ function performGridSearch(originalData, params, progressCallback) {
         }
 
         // Grid search for this pass
-        for (let k = 0; k < matrixSize; k++) {
+        for (var k = 0; k < matrixSize; k++) {
             // Update progress (0-50% for first pass, 50-100% for second)
-            const progress = phaseBaseProgress + 50 * (k + 1) / matrixSize;
+            var progress = phaseBaseProgress + 50 * (k + 1) / matrixSize;
             if (progressCallback) {
                 progressCallback({
                     progress: progress,
-                    message: `Сканирование параметров (проход ${isFirstPass ? 1 : 2}): окно ${k + 1}/${matrixSize}`
+                    message: 'Сканирование параметров (проход ' + (isFirstPass ? 1 : 2) + '): окно ' + (k + 1) + '/' + matrixSize
                 });
             }
 
-            const currentWindow = Math.abs(baseWindow + (matrixSize * d / 2) - (k * d) - 1) + 1;
+            var currentWindow;
+            if (d === 1) {
+                // Second pass: center around optimal values from first pass
+                currentWindow = baseWindow + (k - (matrixSize + 1) / 2);
+            } else {
+                currentWindow = Math.abs(baseWindow + (matrixSize * d / 2) - (k * d) - 1) + 1;
+            }
 
-            for (let j = 0; j < matrixSize; j++) {
+            for (var j = 0; j < matrixSize; j++) {
                 // Recalculate threshold inside inner loop as in MATLAB (line 157)
-                const currentThresholdInner = (threshFactor + (matrixSize * d / 2) - d * j) / 100;
+                var currentThresholdInner;
+                if (d === 1) {
+                    // Second pass: center around optimal values from first pass
+                    currentThresholdInner = (threshFactor + (j - (matrixSize + 1) / 2)) / 100;
+                } else {
+                    currentThresholdInner = (threshFactor + (matrixSize * d / 2) - d * j) / 100;
+                }
 
                 // Process each series and compute metrics
-                let sumSTDF = 0, sumDF = 0, sumASNR = 0, sumARMSE = 0, sumRSquared = 0, sumRPirs = 0;
-                let metricCount = 0;
+                var sumSTDF = 0, sumDF = 0, sumASNR = 0, sumARMSE = 0, sumRSquared = 0, sumRPirs = 0;
+                var metricCount = 0;
 
-                for (let col = 0; col < numSeries; col++) {
-                    const original = originalData.map(row => row[col]);
+                for (var col = 0; col < numSeries; col++) {
+                    var original = [];
+                    for (var rowIdx = 0; rowIdx < originalData.length; rowIdx++) {
+                        original.push(originalData[rowIdx][col]);
+                    }
 
                     if (useChunks && selectedChunks.length > 0) {
                         // Process only selected chunks (optimization)
-                        for (const chunk of selectedChunks) {
-                            const chunkOriginal = original.slice(chunk.start, chunk.end);
-                            let chunkData = chunkOriginal.slice(); // Copy for this iteration
+                        for (var chunkIdx = 0; chunkIdx < selectedChunks.length; chunkIdx++) {
+                            var chunk = selectedChunks[chunkIdx];
+                            var chunkOriginal = original.slice(chunk.start, chunk.end);
+                            var chunkData = chunkOriginal.slice(); // Copy for this iteration
 
                             // Run cleaning iterations (100 passes)
-                            for (let iter = 0; iter < 100; iter++) {
-                                const adaptiveWin = currentWindow + (baseWindow / 100) * 4 * Math.pow(10 - Math.sqrt(iter + 1), 0.5);
-                                const adaptiveThresh = currentThresholdInner + (threshFactor / 100) * 4 * Math.pow(10 - Math.sqrt(iter + 1), 0.5) / 100;
+                            for (var iter = 0; iter < 100; iter++) {
+                                var adaptiveWin = currentWindow + (baseWindow / 100) * 4 * Math.pow(10 - Math.sqrt(iter + 1), 0.5);
+                                var adaptiveThresh = currentThresholdInner + (threshFactor / 100) * 4 * Math.pow(10 - Math.sqrt(iter + 1), 0.5) / 100;
 
-                                const result = filloutliers(
+                                var result = filloutliers(
                                     new Float64Array(chunkData),
                                     fillMethod,
                                     'movmean',
@@ -572,14 +603,14 @@ function performGridSearch(originalData, params, progressCallback) {
                         }
                     } else {
                         // Process entire signal (no optimization)
-                        let data = original.slice(); // Copy original for this iteration
+                        var data = original.slice(); // Copy original for this iteration
 
                         // Run cleaning iterations (100 passes)
-                        for (let iter = 0; iter < 100; iter++) {
-                            const adaptiveWin = currentWindow + (baseWindow / 100) * 4 * Math.pow(10 - Math.sqrt(iter + 1), 0.5);
-                            const adaptiveThresh = currentThresholdInner + (threshFactor / 100) * 4 * Math.pow(10 - Math.sqrt(iter + 1), 0.5) / 100;
+                        for (var iter = 0; iter < 100; iter++) {
+                            var adaptiveWin = currentWindow + (baseWindow / 100) * 4 * Math.pow(10 - Math.sqrt(iter + 1), 0.5);
+                            var adaptiveThresh = currentThresholdInner + (threshFactor / 100) * 4 * Math.pow(10 - Math.sqrt(iter + 1), 0.5) / 100;
 
-                            const result = filloutliers(
+                            var result = filloutliers(
                                 new Float64Array(data),
                                 fillMethod,
                                 'movmean',
@@ -656,65 +687,106 @@ function performGridSearch(originalData, params, progressCallback) {
             return result;
         };
 
-        const normASNR = normalizeMatrix(ASNR);
-        const normARMSE = normalizeMatrix(ARMSE);
-        const normRSquared = normalizeMatrix(RSquared);
-        const normRPirs = normalizeMatrix(RPirs);
-        const normSTDF = normalizeMatrix(STDF);
-        const normDF = normalizeMatrix(DF);
+        // Debug: Check metric matrices before normalization
+        console.log('[Worker] Матрицы перед нормализацией: ASNR=' + (ASNR ? ASNR.length : 'null') + 'x' + (ASNR && ASNR[0] ? ASNR[0].length : '?') +
+                    ', ARMSE=' + (ARMSE ? ARMSE.length : 'null') + 'x' + (ARMSE && ARMSE[0] ? ARMSE[0].length : '?') +
+                    ', RSquared=' + (RSquared ? RSquared.length : 'null') + 'x' + (RSquared && RSquared[0] ? RSquared[0].length : '?'));
 
-        // Combine metrics: ASNR - ARMSE + R² + R_Pirs + STDF + DF
-        const combined = [];
-        for (let i = 0; i < matrixSize; i++) {
-            combined[i] = new Float64Array(matrixSize);
-            for (let j = 0; j < matrixSize; j++) {
-                combined[i][j] = normASNR[i][j] - normARMSE[i][j] +
-                                   normRSquared[i][j] + normRPirs[i][j] +
-                                   normSTDF[i][j] + normDF[i][j];
+        // Initialize variables that may be used outside try block
+        var optimal = null;
+        var logThreshold = threshFactor / 100;
+
+        try {
+            var normASNR = normalizeMatrix(ASNR);
+            var normARMSE = normalizeMatrix(ARMSE);
+            var normRSquared = normalizeMatrix(RSquared);
+            var normRPirs = normalizeMatrix(RPirs);
+            var normSTDF = normalizeMatrix(STDF);
+            var normDF = normalizeMatrix(DF);
+
+            // Combine metrics: ASNR - ARMSE + R² + R_Pirs + STDF + DF
+            var combined = [];
+            for (var i = 0; i < matrixSize; i++) {
+                combined[i] = new Float64Array(matrixSize);
+                for (var j = 0; j < matrixSize; j++) {
+                    combined[i][j] = normASNR[i][j] - normARMSE[i][j] +
+                                       normRSquared[i][j] + normRPirs[i][j] +
+                                       normSTDF[i][j] + normDF[i][j];
+                }
             }
+
+            // Final normalization of NTF
+            var NTF = normalizeMatrix(combined);
+
+            console.log('[Worker] NTF создана: ' + NTF.length + 'x' + NTF[0].length);
+
+            // --- SMOOTHING BEFORE FINDING MINIMUM ---
+            // Smooth NTF (3x3 moving average, radius = 1)
+            var smoothedNTF = smoothMatrix(NTF, 1);
+
+            console.log('[Worker] NTF smoothed: rows=' + (smoothedNTF ? smoothedNTF.length : 0) + ', cols=' + (smoothedNTF && smoothedNTF[0] ? smoothedNTF[0].length : 0) + ', pass=' + (isFirstPass ? 1 : 2));
+
+            // Store NTF from second pass for display
+            if (!isFirstPass) {
+                finalNTF = smoothedNTF;
+                console.log('[Worker] finalNTF сохранена из второго прохода:', finalNTF ? finalNTF.length : 'null');
+            }
+
+            // --- FIND OPTIMAL PARAMETERS ---
+            optimal = findOptimalParamsFromMatrix(smoothedNTF, baseWindow, threshFactor, matrixSize, d);
+
+            // Update base parameters for next iteration
+            if (d === 1) {
+                // Second pass: restore optimal values from first pass
+                baseWindow = optimalWinWidth;
+                threshFactor = optimalThreshFactor;
+            } else {
+                // First pass: compute and save optimal values
+                baseWindow = optimal.windowWidth;
+                threshFactor = optimal.thresholdFactor;
+                optimalWinWidth = baseWindow;
+                optimalThreshFactor = threshFactor;
+            }
+
+            // Log optimal parameters after this pass
+            logThreshold = threshFactor / 100;
+            console.log('[Worker] Проход ' + (isFirstPass ? 1 : 2) + ': окно=' + optimal.windowWidth.toFixed(0) + ', порог=' + logThreshold.toFixed(2) + ', minI=' + optimal.minI + ', minJ=' + optimal.minJ);
+            console.log('[Worker] Отладка: исходные baseWindow=' + (isFirstPass ? 40 : 'из 1-го прохода') + ', threshFactor=' + (isFirstPass ? 140 : 'из 1-го прохода') + ', после обновления: windowWidth=' + optimal.windowWidth.toFixed(0) + ', newThreshFactor=' + optimal.thresholdFactor.toFixed(0));
+        } catch (error) {
+            console.error('[Worker] ОШИБКА при создании NTF:', error);
+            console.error('[Worker] Stack trace:', error.stack);
+            console.error('[Worker] ASNR:', ASNR ? ASNR.length + 'x' + (ASNR[0] ? ASNR[0].length : '?') : 'null');
+            console.error('[Worker] ARMSE:', ARMSE ? ARMSE.length + 'x' + (ARMSE[0] ? ARMSE[0].length : '?') : 'null');
+            console.error('[Worker] RSquared:', RSquared ? RSquared.length + 'x' + (RSquared[0] ? RSquared[0].length : '?') : 'null');
+            console.error('[Worker] RPirs:', RPirs ? RPirs.length + 'x' + (RPirs[0] ? RPirs[0].length : '?') : 'null');
+            console.error('[Worker] STDF:', STDF ? STDF.length + 'x' + (STDF[0] ? STDF[0].length : '?') : 'null');
+            console.error('[Worker] DF:', DF ? DF.length + 'x' + (DF[0] ? DF[0].length : '?') : 'null');
         }
 
-        // Final normalization of NTF
-        const NTF = normalizeMatrix(combined);
-
-        // --- SMOOTHING BEFORE FINDING MINIMUM ---
-        // Smooth NTF (3x3 moving average, radius = 1)
-        const smoothedNTF = smoothMatrix(NTF, 1);
-
-        // --- FIND OPTIMAL PARAMETERS ---
-        const optimal = findOptimalParamsFromMatrix(smoothedNTF, baseWindow, threshFactor, matrixSize, d);
-
-        // Update base parameters for next iteration
-        baseWindow = optimal.windowWidth;
-        threshFactor = optimal.thresholdFactor;
-
-        // Log optimal parameters after this pass
-        const logThreshold = threshFactor / 100;
-        console.log(`[Worker] Проход ${isFirstPass ? 1 : 2}: окно=${optimal.windowWidth.toFixed(0)}, порог=${logThreshold.toFixed(2)}, minI=${optimal.minI}, minJ=${optimal.minJ}`);
-
-        if (progressCallback && isFirstPass) {
+        if (progressCallback && isFirstPass && optimal) {
             progressCallback({
                 progress: 50,
-                message: `Первый проход: окно=${optimal.windowWidth.toFixed(0)}, порог=${logThreshold.toFixed(2)}`
+                message: 'Первый проход: окно=' + optimal.windowWidth.toFixed(0) + ', порог=' + logThreshold.toFixed(2)
             });
         }
 
         if (!isFirstPass) {
             // After second pass, send final progress update
-            if (progressCallback) {
+            if (progressCallback && optimal) {
                 progressCallback({
                     progress: 100,
-                    message: `Второй проход: окно=${optimal.windowWidth.toFixed(0)}, порог=${logThreshold.toFixed(2)}`
+                    message: 'Второй проход: окно=' + optimal.windowWidth.toFixed(0) + ', порог=' + logThreshold.toFixed(2)
                 });
             }
         }
     }
 
     // Final result: convert thresholdFactor back to threshold
-    console.log(`[Worker] Финальные параметры: окно=${baseWindow.toFixed(0)}, порог=${(threshFactor / 100).toFixed(2)}`);
+    console.log('[Worker] Финальные параметры: окно=' + baseWindow.toFixed(0) + ', порог=' + (threshFactor / 100).toFixed(2));
+    console.log('[Worker] finalNTF перед возвратом:', finalNTF ? (finalNTF.length + 'x' + finalNTF[0].length) : 'null');
 
     return {
-        NTF: null, // NTF is only for MATLAB debugging
+        NTF: finalNTF, // Return NTF from second pass for heatmap display
         optimalParams: { windowWidth: baseWindow, threshold: threshFactor / 100 },
         allMetrics: null // Only needed for MATLAB
     };

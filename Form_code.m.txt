@@ -123,7 +123,12 @@ classdef OutlierCleaner_APP_GPT < matlab.apps.AppBase
             relSize = round(app.RelMatrixSizeSlider.Value);      % Шаг изменения параметров (d - relative size)
             winWidth = round(app.WindowWidthSlider.Value);       % Ширина окна скользящего среднего (ma)
             threshFactor = app.ThresholdSlider.Value * 100;      % Пороговый коэффициент * 100 (tfa)
+            initialWinWidth = winWidth;                           % Сохраняем начальную ширину окна
+            initialThreshFactor = threshFactor;                   % Сохраняем начальный порог
             
+            optimalWinWidth = 0;                             % Оптимальная ширина из первого прохода
+            optimalThreshFactor = 0;                         % Оптимальный порог из первого прохода
+            isFirstPass = true;                             % Флаг первого прохода
             % Инициализация матриц для хранения метрик качества очистки
             NTF = ones(matrixSize, matrixSize); % Итоговая целевая функция (Target Function)
             
@@ -153,8 +158,16 @@ classdef OutlierCleaner_APP_GPT < matlab.apps.AppBase
                         
                         % --- БЛОК ФИЛЬТРАЦИИ ---
                         % Вычисляем текущие параметры для итерации (динамическое изменение окна и порога)
-                        currentWindow = abs(winWidth + (matrixSize * d / 2) - (k * d) - 1) + 1;
-                        currentThreshold = (threshFactor + (matrixSize * d / 2) - d * j) / 100;
+                        if d == 1
+                            currentWindow = winWidth + (k - (matrixSize + 1)/2);
+                        else
+                            currentWindow = abs(winWidth + (matrixSize * d / 2) - (k * d) - 1) + 1;
+                        end
+                        if d == 1
+                            currentThreshold = (threshFactor + (j - (matrixSize + 1)/2)) / 100;
+                        else
+                            currentThreshold = (threshFactor + (matrixSize * d / 2) - d * j) / 100;
+                        end
                         
                         % Выполняем filloutliers итеративно (до 100 проходов для сходимости)
                         if app.FillMethodDropDown.Value == "↗∞"
@@ -230,8 +243,17 @@ classdef OutlierCleaner_APP_GPT < matlab.apps.AppBase
                 IminNTF_j = IminNTF_j + mn;
                 
                 % Пересчитываем параметры winWidth и threshFactor на основе найденных индексов
-                winWidth = abs(winWidth + (matrixSize * d / 2) - (IminNTF_k * d) - 1) + 1; 
-                threshFactor = abs(threshFactor + (matrixSize * d / 2) - (d * IminNTF_j) - 1) + 1; 
+                if d == 1
+                    % Второй проход: восстанавливаем оптимальные значения из первого прохода
+                    winWidth = optimalWinWidth;
+                    threshFactor = optimalThreshFactor;
+                else
+                    % Первый проход: вычисляем и сохраняем оптимальные значения
+                    winWidth = abs(winWidth + (matrixSize * d / 2) - (IminNTF_k * d) - 1) + 1;
+                    threshFactor = abs(threshFactor + (matrixSize * d / 2) - (d * IminNTF_j) - 1) + 1;
+                    optimalWinWidth = winWidth;
+                    optimalThreshFactor = threshFactor;
+                end
                 
                 % Обновляем значения на слайдерах интерфейса
                 app.WindowWidthSlider.Value = winWidth; 
