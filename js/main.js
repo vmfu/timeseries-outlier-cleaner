@@ -19,7 +19,7 @@ const appState = {
     params: {
         windowWidth: 40,
         threshold: 1.4,
-        matrixSize: 16,
+        matrixSize: 17,
         relativeSize: 4,
         fillMethod: 'nearest',
         numChunks: 3,        // Optimization: number of chunks to select
@@ -1229,6 +1229,7 @@ function loadData() {
         appState.cleanedData = null;
         appState.NTF = null;
         appState.optimalParams = null;
+        appState.optimalMetrics = null; // Reset normalized metrics
         appState.seriesMetrics = []; // Reset stored metrics
 
         updateFileInfo(file, data);
@@ -1391,8 +1392,19 @@ function updateMetrics(metrics) {
     // RMSE - Root Mean Square Error
     var rmseElement = document.getElementById('metricRMSE');
     if (metrics.ARMSE !== undefined && metrics.ARMSE !== null) {
-        rmseElement.textContent = metrics.ARMSE.toFixed(4);
-        rmseElement.className = 'metric-value ' + getQualityClass('RMSE', metrics.ARMSE);
+        // Use absolute RMSE value (not normalized)
+        // After auto-tune, this comes from optimalMetrics which contains absolute values
+        var displayValue = metrics.ARMSE;
+        var classValue = metrics.ARMSE;
+
+        // If we have optimalMetrics from auto-tune, use those absolute values
+        if (appState.optimalMetrics && appState.optimalMetrics.ARMSE !== undefined) {
+            displayValue = appState.optimalMetrics.ARMSE;
+            classValue = appState.optimalMetrics.ARMSE;
+        }
+
+        rmseElement.textContent = displayValue.toFixed(4);
+        rmseElement.className = 'metric-value ' + getQualityClass('RMSE', classValue);
     } else {
         rmseElement.textContent = '--';
         rmseElement.className = 'metric-value';
@@ -1510,7 +1522,7 @@ function switchTab(tabName) {
             // Use requestAnimationFrame to ensure layout is complete
             requestAnimationFrame(function() {
                 requestAnimationFrame(function() {
-                    drawHeatmap(appState.heatmapMatrix, appState.heatmapOptimal);
+                    drawHeatmap(appState.heatmapMatrix, appState.heatmapOptimal, appState.heatmapFirstPassParams);
                     initializeHeatmapInteraction();
                 });
             });
@@ -1869,8 +1881,9 @@ function updateDataChart(original, cleaned) {
 /**
  * Draw heatmap from NTF matrix
  */
-function drawHeatmap(NTF, optimalParams) {
+function drawHeatmap(NTF, optimalParams, firstPassParams) {
     console.log('[drawHeatmap] Начинаю рисование heatmap');
+    console.log('[drawHeatmap] firstPassParams для центра сетки:', firstPassParams);
 
     var canvas = document.getElementById('heatmapCanvas');
     if (!canvas) {
@@ -1967,6 +1980,8 @@ function drawHeatmap(NTF, optimalParams) {
 
     // Draw color scale
     drawColorScale(ctx, canvas, minVal, maxVal);
+
+    appState.heatmapFirstPassParams = firstPassParams; // Store for tooltip calculation
 
     UI.logMsg('log.heatmapShown', null, 'success');
 }
@@ -2124,20 +2139,29 @@ function getHeatmapCellFromCoords(x, y) {
     }
 
     // Calculate actual parameter values based on grid search algorithm
-    // The grid searches from baseWindow + (matrixSize * step / 2) to baseWindow - ...
+    // The heatmap shows the SECOND PASS (fine search) with step=1
+    // Second pass formula: center + (index - (matrixSize + 1) / 2)
     var matrixSize = appState.params.matrixSize;
     var step = appState.params.relativeSize;
 
-    // Reverse calculation from worker's performGridSearch
-    var baseWindow = appState.params.windowWidth;
-    var baseThreshold = appState.params.threshold;
+    // Use first pass optimal params as center for second pass grid
+    var firstPassCenter = appState.heatmapFirstPassParams || appState.firstPassParams;
+    if (!firstPassCenter) {
+        console.warn('[getHeatmapCellFromCoords] firstPassParams не найдены! Использую appState.params');
+        firstPassCenter = { windowWidth: appState.params.windowWidth, thresholdFactor: appState.params.threshold * 100 };
+    }
 
-    // Calculate window width for this column
-    var windowWidth = Math.abs(baseWindow + (matrixSize * step / 2) - (rowIndex * step) - 1) + 1;
+    var baseWindow = firstPassCenter.windowWidth;
+    var baseThreshFactor = firstPassCenter.thresholdFactor;
 
-    // Calculate threshold for this row (using colIndex for threshold)
-    var threshFactor = baseThreshold * 100;
-    var threshold = (threshFactor + (matrixSize * step / 2) - step * colIndex) / 100;
+    console.log('[getHeatmapCellFromCoords] Использую центр: window=' + baseWindow.toFixed(0) + ', thresholdFactor=' + baseThreshFactor.toFixed(0));
+
+    // Second pass formula (matching MATLAB lines 162, 167):
+    // Worker uses 1-based indexing (k,j go from 1 to matrixSize), so we need to add 1 to our 0-based indices
+    // window = baseWindow + (rowIndex + 1 - (matrixSize + 1) / 2)
+    // threshold = (baseThreshFactor + (colIndex + 1 - (matrixSize + 1) / 2)) / 100
+    var windowWidth = baseWindow + (rowIndex + 1 - (matrixSize + 1) / 2);
+    var threshold = (baseThreshFactor + (colIndex + 1 - (matrixSize + 1) / 2)) / 100;
 
     // Get NTF value
     var ntfValue = appState.heatmapMatrix[rowIndex][colIndex];
@@ -2177,18 +2201,19 @@ function showHeatmapTooltip(cellInfo, mouseX, mouseY, canvasRect) {
     tooltip.classList.remove('hidden');
 
     // Position tooltip near mouse but avoid overflow
+    // Tooltip uses position: fixed, so use viewport coordinates directly
     var tooltipWidth = tooltip.offsetWidth;
     var tooltipHeight = tooltip.offsetHeight;
     var pageX = mouseX + 15;
     var pageY = mouseY + 15;
 
     // Adjust if too close to right edge
-    if (pageX + tooltipWidth > window.innerWidth) {
+    if (mouseX + tooltipWidth + 15 > window.innerWidth) {
         pageX = mouseX - tooltipWidth - 15;
     }
 
     // Adjust if too close to bottom edge
-    if (pageY + tooltipHeight > window.innerHeight) {
+    if (mouseY + tooltipHeight + 15 > window.innerHeight) {
         pageY = mouseY - tooltipHeight - 15;
     }
 
@@ -2389,6 +2414,7 @@ function handleTuneResult(data) {
     console.log('[Main] Получен результат автоподбора:', data);
     console.log('[Main] data.NTF:', data.NTF);
     console.log('[Main] data.optimalParams:', data.optimalParams);
+    console.log('[Main] data.firstPassParams:', data.firstPassParams);
 
     var optimalParams = data.optimalParams;
 
@@ -2401,6 +2427,11 @@ function handleTuneResult(data) {
     console.log('[Main] Оптимальные параметры:', optimalParams);
 
     appState.optimalParams = optimalParams;
+    appState.firstPassParams = data.firstPassParams; // Store first pass params for heatmap center calculation
+    appState.optimalMetrics = data.optimalMetrics; // Store normalized metrics for UI display
+
+    console.log('[Main] Сохранены firstPassParams:', appState.firstPassParams);
+    console.log('[Main] Сохранены optimalMetrics (нормированные):', appState.optimalMetrics);
 
     // Update UI with optimal parameters
     document.getElementById('windowWidth').value = optimalParams.windowWidth;
@@ -2420,10 +2451,11 @@ function handleTuneResult(data) {
         appState.heatmapMatrix = data.NTF;
         appState.heatmapOptimal = optimalParams;
         console.log('[Main] NTF получена, рисую heatmap. Размеры:', data.NTF.length, 'x', data.NTF[0].length);
+        console.log('[Main] Использую firstPassParams для центра сетки:', appState.firstPassParams);
         // Draw heatmap with requestAnimationFrame for proper sizing
         requestAnimationFrame(function() {
             requestAnimationFrame(function() {
-                drawHeatmap(data.NTF, optimalParams);
+                drawHeatmap(data.NTF, optimalParams, data.firstPassParams);
                 initializeHeatmapInteraction();
             });
         });
@@ -2803,7 +2835,7 @@ function resetSession() {
         appState.params = {
             windowWidth: 40,
             threshold: 1.4,
-            matrixSize: 16,
+            matrixSize: 17,
             relativeSize: 4,
             fillMethod: 'nearest',
             numChunks: 3,
@@ -2813,7 +2845,7 @@ function resetSession() {
         // Reset sliders
         document.getElementById('windowWidth').value = 40;
         document.getElementById('threshold').value = 1.4;
-        document.getElementById('matrixSize').value = 16;
+        document.getElementById('matrixSize').value = 17;
         document.getElementById('relativeSize').value = 4;
         var useChunks = document.getElementById('useChunks');
         if (useChunks) {
@@ -2824,7 +2856,7 @@ function resetSession() {
         // Update parameter displays manually
         document.getElementById('windowWidthValue').textContent = '40';
         document.getElementById('thresholdValue').textContent = '1.40';
-        document.getElementById('matrixSizeValue').textContent = '16 × 16';
+        document.getElementById('matrixSizeValue').textContent = '17 × 17';
         document.getElementById('relativeSizeValue').textContent = '4';
         document.getElementById('numChunksValue').textContent = '3';
 
@@ -3645,7 +3677,7 @@ var defaultPresets = {
     'conservative': {
         windowWidth: 60,
         threshold: 2.0,
-        matrixSize: 20,
+        matrixSize: 21,
         relativeSize: 5,
         fillMethod: 'nearest',
         useChunks: true,
@@ -3654,7 +3686,7 @@ var defaultPresets = {
     'balanced': {
         windowWidth: 40,
         threshold: 1.4,
-        matrixSize: 16,
+        matrixSize: 17,
         relativeSize: 4,
         fillMethod: 'nearest',
         useChunks: true,
@@ -3663,7 +3695,7 @@ var defaultPresets = {
     'aggressive': {
         windowWidth: 20,
         threshold: 0.8,
-        matrixSize: 12,
+        matrixSize: 13,
         relativeSize: 3,
         fillMethod: 'linear',
         useChunks: true,

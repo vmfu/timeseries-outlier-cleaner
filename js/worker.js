@@ -220,6 +220,8 @@ function handleTune(jobId, data) {
         data: {
             NTF: result.NTF,
             optimalParams: result.optimalParams,
+            firstPassParams: result.firstPassParams,
+            optimalMetrics: result.optimalMetrics,
             allMetrics: result.allMetrics
         }
     });

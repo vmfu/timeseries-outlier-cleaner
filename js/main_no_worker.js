@@ -14,7 +14,7 @@ const appState = {
     params: {
         windowWidth: 40,
         threshold: 1.4,
-        matrixSize: 16,
+        matrixSize: 17,
         relativeSize: 4,
         fillMethod: 'nearest'
     },

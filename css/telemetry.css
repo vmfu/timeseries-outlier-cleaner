@@ -1707,7 +1707,7 @@ details[open] .error-details-toggle::after {
 }
 
 .heatmap-tooltip {
-    position: absolute;
+    position: fixed;
     background: rgba(10, 10, 15, 0.95);
     border: 1px solid var(--accent-cyan);
     border-radius: 4px;

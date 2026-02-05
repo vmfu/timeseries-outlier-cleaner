@@ -452,7 +452,7 @@ function performGridSearch(originalData, params, progressCallback) {
 
     var baseWindow = params.windowWidth || 40;
     var baseThreshold = params.threshold || 1.4;
-    var matrixSize = params.matrixSize || 16;
+    var matrixSize = params.matrixSize || 17;
     var step = params.relativeSize || 4;
     var fillMethod = params.fillMethod || 'nearest';
     var numChunks = params.numChunks || 3;
@@ -504,10 +504,13 @@ function performGridSearch(originalData, params, progressCallback) {
 
     // Main loop: Execute TWICE (as in MATLAB)
     var finalNTF = null; // Store final NTF from second pass
-    for (var d = step; d >= 1; d = (d === step ? 1 : 0)) {
-        if (d === 0) break; // Exit after second pass
+    var firstPassOptimalWinWidth = null; // Store optimal params from first pass for heatmap center
+    var firstPassOptimalThreshFactor = null;
+    var steps = step === 1 ? [1, 1] : [step, 1]; // Two passes: coarse then fine
 
-        var isFirstPass = d === step;
+    for (var passIdx = 0; passIdx < steps.length; passIdx++) {
+        var d = steps[passIdx];
+        var isFirstPass = passIdx === 0;
         var optimalWinWidth = 0;
         var optimalThreshFactor = 0;
         var phaseBaseProgress = isFirstPass ? 0 : 50; // First pass 0-50%, Second 50-100%
@@ -541,20 +544,22 @@ function performGridSearch(originalData, params, progressCallback) {
             }
 
             var currentWindow;
-            if (d === 1) {
+            if (!isFirstPass) {
                 // Second pass: center around optimal values from first pass
                 currentWindow = baseWindow + (k - (matrixSize + 1) / 2);
             } else {
+                // First pass: use standard formula
                 currentWindow = Math.abs(baseWindow + (matrixSize * d / 2) - (k * d) - 1) + 1;
             }
 
             for (var j = 0; j < matrixSize; j++) {
                 // Recalculate threshold inside inner loop as in MATLAB (line 157)
                 var currentThresholdInner;
-                if (d === 1) {
+                if (!isFirstPass) {
                     // Second pass: center around optimal values from first pass
                     currentThresholdInner = (threshFactor + (j - (matrixSize + 1) / 2)) / 100;
                 } else {
+                    // First pass: use standard formula
                     currentThresholdInner = (threshFactor + (matrixSize * d / 2) - d * j) / 100;
                 }
 
@@ -733,25 +738,55 @@ function performGridSearch(originalData, params, progressCallback) {
             }
 
             // --- FIND OPTIMAL PARAMETERS ---
-            optimal = findOptimalParamsFromMatrix(smoothedNTF, baseWindow, threshFactor, matrixSize, d);
+            optimal = findOptimalParamsFromMatrix(smoothedNTF, baseWindow, threshFactor, matrixSize, d, !isFirstPass, 1); // smoothRadius=1
+
+            // Retrieve absolute metrics at optimal position (correcting for smoothRadius)
+            // optimal.minI and optimal.minJ are 0-based indices from smoothed matrix
+            // We need to map them back to the original (unsmoothed) matrix
+            var originalI = optimal.minI;
+            var originalJ = optimal.minJ;
+            if (!isFirstPass) {
+                // Correct for smoothing: add smoothRadius
+                originalI += 1; // smoothRadius = 1
+                originalJ += 1;
+            }
+            var optimalMetrics = {
+                ASNR: ASNR[originalI][originalJ],  // Use absolute metrics, not normalized
+                ARMSE: ARMSE[originalI][originalJ],  // Absolute RMSE (not normalized to [0,1])
+                RSquared: RSquared[originalI][originalJ],
+                Pearson: RPirs[originalI][originalJ],
+                STDF: STDF[originalI][originalJ],
+                DF: DF[originalI][originalJ]
+            };
+            console.log('[Worker] Абсолютные метрики на оптимальной позиции (' + originalI + ',' + originalJ + '): ARMSE=' + optimalMetrics.ARMSE.toFixed(4) + ', ASNR=' + optimalMetrics.ASNR.toFixed(4));
+
+            // Log BEFORE updating base parameters
+            var oldBaseWindow = baseWindow;
+            var oldThreshFactor = threshFactor;
 
             // Update base parameters for next iteration
-            if (d === 1) {
-                // Second pass: restore optimal values from first pass
-                baseWindow = optimalWinWidth;
-                threshFactor = optimalThreshFactor;
-            } else {
-                // First pass: compute and save optimal values
+            if (!isFirstPass) {
+                // Second pass: use optimal values from second pass
                 baseWindow = optimal.windowWidth;
                 threshFactor = optimal.thresholdFactor;
-                optimalWinWidth = baseWindow;
-                optimalThreshFactor = threshFactor;
+            } else {
+                // First pass: compute and save optimal values (MATLAB lines 252-255)
+                optimalWinWidth = optimal.windowWidth;
+                optimalThreshFactor = optimal.thresholdFactor;
+                // Store for heatmap center calculation
+                firstPassOptimalWinWidth = optimalWinWidth;
+                firstPassOptimalThreshFactor = optimalThreshFactor;
+                baseWindow = optimalWinWidth;
+                threshFactor = optimalThreshFactor;
             }
 
             // Log optimal parameters after this pass
             logThreshold = threshFactor / 100;
             console.log('[Worker] Проход ' + (isFirstPass ? 1 : 2) + ': окно=' + optimal.windowWidth.toFixed(0) + ', порог=' + logThreshold.toFixed(2) + ', minI=' + optimal.minI + ', minJ=' + optimal.minJ);
-            console.log('[Worker] Отладка: исходные baseWindow=' + (isFirstPass ? 40 : 'из 1-го прохода') + ', threshFactor=' + (isFirstPass ? 140 : 'из 1-го прохода') + ', после обновления: windowWidth=' + optimal.windowWidth.toFixed(0) + ', newThreshFactor=' + optimal.thresholdFactor.toFixed(0));
+            console.log('[Worker] Отладка: исходные baseWindow=' + oldBaseWindow.toFixed(0) + ', threshFactor=' + oldThreshFactor.toFixed(0) + ', после обновления: windowWidth=' + optimal.windowWidth.toFixed(0) + ', newThreshFactor=' + optimal.thresholdFactor.toFixed(0));
+            if (!isFirstPass) {
+                console.log('[Worker] Второй проход: сглаживание radius=1, индексы в smoothed матрице: (' + optimal.minI + ',' + optimal.minJ + '), корректированные: (' + (optimal.minI + 1) + ',' + (optimal.minJ + 1) + ')');
+            }
         } catch (error) {
             console.error('[Worker] ОШИБКА при создании NTF:', error);
             console.error('[Worker] Stack trace:', error.stack);
@@ -788,6 +823,12 @@ function performGridSearch(originalData, params, progressCallback) {
     return {
         NTF: finalNTF, // Return NTF from second pass for heatmap display
         optimalParams: { windowWidth: baseWindow, threshold: threshFactor / 100 },
+        firstPassParams: { // First pass optimal params (center of second pass grid)
+            windowWidth: firstPassOptimalWinWidth,
+            thresholdFactor: firstPassOptimalThreshFactor,
+            threshold: firstPassOptimalThreshFactor ? firstPassOptimalThreshFactor / 100 : null
+        },
+        optimalMetrics: optimalMetrics, // Normalized metrics at optimal position
         allMetrics: null // Only needed for MATLAB
     };
 }
@@ -795,7 +836,7 @@ function performGridSearch(originalData, params, progressCallback) {
 /**
  * Find optimal parameters from NTF matrix
  */
-function findOptimalParamsFromMatrix(NTF, baseWindow, threshFactor, matrixSize, step) {
+function findOptimalParamsFromMatrix(NTF, baseWindow, threshFactor, matrixSize, step, isSecondPass, smoothRadius = 0) {
     const rows = NTF.length;
     const cols = NTF[0].length;
 
@@ -816,14 +857,23 @@ function findOptimalParamsFromMatrix(NTF, baseWindow, threshFactor, matrixSize, 
     // Line 233-234 MATLAB:
     // winWidth = abs(winWidth + (matrixSize * d / 2) - (IminNTF_k * d) - 1) + 1;
     // threshFactor = abs(threshFactor + (matrixSize * d / 2) - (d * IminNTF_j) - 1) + 1;
+    //
+    // Line 242-243 MATLAB (index correction after smoothing):
+    // IminNTF_k = IminNTF_k + mn;  // mn = smoothRadius
+    // IminNTF_j = IminNTF_j + mn;
 
-    // For second pass (d=1), grid is already centered around baseWindow/threshFactor
-    // So parameters are: base + (minIndex - matrixSize/2)
+    // For second pass, grid is already centered around baseWindow/threshFactor
+    // So parameters are: base + (minIndex + smoothRadius - matrixSize/2)
     let windowWidth, newThreshFactor;
-    if (step === 1) {
-        windowWidth = baseWindow + (minI - matrixSize / 2);
-        newThreshFactor = threshFactor + (minJ - matrixSize / 2);
+    if (isSecondPass) {
+        // Correct indices for smoothing: the smoothed matrix is smaller by 2*smoothRadius
+        // so minI/minJ need to be adjusted to match original grid
+        var correctedI = minI + smoothRadius;
+        var correctedJ = minJ + smoothRadius;
+        windowWidth = baseWindow + (correctedI - matrixSize / 2);
+        newThreshFactor = threshFactor + (correctedJ - matrixSize / 2);
     } else {
+        // First pass: use standard formula (no smoothing correction needed)
         windowWidth = Math.abs(baseWindow + (matrixSize * step / 2) - (minI * step) - 1) + 1;
         newThreshFactor = Math.abs(threshFactor + (matrixSize * step / 2) - (step * minJ) - 1) + 1;
     }
