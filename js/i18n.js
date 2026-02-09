@@ -126,6 +126,12 @@
             'log.heatmapDraw': 'Отрисовка тепловой карты: {rows}x{cols}, NTF[0][0] = {ntf}',
             'log.heatmapShown': 'Карта параметров отображена',
 
+            // Demo Messages
+            'msg.demoLoaded': 'Демо-данные загружены автоматически. 4 шумные синусоиды с 55% уровнем шума.',
+            'msg.demoReady': 'Нажмите "2. Настроить" для автоматического подбора оптимальных параметров.',
+            'msg.welcome': 'Добро пожаловать! Выберите файл данных для начала работы.',
+            'msg.welcomeBack': 'С возвращением! Выберите файл или загрузите новые данные.',
+
             // Visualization Panel
             'panel.visualization': 'ПАНЕЛЬ ВИЗУАЛИЗАЦИИ',
 
@@ -466,6 +472,12 @@
             'log.errorLogExported': 'Error log exported: {filename}',
             'log.heatmapDraw': 'Drawing heatmap: {rows}x{cols}, NTF[0][0] = {ntf}',
             'log.heatmapShown': 'Parameter map displayed',
+
+            // Demo Messages
+            'msg.demoLoaded': 'Demo data loaded automatically. 4 noisy sinusoids with 55% noise level.',
+            'msg.demoReady': 'Click "2. Auto-Tune" to automatically find optimal parameters.',
+            'msg.welcome': 'Welcome! Select a data file to begin.',
+            'msg.welcomeBack': 'Welcome back! Select a file or load new data.',
 
             // Visualization Panel
             'panel.visualization': 'VISUALIZATION PANEL',

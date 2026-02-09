@@ -74,6 +74,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeCharts();
     UI.logMsg('log.systemInit', null, 'info');
 
+    // Load demo data automatically on first visit
+    loadDemoData();
+
     // Handle window resize with debounce for performance
     window.addEventListener('resize', Utils.debounce(function() {
         if (appState.dataChart) {
@@ -272,6 +275,83 @@ function initializeUI() {
 
     // Initialize presets dropdown
     updatePresetSelect();
+}
+
+/**
+ * Load demo data automatically on first visit
+ */
+function loadDemoData() {
+    // Check if demo was already shown (to avoid reloading on page refresh)
+    var demoShown = sessionStorage.getItem('demoDataShown');
+
+    // Check for URL parameter to skip demo
+    var urlParams = new URLSearchParams(window.location.search);
+    var skipDemo = urlParams.has('nodemo') || urlParams.has('no-demo');
+
+    if (demoShown || skipDemo) {
+        // Demo already shown or skipped, log welcome message
+        if (!skipDemo) {
+            UI.logMsg('msg.welcomeBack', null, 'info');
+        }
+        return;
+    }
+
+    // Fetch demo data file
+    fetch('data/demo-data.txt')
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('Demo data file not found');
+            }
+            return response.text();
+        })
+        .then(function(content) {
+            var data = parseAsciiData(content);
+
+            if (data.length === 0) {
+                throw new Error('Demo data is empty');
+            }
+
+            // Mark demo as shown
+            sessionStorage.setItem('demoDataShown', 'true');
+
+            // Set up demo file info
+            appState.currentFile = {
+                name: 'demo-data.txt',
+                size: content.length
+            };
+            appState.originalData = data;
+            appState.cleanedData = null;
+            appState.optimalParams = null;
+            appState.optimalMetrics = null;
+            appState.seriesMetrics = [];
+
+            // Update file info
+            updateFileInfo(appState.currentFile, data);
+
+            // Update chart
+            updateDataChart(data, null);
+
+            // Set visibility to original
+            setChartVisibility('original');
+
+            // Force chart resize
+            setTimeout(function() {
+                if (appState.dataChart) {
+                    appState.dataChart.resize();
+                }
+            }, 100);
+
+            // Log demo loaded message
+            UI.logMsg('msg.demoLoaded', null, 'info');
+            UI.logMsg('msg.demoReady', null, 'info');
+
+            console.log('[Main] Demo data loaded successfully');
+        })
+        .catch(function(error) {
+            console.warn('[Main] Demo data not available:', error);
+            // Demo data not available, show welcome message
+            UI.logMsg('msg.welcome', null, 'info');
+        });
 }
 
 /**
