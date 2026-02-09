@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="title.full">Outlier Cleaner - Telemetry Data Processing</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    <link rel="stylesheet" href="css/telemetry.css">
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <!-- i18n system -->
+    <script src="js/i18n.js"></script>
+    <!-- Utility functions for performance optimization -->
+    <script src="js/utils.js"></script>
+    <!-- Error handling system -->
+    <script src="js/error.js"></script>
+    <!-- Core modules -->
+    <script src="js/storage.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/queue.js"></script>
+    <script src="js/chart.js"></script>
+    <script src="js/ui.js"></script>
+</head>
+<body>
+    <!-- Skip to main content for keyboard users -->
+    <a href="#main-content" class="skip-to-content">Skip to main content</a>
+    <div class="crt-overlay" aria-hidden="true"></div>
+    <div class="main-container">
+        <!-- Header -->
+        <header class="telemetry-header" role="banner">
+            <div class="header-decoration left"></div>
+            <h1 class="main-title">
+                <span class="title-prefix" data-i18n="title.prefix">ОТК-001</span>
+                <span class="title-divider">///</span>
+                <span class="title-main" data-i18n="title.main">СИСТЕМА ОЧИСТКИ ДАННЫХ</span>
+            </h1>
+            <!-- Language Switcher -->
+            <div class="language-switcher" role="navigation" aria-label="Language selection">
+                <span class="lang-label" data-i18n="lang.switch" aria-hidden="true">Language / Язык</span>
+                <button class="lang-button" data-lang="ru" aria-label="Switch to Russian">🇷🇺 RU</button>
+                <button class="lang-button" data-lang="en" aria-label="Switch to English">🇺🇸 EN</button>
+            </div>
+            <div class="header-decoration right"></div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid" role="main" id="main-content">
+            <!-- Left Panel: Control Panel -->
+            <section class="control-panel panel" aria-labelledby="control-panel-title">
+                <div class="panel-header">
+                    <span class="panel-id" id="control-panel-title" data-i18n="panel.control">ПАНЕЛЬ УПРАВЛЕНИЯ</span>
+                    <span class="panel-status status-ready" data-i18n="panel.status.ready" data-i18n-title="tooltip.status.ready" role="status" aria-live="polite">ГОТОВ</span>
+                </div>
+
+                <!-- File Loading Section -->
+                <div class="control-section">
+                    <h2 class="section-title" data-i18n="section.load" id="load-section-title">1. ЗАГРУЗКА ДАННЫХ</h2>
+                    <div class="input-group" aria-labelledby="load-section-title">
+                        <label for="fileInput" class="input-label" id="file-input-label">
+                            <span class="label-text" data-i18n="label.file">Выбор файла данных:</span>
+                            <span class="label-desc" id="file-input-desc" data-i18n="desc.file">ASCII формат, столбцы: время, сигналы...</span>
+                        </label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="fileInput" multiple accept=".txt,.dat,.csv,.asc" class="file-input" aria-label="Select data files" aria-describedby="file-input-desc">
+                            <button type="button" class="file-button" aria-label="Open file dialog" onclick="document.getElementById('fileInput').click()">
+                                <span class="button-icon">📁</span>
+                                <span class="button-text" data-i18n="button.open">ОТКРЫТЬ ФАЙЛ</span>
+                            </button>
+                            <div id="fileCount" class="file-count" data-i18n="file.count" data-i18n-params='{"count": 0}' aria-live="polite" aria-atomic="true">Выбрано файлов: 0</div>
+                        </div>
+                    </div>
+                    <div id="selectedFiles" class="selected-files-list"></div>
+
+                    <!-- Batch Processing Controls -->
+                    <div class="batch-controls" id="batchControls" role="group" aria-label="Batch processing controls" style="display: none;">
+                        <button type="button" id="batchProcessBtn" class="batch-button batch-process" aria-label="Process all loaded files">
+                            <span class="button-icon" aria-hidden="true">▶️</span>
+                            <span class="button-text" data-i18n="button.batchProcess">ОБРАБОТАТЬ ВСЕ ФАЙЛЫ</span>
+                        </button>
+                        <button type="button" id="batchCancelBtn" class="batch-button batch-cancel" aria-label="Cancel batch processing">
+                            <span class="button-icon" aria-hidden="true">⏹️</span>
+                            <span class="button-text" data-i18n="button.batchCancel">ОТМЕНИТЬ</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Prominent File Info Display -->
+                <div class="control-section prominent-file-info" aria-label="File information">
+                    <div class="file-info-display">
+                        <div class="info-display-item">
+                            <span class="info-display-label" data-i18n="info.points" id="points-label">ТОЧЕК</span>
+                            <span id="prominentPoints" class="info-display-value" aria-labelledby="points-label">--</span>
+                        </div>
+                        <div class="info-display-item">
+                            <span class="info-display-label" data-i18n="info.series" id="series-label">СЕРИЙ</span>
+                            <span id="prominentSeries" class="info-display-value" aria-labelledby="series-label">--</span>
+                        </div>
+                        <div class="info-display-item">
+                            <span class="info-display-label" data-i18n="label.file" id="files-label">ФАЙЛОВ</span>
+                            <span id="prominentFileCount" class="info-display-value" aria-labelledby="files-label">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced Settings Toggle -->
+                <div class="control-section prominent-toggle">
+                    <div class="settings-toggle enhanced">
+                        <label for="advancedToggle" class="toggle-label">
+                            <span class="toggle-icon">⚙️</span>
+                            <input type="checkbox" id="advancedToggle" class="toggle-checkbox">
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-text" data-i18n="toggle.advanced">ОТКРЫТЬ КАПОТ (расширенные настройки)</span>
+                        </label>
+                        <span class="toggle-desc" data-i18n="desc.advanced">Показать параметры настройки алгоритма</span>
+                        <div class="params-preview" id="paramsPreview" data-i18n="paramsPreview" data-i18n-params='{"window":40,"threshold":1.4,"method":"movmean"}'></div>
+                    </div>
+                </div>
+
+                <!-- Advanced Parameters (Hidden by default) -->
+                <div id="advancedSettings" class="advanced-settings hidden" role="region" aria-labelledby="params-section-title">
+                    <h2 class="section-title" data-i18n="section.params" id="params-section-title">ПАРАМЕТРЫ АЛГОРИТМА</h2>
+
+                    <!-- Window Width Slider -->
+                    <div class="slider-group">
+                        <label class="slider-label" id="window-width-label">
+                            <span class="slider-name" data-i18n="label.window">Ширина окна</span>
+                            <span class="slider-desc" id="window-width-desc" data-i18n="desc.window">Размер скользящего окна (1-100)</span>
+                        </label>
+                        <div class="slider-control">
+                            <input type="range" id="windowWidth" min="1" max="100" value="40" class="slider" aria-labelledby="window-width-label" aria-describedby="window-width-desc">
+                            <div class="slider-value" aria-live="polite">
+                                <span id="windowWidthValue" class="value-display">40</span>
+                                <span class="value-unit" data-i18n="unit.window" aria-hidden="true">ед.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Threshold Slider -->
+                    <div class="slider-group">
+                        <label class="slider-label" id="threshold-label">
+                            <span class="slider-name" data-i18n="label.threshold">Пороговый коэффициент</span>
+                            <span class="slider-desc" id="threshold-desc" data-i18n="desc.threshold">Чувствительность обнаружения (0.1-2.0)</span>
+                        </label>
+                        <div class="slider-control">
+                            <input type="range" id="threshold" min="0.1" max="2.0" step="0.1" value="1.4" class="slider" aria-labelledby="threshold-label" aria-describedby="threshold-desc">
+                            <div class="slider-value" aria-live="polite">
+                                <span id="thresholdValue" class="value-display">1.4</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Matrix Size Slider -->
+                    <div class="slider-group">
+                        <label class="slider-label" id="matrix-size-label">
+                            <span class="slider-name" data-i18n="label.matrix">Размер матрицы наводки</span>
+                            <span class="slider-desc" id="matrix-size-desc" data-i18n="desc.matrix">Размер сетки поиска параметров (10-50)</span>
+                        </label>
+                        <div class="slider-control">
+                            <input type="range" id="matrixSize" min="10" max="50" value="17" class="slider" aria-labelledby="matrix-size-label" aria-describedby="matrix-size-desc">
+                            <div class="slider-value" aria-live="polite">
+                                <span id="matrixSizeValue" class="value-display">17</span>
+                                <span class="value-unit" aria-hidden="true">×17</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Relative Size Slider -->
+                    <div class="slider-group">
+                        <label class="slider-label" id="relative-size-label">
+                            <span class="slider-name" data-i18n="label.relative">Относительный размер 2 матрицы</span>
+                            <span class="slider-desc" id="relative-size-desc" data-i18n="desc.relative">Шаг грубого поиска (1-9)</span>
+                        </label>
+                        <div class="slider-control">
+                            <input type="range" id="relativeSize" min="1" max="9" value="4" class="slider" aria-labelledby="relative-size-label" aria-describedby="relative-size-desc">
+                            <div class="slider-value" aria-live="polite">
+                                <span id="relativeSizeValue" class="value-display">4</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Optimization Section -->
+                    <div class="optimization-section">
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="useChunks" checked class="checkbox" aria-describedby="use-chunks-desc">
+                                <span class="checkbox-text" data-i18n="checkbox.chunks">Оптимизация через чанки</span>
+                                <span class="checkbox-desc" id="use-chunks-desc" data-i18n="desc.optimization">Ускоряет автоподбор в 5-10 раз</span>
+                            </label>
+                        </div>
+
+                        <div class="slider-group">
+                            <label class="slider-label" id="num-chunks-label">
+                                <span class="slider-name" data-i18n="label.chunks">Количество тестовых чанков</span>
+                                <span class="slider-desc" id="num-chunks-desc" data-i18n="desc.chunks">Чанк=25 точек (1-5)</span>
+                            </label>
+                            <div class="slider-control">
+                                <input type="range" id="numChunks" min="1" max="5" value="3" class="slider" aria-labelledby="num-chunks-label" aria-describedby="num-chunks-desc">
+                                <div class="slider-value" aria-live="polite">
+                                    <span id="numChunksValue" class="value-display">3</span>
+                                    <span class="value-unit" data-i18n="unit.chunks" aria-hidden="true">шт.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fill Method Dropdown -->
+                    <div class="dropdown-group">
+                        <label class="dropdown-label" id="fill-method-label">
+                            <span class="dropdown-name" data-i18n="label.fillMethod">Метод заполнения выбросов</span>
+                            <span class="dropdown-desc" id="fill-method-desc" data-i18n="desc.fillMethod">Способ замещения обнаруженных аномалий</span>
+                        </label>
+                        <select id="fillMethod" class="dropdown" aria-labelledby="fill-method-label" aria-describedby="fill-method-desc">
+                            <option value="extreme" data-i18n="fillMethod.extreme">↗∞ Экстремальное значение (маркировка)</option>
+                            <option value="center" data-i18n="fillMethod.center">Центральное значение (медиана/среднее)</option>
+                            <option value="clip" data-i18n="fillMethod.clip">Пороговая обрезка</option>
+                            <option value="previous" data-i18n="fillMethod.previous">Предыдущее верное</option>
+                            <option value="next" data-i18n="fillMethod.next">Следующее верное</option>
+                            <option value="nearest" selected data-i18n="fillMethod.nearest">Ближайшее верное</option>
+                            <option value="linear" data-i18n="fillMethod.linear">Линейная интерполяция</option>
+                            <option value="spline" data-i18n="fillMethod.spline">Сплайн-интерполяция</option>
+                            <option value="pchip" data-i18n="fillMethod.pchip">Сплайн² (PCHIP)</option>
+                            <option value="makima" data-i18n="fillMethod.makima">Модификатор Акимы</option>
+                        </select>
+                    </div>
+
+                    <!-- Presets Section -->
+                    <div class="presets-section">
+                        <h3 class="presets-title" data-i18n="presets.title" id="presets-title">Пресеты настроек</h3>
+                        <div class="presets-controls">
+                            <select id="presetSelect" class="crt-select preset-select" aria-labelledby="presets-title">
+                                <option value="" data-i18n="presets.select">-- Выберите пресет --</option>
+                            </select>
+                            <button id="applyPresetBtn" class="crt-button preset-apply" data-i18n="presets.apply" aria-label="Apply preset">✓</button>
+                            <button id="savePresetBtn" class="crt-button preset-save" data-i18n="presets.save" aria-label="Save current as preset">💾</button>
+                            <button id="deletePresetBtn" class="crt-button preset-delete" data-i18n="presets.delete" aria-label="Delete current preset">🗑</button>
+                        </div>
+                        <div class="presets-info" data-i18n="presets.info" aria-hidden="true">Быстрое переключение между параметрами</div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="control-section">
+                    <h2 class="section-title" data-i18n="section.operations">2. ОПЕРАЦИИ</h2>
+                    <div class="button-grid" role="group" aria-label="Operation buttons">
+                        <button id="loadBtn" class="action-button" disabled aria-label="Load data - Step 1">
+                            <span class="button-number" aria-hidden="true">1.</span>
+                            <span class="button-label" data-i18n="button.load">ЗАГРУЗИТЬ</span>
+                            <span class="button-desc" data-i18n="desc.load">Чтение файла данных</span>
+                        </button>
+
+                        <button id="tuneBtn" class="action-button" disabled aria-label="Auto-tune parameters - Step 2">
+                            <span class="button-number" aria-hidden="true">2.</span>
+                            <span class="button-label" data-i18n="button.tune">НАВЕСТЬСЯ</span>
+                            <span class="button-desc" data-i18n="desc.tune">Автоподбор параметров</span>
+                        </button>
+
+                        <button id="cleanBtn" class="action-button" disabled aria-label="Clean data - Step 3">
+                            <span class="button-number" aria-hidden="true">3.</span>
+                            <span class="button-label" data-i18n="button.clean">ОЧИСТИТЬ</span>
+                            <span class="button-desc" data-i18n="desc.clean">Применить фильтрацию</span>
+                        </button>
+
+                        <button id="saveBtn" class="action-button" disabled aria-label="Save results - Step 4">
+                            <span class="button-number" aria-hidden="true">4.</span>
+                            <span class="button-label" data-i18n="button.save">СОХРАНИТЬ</span>
+                            <span class="button-desc" data-i18n="desc.save">Экспорт результатов</span>
+                        </button>
+                    </div>
+
+                    <!-- Reset Button -->
+                    <button id="resetBtn" class="reset-button" aria-label="Reset session and clear all data">
+                        <span class="button-icon" aria-hidden="true">⚠</span>
+                        <span class="button-label" data-i18n="button.reset">СБРОС СЕССИИ</span>
+                        <span class="button-desc" data-i18n="desc.reset">Очистить все данные и начать заново</span>
+                    </button>
+
+                    <!-- Batch Export Button -->
+                    <button id="exportBatchBtn" class="action-button batch-export" style="display: none;" aria-label="Export all batch results">
+                        <span class="button-icon" aria-hidden="true">📦</span>
+                        <span class="button-label" data-i18n="button.exportBatch">ЭКСПОРТ ВСЕХ РЕЗУЛЬТАТОВ</span>
+                        <span class="button-desc" data-i18n="desc.save">Экспорт всех файлов</span>
+                    </button>
+                </div>
+
+                <!-- Reset Confirmation Modal -->
+                <div id="resetModal" class="modal-overlay" role="dialog" aria-labelledby="reset-modal-title" aria-modal="true">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title" id="reset-modal-title" data-i18n="modal.reset.title">Подтверждение сброса</h3>
+                            <button class="modal-close" data-i18n="modal.close" aria-label="Close dialog">✕</button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="modal-text" data-i18n="modal.reset.message">Вы уверены, что хотите сбросить текущую сессию?</p>
+                            <p class="modal-warning" data-i18n="modal.reset.warning" role="alert">⚠ Все данные, результаты и параметры будут удалены!</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="confirmResetBtn" class="modal-button modal-confirm" data-i18n="modal.confirm">Да, сбросить</button>
+                            <button id="cancelResetBtn" class="modal-button modal-cancel" data-i18n="modal.cancel">Отмена</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save Options -->
+                <div class="control-section">
+                    <h2 class="section-title" data-i18n="section.save">3. ПАРАМЕТРЫ СОХРАНЕНИЯ</h2>
+                    
+                    <div class="control-group">
+                        <label class="control-label" for="exportFormat" id="export-format-label" data-i18n="label.exportFormat">Формат экспорта:</label>
+                        <select id="exportFormat" class="control-select" aria-labelledby="export-format-label">
+                            <option value="csv" data-i18n="exportFormat.csv">CSV (Comma Separated Values)</option>
+                            <option value="txt" data-i18n="exportFormat.txt">TXT (ASCII)</option>
+                        </select>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="saveRestored" checked class="checkbox" aria-describedby="save-restored-desc">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text" data-i18n="checkbox.saveRestored">Сохранить восстановленные данные</span>
+                        </label>
+                        <span class="checkbox-desc" id="save-restored-desc" data-i18n="desc.saveRestored">Включить в результат восстановленные значения</span>
+                    </div>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label" id="validityFlagWrapper">
+                            <input type="checkbox" id="addValidityFlag" checked class="checkbox" aria-describedby="validity-flag-desc">
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text" data-i18n="checkbox.validityFlag">Дополнить признаком истинности</span>
+                        </label>
+                        <span class="checkbox-desc" id="validity-flag-desc" data-i18n="desc.validityFlag">Добавить столбец с флагом корректности (0/1)</span>
+                    </div>
+                </div>
+
+                <!-- Report Export -->
+                <div class="control-section">
+                    <h2 class="section-title" data-i18n="section.report">4. ЭКСПОРТ ОТЧЕТА</h2>
+                    <div class="button-grid" role="group" aria-label="Report export buttons">
+                        <button id="exportJsonBtn" class="action-button" disabled aria-label="Export JSON report">
+                            <span class="button-icon" aria-hidden="true">📄</span>
+                            <span class="button-label" data-i18n="button.exportJson">JSON ОТЧЕТ</span>
+                            <span class="button-desc" data-i18n="desc.exportJson">Экспорт в структурированный формат</span>
+                        </button>
+
+                        <button id="exportHtmlBtn" class="action-button" disabled aria-label="Export HTML report">
+                            <span class="button-icon" aria-hidden="true">📊</span>
+                            <span class="button-label" data-i18n="button.exportHtml">HTML ОТЧЕТ</span>
+                            <span class="button-desc" data-i18n="desc.exportHtml">Экспорт с графиками и метриками</span>
+                        </button>
+
+                        <button id="exportErrorLogBtn" class="action-button" onclick="ErrorHandler.exportLog()" aria-label="Export error log">
+                            <span class="button-icon" aria-hidden="true">📋</span>
+                            <span class="button-label" data-i18n="button.exportErrorLog">ЖУРНАЛ ОШИБОК</span>
+                            <span class="button-desc" data-i18n="desc.exportErrorLog">Экспорт журнала ошибок</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress Section -->
+
+                <!-- Log Section -->
+                <div class="control-section log-section">
+                    <h2 class="section-title" data-i18n="section.log">5. ЖУРНАЛ ОПЕРАЦИЙ</h2>
+                    <div id="logArea" class="log-area" role="log" aria-live="polite" aria-label="Operation log">
+                        <div class="log-entry log-info">
+                            <span class="log-time" aria-hidden="true">--:--:--</span>
+                            <span class="log-message" data-i18n="log.init">Система готова к работе. Приятного использования!</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Visualization -->
+            <section class="plot-panel panel" aria-labelledby="plot-panel-title">
+                <div class="panel-header">
+                    <span class="panel-id" id="plot-panel-title" data-i18n="panel.visualization">ПАНЕЛЬ ВИЗУАЛИЗАЦИИ</span>
+                    <span class="panel-status status-ready" data-i18n="panel.status.online" data-i18n-title="tooltip.status.online" role="status" aria-live="polite">ОНЛАЙН</span>
+                </div>
+
+                <!-- Tab Navigation -->
+                <div class="tab-nav" role="tablist" aria-label="View tabs">
+                    <button class="tab-button active" data-tab="data" role="tab" aria-selected="true" aria-controls="dataTab">
+                        <span class="tab-icon" aria-hidden="true">📊</span>
+                        <span class="tab-text" data-i18n="tab.data">ДАННЫЕ</span>
+                    </button>
+                    <button class="tab-button" data-tab="heatmap" role="tab" aria-selected="false" aria-controls="heatmapTab">
+                        <span class="tab-icon" aria-hidden="true">🌡️</span>
+                        <span class="tab-text" data-i18n="tab.heatmap">КАРТА ПАРАМЕТРОВ</span>
+                    </button>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Data Plot Tab -->
+                    <div id="dataTab" class="tab-pane active" role="tabpanel" aria-labelledby="dataTab-btn">
+                        <!-- Chart Visibility Toolbar -->
+                        <div class="chart-toolbar" role="toolbar" aria-label="Chart and view controls">
+                            <div class="view-toggle" role="group" aria-label="View toggle">
+                                <button id="chartViewBtn" class="view-btn active" data-i18n="chart.view" aria-label="Switch to chart view" aria-pressed="true">
+                                    <span class="view-icon" aria-hidden="true">📊</span>
+                                </button>
+                                <button id="tableViewBtn" class="view-btn" data-i18n="table.view" aria-label="Switch to table view" aria-pressed="false">
+                                    <span class="view-icon" aria-hidden="true">📋</span>
+                                </button>
+                            </div>
+                            <span class="toolbar-label" data-i18n="chart.visibility" aria-hidden="true">Visibility:</span>
+                            <div class="visibility-buttons" role="group" aria-label="Dataset visibility">
+                                <button class="visibility-btn" data-visibility="original" aria-label="Show original data" aria-pressed="true">
+                                    <span class="vis-icon" aria-hidden="true">🔴</span>
+                                    <span class="vis-text" data-i18n="chart.showOriginal">Original</span>
+                                </button>
+                                <button class="visibility-btn" data-visibility="cleaned" aria-label="Show cleaned data" aria-pressed="true">
+                                    <span class="vis-icon" aria-hidden="true">🟢</span>
+                                    <span class="vis-text" data-i18n="chart.showCleaned">Cleaned</span>
+                                </button>
+                                <button class="visibility-btn active" data-visibility="both" aria-label="Show both datasets" aria-pressed="true">
+                                    <span class="vis-icon" aria-hidden="true">📊</span>
+                                    <span class="vis-text" data-i18n="chart.showBoth">Both</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-container" id="dropZone" role="region" aria-label="Data visualization area">
+                            <div class="chart-wrapper">
+                                <div class="zoom-controls" role="group" aria-label="Zoom controls">
+                                    <button id="zoomInBtn" class="zoom-button" aria-label="Zoom in">🔍</button>
+                                    <button id="zoomOutBtn" class="zoom-button" aria-label="Zoom out">➖</button>
+                                    <button id="zoomResetBtn" class="zoom-button" aria-label="Reset zoom">🏠</button>
+                                </div>
+                                <canvas id="dataChart" aria-label="Data chart showing original and cleaned time series"></canvas>
+                            </div>
+                            <div id="noDataMessage" class="no-data-message" role="alert" aria-live="assertive">
+                                <span class="no-data-icon" aria-hidden="true">📭</span>
+                                <span class="no-data-text" data-i18n="noData.title">Нет загруженных данных</span>
+                                <span class="no-data-sub" data-i18n="noData.subtitle">Выберите файл для начала работы</span>
+                            </div>
+                            <div id="dropOverlay" class="drop-overlay" aria-hidden="true">
+                                <span class="drop-icon" aria-hidden="true">📂</span>
+                                <span class="drop-text" data-i18n="dropZone.text">Отпустите файл здесь</span>
+                                <span class="drop-sub" data-i18n="dropZone.sub">TXT, DAT, CSV, ASC</span>
+                            </div>
+                        </div>
+
+                        <!-- Table Container -->
+                        <div class="table-container" id="tableContainer" style="display: none;" role="region" aria-labelledby="table-view-title">
+                            <div class="table-toolbar">
+                                <div class="table-controls">
+                                    <label for="tableSeriesSelect" class="visually-hidden" id="table-view-title">Просмотр таблицы данных</label>
+                                    <select id="tableSeriesSelect" class="crt-select" aria-label="Select series">
+                                        <option value="all" data-i18n="table.allSeries">Все серии</option>
+                                    </select>
+                                    <input type="text" id="tableFilter" class="crt-input" placeholder="Фильтр..." data-i18n-placeholder="table.filterPlaceholder" aria-label="Filter table rows">
+                                    <button id="exportTableBtn" class="crt-button" data-i18n="table.export" aria-label="Export table to CSV">
+                                        <span class="button-icon" aria-hidden="true">📤</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="data-table-wrapper">
+                                <table id="dataTable" class="data-table" aria-labelledby="table-view-title">
+                                    <thead>
+                                        <tr>
+                                            <th data-sort="index" onclick="handleTableSort('index')" data-i18n="table.index" scope="col">№</th>
+                                            <th data-sort="time" onclick="handleTableSort('time')" data-i18n="table.time" scope="col">Время</th>
+                                            <th id="tableSeriesHeader" data-sort="series" onclick="handleTableSort('series')" data-i18n="table.series" style="display: none;" scope="col">Серия</th>
+                                            <th data-sort="original" onclick="handleTableSort('original')" data-i18n="table.original" scope="col">Исходный</th>
+                                            <th data-sort="cleaned" onclick="handleTableSort('cleaned')" data-i18n="table.cleaned" scope="col">Очищенный</th>
+                                            <th data-sort="status" onclick="handleTableSort('status')" data-i18n="table.status" scope="col">Статус</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="table-pagination" role="navigation" aria-label="Table pagination">
+                                <button id="prevPageBtn" class="crt-button" disabled aria-label="Previous page">◀</button>
+                                <span id="pageInfo" class="page-info" aria-live="polite">Стр. 1-50 из 100</span>
+                                <button id="nextPageBtn" class="crt-button" disabled aria-label="Next page">▶</button>
+                            </div>
+                            <div id="tableNoData" class="no-data-message" role="alert" aria-live="assertive" style="display: none;">
+                                <span class="no-data-icon" aria-hidden="true">📋</span>
+                                <span class="no-data-text" data-i18n="noData.title">Нет загруженных данных</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Heatmap Tab -->
+                    <div id="heatmapTab" class="tab-pane" role="tabpanel" aria-labelledby="heatmap-tab-btn">
+                        <div class="heatmap-container">
+                            <div class="chart-wrapper">
+                                <canvas id="heatmapCanvas" aria-label="Parameter optimization heatmap"></canvas>
+                                <div id="heatmapTooltip" class="heatmap-tooltip hidden" role="tooltip"></div>
+                            </div>
+                            <div id="noHeatmapMessage" class="no-data-message" role="alert">
+                                <span class="no-data-icon" aria-hidden="true">🌡️</span>
+                                <span class="no-data-text" data-i18n="noHeatmap.title">Карта параметров недоступна</span>
+                                <span class="no-data-sub" data-i18n="noHeatmap.subtitle">Выполните автоподбор для отображения</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metrics Display -->
+                <div class="metrics-panel" id="dataMetrics" role="region" aria-labelledby="metrics-title">
+                    <h2 class="section-title" id="metrics-title" data-i18n="section.metrics">МЕТРИКИ КАЧЕСТВА</h2>
+                    <div class="metrics-grid" role="list">
+                        <div class="metric-card">
+                            <span class="metric-name" data-metric="STDF" id="stdf-label">STDF</span>
+                            <span class="metric-desc" id="stdf-desc" data-i18n="metric.STDF">Гладкость</span>
+                            <span id="metricSTDF" class="metric-value" aria-labelledby="stdf-label stdf-desc">--</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-name" data-metric="DF" id="df-label">DF</span>
+                            <span class="metric-desc" id="df-desc" data-i18n="metric.DF">Доля удалённых</span>
+                            <span id="metricDF" class="metric-value" aria-labelledby="df-label df-desc">--</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-name" data-metric="ASNR" id="asnr-label">ASNR</span>
+                            <span class="metric-desc" id="asnr-desc" data-i18n="metric.ASNR">С/Ш (дБ)</span>
+                            <span id="metricASNR" class="metric-value" aria-labelledby="asnr-label asnr-desc">--</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-name" data-metric="RMSE" id="rmse-label">RMSE</span>
+                            <span class="metric-desc" id="rmse-desc" data-i18n="metric.RMSE">СКО</span>
+                            <span id="metricRMSE" class="metric-value" aria-labelledby="rmse-label rmse-desc">--</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-name" data-metric="RSquared" id="rsquared-label">R²</span>
+                            <span class="metric-desc" id="rsquared-desc" data-i18n="metric.RSquared">Детерминация</span>
+                            <span id="metricRSquared" class="metric-value" aria-labelledby="rsquared-label rsquared-desc">--</span>
+                        </div>
+                        <div class="metric-card">
+                            <span class="metric-name" data-metric="Pearson" id="pearson-label">R Пирсона</span>
+                            <span class="metric-desc" id="pearson-desc" data-i18n="metric.Pearson">Корреляция</span>
+                            <span id="metricPearson" class="metric-value" aria-labelledby="pearson-label pearson-desc">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Info -->
+                <div class="file-info-panel">
+                    <h2 class="section-title" data-i18n="section.fileInfo">ИНФОРМАЦИЯ О ФАЙЛЕ</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label" data-i18n="info.filename">Файл:</span>
+                            <span id="infoFilename" class="info-value">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label" data-i18n="info.size">Размер:</span>
+                            <span id="infoSize" class="info-value">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label" data-i18n="info.points">Точек:</span>
+                            <span id="infoPoints" class="info-value">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label" data-i18n="info.series">Сериев:</span>
+                            <span id="infoSeries" class="info-value">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label" data-i18n="info.optWindow">Опт. окно:</span>
+                            <span id="infoOptWindow" class="info-value">--</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label" data-i18n="info.optThreshold">Опт. порог:</span>
+                            <span id="infoOptThreshold" class="info-value">--</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="telemetry-footer">
+            <div class="footer-decoration"></div>
+            <div class="footer-content">
+                <span class="footer-text" data-i18n="footer.text">ОТК-001 /// СИСТЕМА ОЧИСТКИ ДАННЫХ ВРЕМЕННЫХ РЯДОВ</span>
+                <span class="footer-separator">|</span>
+                <span class="footer-author" data-i18n="footer.author">Разработчик: Фунтиков В.М.</span>
+                <span class="footer-separator">|</span>
+                <span class="footer-version" data-i18n="footer.version">Версия: 2.0 (Web)</span>
+            </div>
+            <div class="footer-decoration"></div>
+        </footer>
+    </div>
+
+    <!-- Fixed Progress Bar (Top) -->
+    <div id="progressBar" class="progress-bar hidden">
+        <div class="progress-bar-content">
+            <span class="progress-label" data-i18n="progress.label">ХОД ПРОЦЕССА</span>
+            <div class="progress-track">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+            <span id="progressPercent" class="progress-percent">0%</span>
+            <span id="progressMessage" class="progress-message"></span>
+            <span id="progressETA" class="progress-eta hidden"></span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+First, check what MCP and LSP tools you have.
+
+A working program for cleaning time series data from noise and outliers, written in MATLAB, is available. The task is to rewrite this program in HTML, CSS, and JavaScript. The mathematical algorithms and initial coefficients must remain unchanged. Special attention should be paid to the `filloutliers` function, its interactive operation, and quality metrics. Note that the input file may contain several time series simultaneously. File loading: A batch processing function needs to be added. The interface should not freeze during calculations. The interface should be styled in the manner of rocket and space telemetry with a touch of post-Soviet research institute aesthetics. All interface elements must have descriptions.
+The file should be selected and opened in a modern and convenient way, with the possibility of batch processing.
+The graphs should be displayed informatively, utilizing modern capabilities. The logs should show the progress of task execution. The interface should not freeze during calculations.
+
+Create all the necessary Markdown files and proceed with the task described in the file "primary prompt is a human task.txt".
