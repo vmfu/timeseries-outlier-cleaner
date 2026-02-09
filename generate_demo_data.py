@@ -57,7 +57,7 @@ for series_idx in range(1, num_series + 1):
 data_transposed = np.array(data).T
 
 # Save as ASCII text file (MATLAB compatible format)
-np.savetxt('demo-data.txt', data_transposed, fmt='%.6f', delimiter='\t')
+np.savetxt('data/demo-data.txt', data_transposed, fmt='%.6f', delimiter='\t')
 
 print(f"Generated demo-data.txt with {num_points} points and {num_series} series")
 print(f"Noise level: {noise_level * 100}%")
