@@ -341,6 +341,10 @@ function loadDemoData() {
                 }
             }, 100);
 
+            // Enable buttons (same as loadData)
+            document.getElementById('tuneBtn').disabled = false;
+            document.getElementById('cleanBtn').disabled = false;
+
             // Log demo loaded message
             UI.logMsg('msg.demoLoaded', null, 'info');
             UI.logMsg('msg.demoReady', null, 'info');
